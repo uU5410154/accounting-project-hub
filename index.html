@@ -103,11 +103,13 @@
     .summary-name { font-size: 11px; opacity: 0.8; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
     
     /* Project Pool */
-    .pool { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 12px; min-height: 80px; }
+    .pool { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 12px; min-height: 80px; padding: 12px; border: 2px dashed transparent; border-radius: 12px; transition: all 0.2s; }
+    .pool.drag-over { border-color: #38BDF8; background: rgba(56, 189, 248, 0.1); }
     .pool-empty { grid-column: 1 / -1; text-align: center; color: #64748B; padding: 30px; background: #0F172A; border-radius: 10px; border: 2px dashed #334155; }
-    .pool-project { padding: 16px; background: #334155; border-radius: 10px; cursor: pointer; border: 2px solid transparent; transition: all 0.2s; }
+    .pool-project { padding: 16px; background: #334155; border-radius: 10px; cursor: grab; border: 2px solid transparent; transition: all 0.2s; }
     .pool-project:hover { border-color: #38BDF8; transform: translateY(-2px); }
-    .pool-project:active { transform: scale(0.98); }
+    .pool-project:active { transform: scale(0.98); cursor: grabbing; }
+    .pool-project.dragging { opacity: 0.5; transform: scale(0.95); }
     .pool-project-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 8px; gap: 8px; }
     .pool-project-name { font-weight: 600; font-size: 15px; flex: 1; }
     .pool-project-desc { font-size: 13px; color: #94A3B8; line-height: 1.4; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
@@ -122,7 +124,36 @@
     
     /* Team Boards */
     .boards { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 16px; }
-    .board { background: #1E293B; border-radius: 12px; padding: 16px; border: 2px solid #334155; border-top-width: 4px; }
+    .board { background: #1E293B; border-radius: 12px; padding: 16px; border: 2px solid #334155; border-top-width: 4px; transition: all 0.2s; }
+    .board.current-user-board { background: linear-gradient(135deg, #1E293B 0%, #0F172A 100%); border-width: 3px; }
+    .board.current-user-board .board-name { color: #38BDF8; }
+    .board.drag-over { border-color: #38BDF8; background: #1E3A5F; box-shadow: 0 0 20px rgba(56, 189, 248, 0.3); }
+    .board-dropzone { min-height: 60px; border: 2px dashed #475569; border-radius: 8px; display: flex; align-items: center; justify-content: center; color: #64748B; font-size: 12px; margin-top: 12px; transition: all 0.2s; }
+    .board-dropzone.drag-over { border-color: #38BDF8; background: rgba(56, 189, 248, 0.1); color: #38BDF8; }
+    
+    /* Today line */
+    .gantt-today-line { position: absolute; top: 0; bottom: 0; width: 2px; background: #EF4444; z-index: 5; pointer-events: none; }
+    .gantt-today-line::before { content: ''; position: absolute; top: 0; left: -4px; width: 10px; height: 10px; background: #EF4444; border-radius: 50%; }
+    
+    /* Portfolio gantt */
+    .portfolio-gantt { background: #1E293B; border-radius: 12px; overflow: hidden; }
+    .portfolio-project-column { min-width: 200px; max-width: 200px; flex-shrink: 0; position: sticky; left: 0; z-index: 20; background: #1E293B; }
+    .portfolio-timeline-column { flex: 1; overflow-x: visible; }
+    .portfolio-header-cell { padding: 12px; font-weight: 600; font-size: 12px; color: #94A3B8; border-bottom: 1px solid #334155; border-right: 1px solid #334155; background: #1E293B; }
+    .portfolio-body-rows { }
+    .portfolio-row { display: flex; align-items: center; border-bottom: 1px solid #334155; min-height: 36px; }
+    .portfolio-row:last-child { border-bottom: none; }
+    .portfolio-row.portfolio-role-row { min-height: 26px; background: #1a2235; }
+    .portfolio-project-group { border-bottom: 1px solid #334155; }
+    .portfolio-project-group:last-child { border-bottom: none; }
+    .portfolio-project-name { min-width: 200px; max-width: 200px; padding: 8px 12px; font-size: 12px; font-weight: 500; cursor: pointer; display: flex; align-items: center; border-right: 1px solid #334155; background: #1E293B; position: sticky; left: 0; z-index: 10; }
+    .portfolio-project-name:hover { color: #38BDF8; background: #334155; }
+    .portfolio-role-name { min-width: 200px; max-width: 200px; padding: 4px 12px 4px 20px; font-size: 11px; display: flex; align-items: center; border-right: 1px solid #334155; background: #1a2235; position: sticky; left: 0; z-index: 10; }
+    .portfolio-bar-container { flex: 1; position: relative; height: 32px; display: flex; }
+    .portfolio-bar { position: absolute; height: 26px; top: 3px; border-radius: 6px; display: flex; align-items: center; justify-content: center; font-size: 10px; color: white; font-weight: 500; cursor: pointer; transition: all 0.2s; min-width: 40px; }
+    .portfolio-bar:hover { transform: scaleY(1.15); filter: brightness(1.1); z-index: 5; }
+    .portfolio-bar.portfolio-role-bar { height: 18px; top: 4px; font-size: 9px; border-radius: 4px; }
+    .portfolio-bar.portfolio-role-bar:hover { transform: scaleY(1.2); }
     .board-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 10px; }
     .board-member { display: flex; align-items: center; gap: 10px; flex: 1; }
     .board-avatar { width: 40px; height: 40px; border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 18px; }
@@ -134,11 +165,15 @@
     
     /* Project List in Board */
     .board-projects { display: flex; flex-direction: column; gap: 8px; }
-    .board-project-item { padding: 12px; background: #0F172A; border-radius: 8px; cursor: pointer; transition: all 0.2s; }
-    .board-project-item:hover { background: #334155; }
-    .board-project-item:active { transform: scale(0.98); }
-    .board-project-name { font-weight: 500; font-size: 13px; margin-bottom: 4px; }
-    .board-project-status { font-size: 11px; color: #64748B; }
+    .board-project-item { padding: 12px; background: #0F172A; border-radius: 8px; cursor: grab; transition: all 0.2s; border-left: 3px solid transparent; }
+    .board-project-item:hover { background: #334155; transform: translateX(2px); }
+    .board-project-item:active { transform: scale(0.98); cursor: grabbing; }
+    .board-project-item.dragging { opacity: 0.5; }
+    .board-project-header { display: flex; justify-content: space-between; align-items: flex-start; gap: 8px; margin-bottom: 6px; }
+    .board-project-name { font-weight: 500; font-size: 13px; flex: 1; }
+    .board-project-meta { display: flex; gap: 6px; flex-wrap: wrap; align-items: center; }
+    .board-project-status { font-size: 10px; color: #64748B; background: #1E293B; padding: 2px 6px; border-radius: 4px; }
+    .board-project-role { font-size: 9px; font-weight: 600; color: white; background: #6366F1; padding: 2px 6px; border-radius: 4px; text-transform: uppercase; }
     
     /* Modal */
     .modal-overlay { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.8); display: flex; align-items: flex-start; justify-content: center; z-index: 1000; padding: 20px; overflow-y: auto; }
@@ -190,7 +225,8 @@
     .back-btn { padding: 8px 14px; background: #334155; border: none; border-radius: 8px; color: #94A3B8; font-size: 13px; cursor: pointer; margin-bottom: 16px; font-family: inherit; }
     .detail-title { display: flex; align-items: center; gap: 12px; margin-bottom: 10px; flex-wrap: wrap; }
     .detail-name { font-size: 22px; font-weight: 700; }
-    .status-badge { padding: 6px 12px; background: #334155; border-radius: 16px; font-size: 11px; font-weight: 500; cursor: pointer; }
+    .status-badge { padding: 6px 12px; background: #334155; border-radius: 16px; font-size: 11px; font-weight: 500; cursor: pointer; transition: all 0.2s; }
+    .status-badge:hover { background: #475569; transform: scale(1.05); }
     .detail-desc { font-size: 14px; color: #94A3B8; line-height: 1.5; }
     .detail-actions { display: flex; gap: 10px; margin-top: 16px; flex-wrap: wrap; }
     
@@ -202,21 +238,36 @@
     
     /* Gantt Chart */
     .gantt { background: #0F172A; border-radius: 10px; overflow: hidden; border: 1px solid #334155; }
+    .gantt-controls { display: flex; gap: 8px; padding: 12px; background: #1E293B; border-bottom: 1px solid #334155; align-items: center; flex-wrap: wrap; }
+    .gantt-scale-btn { padding: 6px 12px; font-size: 11px; background: #334155; border: none; color: #94A3B8; border-radius: 6px; cursor: pointer; transition: all 0.2s; }
+    .gantt-scale-btn:hover { background: #475569; }
+    .gantt-scale-btn.active { background: #3B82F6; color: white; }
+    .gantt-scroll-container { overflow-x: auto; overflow-y: hidden; -webkit-overflow-scrolling: touch; }
+    .gantt-wrapper { display: flex; min-width: max-content; }
+    .gantt-task-column { min-width: 180px; max-width: 180px; flex-shrink: 0; position: sticky; left: 0; z-index: 20; background: #1E293B; }
+    .gantt-timeline-column { flex: 1; }
     .gantt-header { display: flex; border-bottom: 1px solid #334155; }
-    .gantt-task-col { min-width: 180px; padding: 12px; font-weight: 600; font-size: 12px; color: #64748B; background: #1E293B; border-right: 1px solid #334155; display: flex; justify-content: space-between; align-items: center; }
-    .gantt-timeline { display: flex; flex: 1; overflow-x: auto; -webkit-overflow-scrolling: touch; }
-    .gantt-date { min-width: 36px; padding: 6px 2px; text-align: center; border-right: 1px solid #334155; }
-    .gantt-date.weekend { background: rgba(100,116,139,0.1); }
+    .gantt-header-months { display: flex; border-bottom: 1px solid #334155; background: #0F172A; }
+    .gantt-month-label { padding: 6px 8px; text-align: center; font-size: 11px; font-weight: 600; color: #38BDF8; border-right: 1px solid #334155; }
+    .gantt-task-col { padding: 12px; font-weight: 600; font-size: 12px; color: #64748B; background: #1E293B; border-right: 1px solid #334155; border-bottom: 1px solid #334155; display: flex; justify-content: space-between; align-items: center; height: 52px; box-sizing: border-box; }
+    .gantt-task-col-spacer { height: 30px; border-right: 1px solid #334155; border-bottom: 1px solid #334155; background: #1E293B; }
+    .gantt-timeline { display: flex; }
+    .gantt-date { min-width: 36px; padding: 6px 2px; text-align: center; border-right: 1px solid #334155; box-sizing: border-box; }
+    .gantt-date.weekend { background: rgba(100,116,139,0.15); }
+    .gantt-date.today { background: #7F1D1D !important; }
+    .gantt-date.today * { color: #FCA5A5 !important; }
     .gantt-date-day { font-size: 11px; font-weight: 600; }
     .gantt-date-month { font-size: 8px; color: #64748B; }
-    .gantt-body { max-height: 350px; overflow-y: auto; }
-    .gantt-row { display: flex; border-bottom: 1px solid #334155; }
-    .gantt-task-name { min-width: 180px; padding: 10px 12px; font-size: 12px; font-weight: 500; background: #1E293B; border-right: 1px solid #334155; display: flex; align-items: center; justify-content: space-between; gap: 6px; }
+    .gantt-date-week { font-size: 9px; color: #94A3B8; }
+    .gantt-body { max-height: 400px; overflow-y: auto; overflow-x: hidden; }
+    .gantt-body-rows { }
+    .gantt-row { display: flex; border-bottom: 1px solid #334155; min-height: 44px; }
+    .gantt-task-name { min-width: 180px; max-width: 180px; padding: 10px 12px; font-size: 12px; font-weight: 500; background: #1E293B; border-right: 1px solid #334155; display: flex; align-items: center; justify-content: space-between; gap: 6px; position: sticky; left: 0; z-index: 10; }
     .gantt-task-text { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; flex: 1; }
-    .gantt-task-actions { display: flex; gap: 2px; }
+    .gantt-task-actions { display: flex; gap: 2px; flex-shrink: 0; }
     .gantt-bar-container { flex: 1; position: relative; height: 44px; display: flex; }
-    .gantt-bar-cell { min-width: 36px; border-right: 1px solid #334155; }
-    .gantt-bar-cell.weekend { background: rgba(100,116,139,0.1); }
+    .gantt-bar-cell { min-width: 36px; border-right: 1px solid #334155; box-sizing: border-box; }
+    .gantt-bar-cell.weekend { background: rgba(100,116,139,0.15); }
     
     .gantt-bar { 
       position: absolute; 
@@ -318,24 +369,74 @@
       .main { padding: 24px; }
       .section { padding: 24px; }
       .detail-name { font-size: 28px; }
-      .gantt-task-col, .gantt-task-name { min-width: 220px; }
+      .gantt-task-col, .gantt-task-name, .gantt-task-column { min-width: 220px; max-width: 220px; }
       .gantt-date, .gantt-bar-cell { min-width: 40px; }
     }
     
+    @media (max-width: 767px) {
+      .nav { flex-wrap: wrap; gap: 8px; padding: 12px; }
+      .nav-brand { order: 1; }
+      .nav-links { order: 3; width: 100%; justify-content: center; gap: 4px; }
+      .nav-actions { order: 2; flex: 1; justify-content: flex-end; flex-wrap: wrap; gap: 4px; }
+      .nav-link { padding: 8px 12px; font-size: 11px; }
+      .user-badge { display: none; }
+      .sync-status { padding: 4px 8px; }
+      .sync-text { display: none; }
+      .boards { grid-template-columns: 1fr; }
+      .board { padding: 12px; }
+      .board-header { flex-wrap: wrap; gap: 8px; }
+      .board-actions { width: 100%; justify-content: flex-end; }
+      .board-dropzone { min-height: 50px; font-size: 11px; }
+      .pool-project { padding: 12px; }
+      .pool-project-meta { gap: 4px; }
+      .pool-project-date { font-size: 10px; padding: 3px 6px; }
+      .portfolio-project-name, .portfolio-project-column, .portfolio-role-name { min-width: 120px; max-width: 120px; font-size: 11px; }
+      .portfolio-bar { font-size: 9px; }
+      .section-header { flex-direction: column; gap: 8px; align-items: flex-start; }
+    }
+    
     @media (max-width: 480px) {
-      .nav-title { font-size: 16px; }
-      .nav-link { padding: 6px 10px; font-size: 12px; }
+      .nav-title { font-size: 14px; }
+      .nav-link { padding: 6px 10px; font-size: 11px; }
+      .nav-actions .btn { padding: 6px 8px; font-size: 10px; }
+      .nav-actions .btn-sm { min-width: auto; }
+      #btn-export, #btn-import, #btn-settings, #btn-users { display: none; }
       .btn { padding: 8px 12px; font-size: 12px; }
       .form-row { grid-template-columns: 1fr; }
-      .pool { grid-template-columns: 1fr; }
+      .pool { grid-template-columns: 1fr; padding: 8px; }
       .boards { grid-template-columns: 1fr; }
       .detail-actions { flex-direction: column; }
       .detail-actions .btn { width: 100%; justify-content: center; }
-      .modal { margin: 10px; border-radius: 12px; }
-      .modal-body { padding: 16px; }
-      .gantt-task-col, .gantt-task-name { min-width: 140px; padding: 8px; font-size: 11px; }
-      .gantt-date, .gantt-bar-cell { min-width: 32px; }
+      .modal { margin: 10px; border-radius: 12px; max-height: 90vh; }
+      .modal-body { padding: 16px; max-height: 60vh; overflow-y: auto; }
+      .gantt-task-col, .gantt-task-name, .gantt-task-column { min-width: 120px; max-width: 120px; padding: 6px; font-size: 10px; }
+      .gantt-controls { flex-direction: column; align-items: stretch; }
+      .gantt-scale-btn { padding: 8px 12px; }
+      .gantt-date, .gantt-bar-cell { min-width: 28px; }
+      .gantt-bar-label { font-size: 9px; }
       .time-col, .hour-label { min-width: 50px; }
+      .board-project-item { padding: 10px; }
+      .board-project-name { font-size: 12px; }
+      .portfolio-project-name, .portfolio-project-column, .portfolio-role-name { min-width: 100px; max-width: 100px; font-size: 10px; }
+      .portfolio-header-cell { padding: 8px; font-size: 10px; }
+      .login-container { padding: 24px 16px; margin: 16px; }
+      .login-logo-title { font-size: 20px; }
+      .summary { grid-template-columns: repeat(2, 1fr); gap: 8px; }
+      .summary-card { padding: 12px; }
+      .summary-value { font-size: 20px; }
+    }
+    
+    /* Touch-friendly improvements */
+    @media (hover: none) and (pointer: coarse) {
+      .pool-project, .board-project-item { 
+        -webkit-touch-callout: none;
+        -webkit-user-select: none;
+        user-select: none;
+      }
+      .btn { min-height: 44px; }
+      .nav-link { min-height: 40px; display: flex; align-items: center; }
+      .gantt-bar { min-height: 32px; }
+      .gantt-bar-handle { width: 16px; }
     }
   </style>
 </head>
@@ -360,9 +461,6 @@
         </div>
         <button class="login-btn" onclick="handleLogin()">Sign In</button>
       </div>
-      <div class="login-hint">
-        <div class="login-hint-text">Contact admin for access credentials</div>
-      </div>
     </div>
   </div>
 
@@ -375,6 +473,7 @@
       </div>
       <div class="nav-links">
         <button class="nav-link active" id="nav-dashboard" onclick="showView('dashboard')">📋 Projects</button>
+        <button class="nav-link" id="nav-portfolio" onclick="showView('portfolio')">📊 Portfolio</button>
         <button class="nav-link" id="nav-calendar" onclick="showView('calendar')">📅 Schedule</button>
       </div>
       <div class="nav-actions">
@@ -390,6 +489,7 @@
         </div>
         <button class="btn btn-success btn-sm" onclick="downloadBackup()" title="Download Backup">💾 Backup</button>
         <button class="btn btn-secondary btn-sm" onclick="syncNow()" id="btn-sync" title="Sync with Google Sheets">🔄</button>
+        <button class="btn btn-secondary btn-sm" onclick="openUsersModal()" id="btn-users" title="User Management">👥 Users</button>
         <button class="btn btn-secondary btn-sm" onclick="openConfigModal()" id="btn-settings" title="Settings">⚙️</button>
         <button class="btn btn-secondary btn-sm" onclick="exportData()" id="btn-export" title="Export JSON">📤</button>
         <button class="btn btn-secondary btn-sm" onclick="document.getElementById('import-file').click()" id="btn-import" title="Import JSON">📥</button>
@@ -410,12 +510,15 @@
             <h2 class="section-title">📦 Project Pool</h2>
             <button class="btn btn-primary btn-sm" onclick="openProjectModal()" id="btn-new-project">+ New Project</button>
           </div>
-          <div class="pool" id="project-pool"></div>
+          <div class="pool" id="project-pool" 
+               ondragover="handlePoolDragOver(event)" 
+               ondragleave="handlePoolDragLeave(event)" 
+               ondrop="handlePoolDrop(event)"></div>
       </div>
       <div class="section">
         <div class="section-header">
           <h2 class="section-title">👥 Team</h2>
-          <button class="btn btn-primary btn-sm" onclick="openMemberModal()">+ Add Member</button>
+          <button class="btn btn-primary btn-sm" id="btn-add-member" onclick="openMemberModal()">+ Add Member</button>
         </div>
         <div class="boards" id="team-boards"></div>
       </div>
@@ -432,6 +535,27 @@
         </div>
         <div class="tabs" id="project-tabs"></div>
         <div id="tab-content"></div>
+      </div>
+    </div>
+
+    <!-- Portfolio View (All Projects Timeline) -->
+    <div id="view-portfolio" class="hidden">
+      <div class="section">
+        <h1 style="font-size: 22px; font-weight: 700; margin: 16px 0;">📊 Portfolio Overview</h1>
+        <p style="color:#64748B;margin-bottom:16px;">Aggregated timeline of all projects with role assignments</p>
+        <div id="portfolio-filters" style="display:flex;gap:12px;flex-wrap:wrap;align-items:center;margin-bottom:16px;padding:12px;background:#334155;border-radius:8px;">
+          <span style="color:#94A3B8;font-size:12px;">👤 Filter by Member:</span>
+          <select id="portfolio-member-filter" onchange="renderPortfolio()" style="background:#1E293B;border:1px solid #475569;color:#E2E8F0;padding:6px 12px;border-radius:6px;font-size:12px;">
+            <option value="all">All Members</option>
+          </select>
+          <div style="flex:1;"></div>
+          <div style="display:flex;gap:8px;align-items:center;">
+            <span style="font-size:10px;background:#8B5CF6;color:white;padding:2px 8px;border-radius:4px;">PM</span>
+            <span style="font-size:10px;background:#10B981;color:white;padding:2px 8px;border-radius:4px;">Dev</span>
+            <span style="font-size:10px;color:#64748B;">= Role assignments</span>
+          </div>
+        </div>
+        <div id="portfolio-gantt"></div>
       </div>
     </div>
 
@@ -673,33 +797,130 @@
   <div class="modal-overlay hidden" id="modal-config" onclick="closeModal('config')">
     <div class="modal" style="max-width:500px;" onclick="event.stopPropagation()">
       <div class="modal-header">
-        <h3 class="modal-title">⚙️ Google Sheets Sync</h3>
+        <h3 class="modal-title">⚙️ Cloud Sync Status</h3>
         <button class="modal-close" onclick="closeModal('config')">×</button>
       </div>
       <div class="modal-body">
         <div class="config-section">
-          <label class="config-label">Google Apps Script Web App URL</label>
-          <input class="config-input" id="config-sheets-url" placeholder="https://script.google.com/macros/s/xxxxx/exec">
-          <div class="config-hint">
-            📋 <b>Setup Instructions:</b><br>
-            1. Create a Google Sheet named "Project Hub Database"<br>
-            2. Rename first sheet tab to "Data"<br>
-            3. Go to Extensions → Apps Script<br>
-            4. Paste the script code and click Save<br>
-            5. Deploy → New deployment → Web app<br>
-            6. Set "Who has access" to "Anyone"<br>
-            7. Copy the URL and paste here
+          <label class="config-label">Database</label>
+          <div style="padding:12px;background:#064E3B;border-radius:8px;color:#6EE7B7;">
+            ☁️ <b>Google Sheets</b> - Auto-sync enabled
           </div>
         </div>
         <div class="config-section">
           <label class="config-label">Connection Status</label>
-          <div id="config-sync-status" style="padding:8px 0;color:#94A3B8;">Not connected</div>
+          <div id="config-sync-status" style="padding:8px 0;color:#94A3B8;">Checking...</div>
+        </div>
+        <div class="config-section">
+          <label class="config-label">Actions</label>
+          <div style="display:flex;gap:8px;flex-wrap:wrap;">
+            <button class="btn btn-primary btn-sm" onclick="testConnection()">🔍 Test Connection</button>
+            <button class="btn btn-secondary btn-sm" onclick="forceLoadFromCloud()">⬇️ Load from Cloud</button>
+            <button class="btn btn-success btn-sm" onclick="syncNow()">⬆️ Push to Cloud</button>
+          </div>
         </div>
       </div>
       <div class="modal-footer">
-        <button class="btn btn-secondary" onclick="closeModal('config')">Cancel</button>
-        <button class="btn btn-primary" onclick="testConnection()">Test Connection</button>
-        <button class="btn btn-success" onclick="saveConfig()">Save & Sync</button>
+        <button class="btn btn-secondary" onclick="closeModal('config')">Close</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Quick Assign Modal (Mobile-friendly) -->
+  <div class="modal-overlay hidden" id="modal-quickassign" onclick="closeModal('quickassign')">
+    <div class="modal" style="max-width:450px;" onclick="event.stopPropagation()">
+      <div class="modal-header">
+        <h3 class="modal-title">👥 Assign Project</h3>
+        <button class="modal-close" onclick="closeModal('quickassign')">×</button>
+      </div>
+      <div class="modal-body" id="quickassign-content">
+      </div>
+    </div>
+  </div>
+
+  <!-- Role Select Modal (for drag & drop) -->
+  <div class="modal-overlay hidden" id="modal-roleselect" onclick="closeModal('roleselect')">
+    <div class="modal" style="max-width:350px;" onclick="event.stopPropagation()">
+      <div class="modal-header">
+        <h3 class="modal-title">🏷️ Select Role</h3>
+        <button class="modal-close" onclick="closeModal('roleselect')">×</button>
+      </div>
+      <div class="modal-body" id="roleselect-content">
+      </div>
+    </div>
+  </div>
+
+  <!-- User Management Modal (Admin Only) -->
+  <div class="modal-overlay hidden" id="modal-users" onclick="closeModal('users')">
+    <div class="modal" style="max-width:600px;" onclick="event.stopPropagation()">
+      <div class="modal-header">
+        <h3 class="modal-title">👥 User Management</h3>
+        <button class="modal-close" onclick="closeModal('users')">×</button>
+      </div>
+      <div class="modal-body" id="users-content" style="max-height:500px;overflow-y:auto;">
+      </div>
+    </div>
+  </div>
+
+  <!-- Add/Edit User Modal -->
+  <div class="modal-overlay hidden" id="modal-user-edit" onclick="closeModal('user-edit')">
+    <div class="modal" style="max-width:400px;" onclick="event.stopPropagation()">
+      <div class="modal-header">
+        <h3 class="modal-title" id="user-edit-title">Add User</h3>
+        <button class="modal-close" onclick="closeModal('user-edit')">×</button>
+      </div>
+      <div class="modal-body">
+        <input type="hidden" id="edit-user-original-username">
+        <div class="form-group">
+          <label class="form-label">Username *</label>
+          <input type="text" class="form-input" id="user-username" placeholder="Enter username (lowercase)">
+          <small style="color:#64748B;font-size:10px;">Letters and numbers only, no spaces</small>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Password *</label>
+          <input type="text" class="form-input" id="user-password" placeholder="Enter password">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Display Name *</label>
+          <input type="text" class="form-input" id="user-displayname" placeholder="e.g., John Doe">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Role</label>
+          <select class="form-select" id="user-role">
+            <option value="user">User</option>
+            <option value="admin">Admin</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Icon</label>
+          <select class="form-select" id="user-icon">
+            <option value="👤">👤 Default</option>
+            <option value="👨‍💻">👨‍💻 Developer</option>
+            <option value="👩‍💻">👩‍💻 Developer (F)</option>
+            <option value="👨‍💼">👨‍💼 Manager</option>
+            <option value="👩‍💼">👩‍💼 Manager (F)</option>
+            <option value="👨‍🔬">👨‍🔬 Analyst</option>
+            <option value="👩‍🔬">👩‍🔬 Analyst (F)</option>
+            <option value="👨‍🎨">👨‍🎨 Designer</option>
+            <option value="👩‍🎨">👩‍🎨 Designer (F)</option>
+            <option value="👨‍🔧">👨‍🔧 Engineer</option>
+            <option value="👩‍🔧">👩‍🔧 Engineer (F)</option>
+            <option value="📊">📊 PM</option>
+            <option value="💻">💻 Tech</option>
+            <option value="👑">👑 Admin</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Link to Team Member</label>
+          <select class="form-select" id="user-member-link">
+            <option value="">-- Not Linked --</option>
+          </select>
+          <small style="color:#64748B;font-size:10px;">Link to show their card first when logged in</small>
+        </div>
+        <div class="form-actions">
+          <button class="btn btn-secondary" onclick="closeModal('user-edit')">Cancel</button>
+          <button class="btn btn-primary" onclick="saveUser()">Save User</button>
+        </div>
       </div>
     </div>
   </div>
@@ -709,10 +930,17 @@
 
   <script>
     // ==================== AUTHENTICATION ====================
-    const USERS = {
-      admin: { password: 'u@U5410154', role: 'admin', name: 'Administrator', icon: '👑' },
-      user: { password: '123456', role: 'user', name: 'Team Member', icon: '👤' }
+    // Default users (always available, cannot be deleted)
+    const DEFAULT_USERS = {
+      admin: { password: 'u@U5410154', role: 'admin', name: 'Administrator', icon: '👑', memberId: null, isDefault: true },
+      user: { password: '123456', role: 'user', name: 'Team Member', icon: '👤', memberId: null, isDefault: true }
     };
+    
+    // Get all users (default + custom from data)
+    function getAllUsers() {
+      const customUsers = (data && data.users) ? data.users : {};
+      return { ...DEFAULT_USERS, ...customUsers };
+    }
     
     let currentUser = null;
     
@@ -721,8 +949,9 @@
       const password = document.getElementById('login-password').value;
       const errorEl = document.getElementById('login-error');
       
-      if (USERS[username] && USERS[username].password === password) {
-        currentUser = { username, ...USERS[username] };
+      const allUsers = getAllUsers();
+      if (allUsers[username] && allUsers[username].password === password) {
+        currentUser = { username, ...allUsers[username] };
         sessionStorage.setItem('currentUser', JSON.stringify(currentUser));
         errorEl.classList.remove('show');
         showApp();
@@ -752,29 +981,49 @@
     }
     
     function isAdmin() { return currentUser && currentUser.role === 'admin'; }
+    function getCurrentUserMemberId() { return currentUser ? currentUser.memberId : null; }
     
     function updateUIForRole() {
       // Admin-only buttons
-      const adminOnlyElements = ['btn-import', 'btn-new-project', 'btn-settings'];
+      const adminOnlyElements = ['btn-import', 'btn-add-member', 'btn-users'];
       adminOnlyElements.forEach(id => {
         const el = document.getElementById(id);
         if (el) el.style.display = isAdmin() ? '' : 'none';
       });
+      
+      // Users can create projects but admin can do more
+      const newProjectBtn = document.getElementById('btn-new-project');
+      if (newProjectBtn) {
+        newProjectBtn.style.display = ''; // Show for all users
+      }
     }
     
     function canEditProject() { return isAdmin(); }
     function canDeleteProject() { return isAdmin(); }
-    function canEditProjectTimeline() { return isAdmin(); }
-    function canEditTask(task) { 
+    function canEditProjectTimeline(project) { 
       if (isAdmin()) return true;
-      // User can only edit tasks they created (not locked) and can update progress
+      // Users cannot edit if timeline is locked
+      return project && !project.lockedTimeline;
+    }
+    function canEditTask(task, project) { 
+      if (isAdmin()) return true;
+      // User can only edit tasks that are not locked and project timeline is not locked
+      if (project && project.lockedTimeline) return false;
       return task && !task.locked;
     }
-    function canDragTask(task) {
+    function canDragTask(task, project) {
       if (isAdmin()) return true;
+      if (project && project.lockedTimeline) return false;
       return task && !task.locked;
+    }
+    function canAddTask(project) {
+      if (isAdmin()) return true;
+      // Users can add tasks if timeline is not locked
+      return project && !project.lockedTimeline;
     }
     function canLockTask() { return isAdmin(); }
+    function canEditMember() { return isAdmin(); }
+    function canDeleteMember() { return isAdmin(); }
     
     // Check for existing session
     function checkSession() {
@@ -800,21 +1049,9 @@
     });
 
     // ==================== CLOUD SYNC (Google Sheets) ====================
-    const CONFIG_KEY = 'projectHubConfig';
-    let cloudConfig = loadConfig();
+    const SHEETS_URL = 'https://script.google.com/macros/s/AKfycby8y1w7fGnFgnvEJfDVWHwJjXa2CTWQaVtmJjfyevA-eJJADQzWCvkio9txYP3u1i1cEw/exec';
     let isSyncing = false;
     let lastSyncTime = null;
-    
-    function loadConfig() {
-      try {
-        const saved = localStorage.getItem(CONFIG_KEY);
-        return saved ? JSON.parse(saved) : { sheetsUrl: '', autoSync: true };
-      } catch (e) { return { sheetsUrl: '', autoSync: true }; }
-    }
-    
-    function saveConfigLocal() {
-      localStorage.setItem(CONFIG_KEY, JSON.stringify(cloudConfig));
-    }
     
     function updateSyncStatus(status, message) {
       const statusEl = document.getElementById('sync-status');
@@ -848,7 +1085,7 @@
     }
     
     async function syncToCloud(dataToSync) {
-      if (!cloudConfig.sheetsUrl || isSyncing) return false;
+      if (isSyncing) return false;
       
       isSyncing = true;
       updateSyncStatus('syncing');
@@ -856,7 +1093,7 @@
       try {
         const jsonStr = JSON.stringify(dataToSync);
         const base64Data = base64Encode(jsonStr);
-        const url = cloudConfig.sheetsUrl + '?action=save&data=' + encodeURIComponent(base64Data) + '&t=' + Date.now();
+        const url = SHEETS_URL + '?action=save&data=' + encodeURIComponent(base64Data) + '&t=' + Date.now();
         
         const response = await fetch(url);
         const result = await response.json();
@@ -878,22 +1115,17 @@
     }
     
     async function loadFromCloud() {
-      if (!cloudConfig.sheetsUrl) {
-        updateSyncStatus('local', 'Local');
-        return null;
-      }
-      
       updateSyncStatus('syncing');
       
       try {
-        const response = await fetch(cloudConfig.sheetsUrl + '?t=' + Date.now());
+        const response = await fetch(SHEETS_URL + '?t=' + Date.now());
         const result = await response.json();
         
         if (result.success && result.data) {
           updateSyncStatus('synced', 'Loaded');
           return result.data;
         } else {
-          updateSyncStatus('local', 'No cloud data');
+          updateSyncStatus('synced', 'Ready');
           return null;
         }
       } catch (error) {
@@ -904,42 +1136,29 @@
     }
     
     async function syncNow() {
-      if (!cloudConfig.sheetsUrl) {
-        openConfigModal();
-        return;
-      }
-      
       showToast('Syncing...');
       const success = await syncToCloud(data);
       if (success) {
         showToast('Synced to Google Sheets!');
       } else {
-        showToast('Sync failed - check settings');
+        showToast('Sync failed');
       }
     }
     
     function openConfigModal() {
-      document.getElementById('config-sheets-url').value = cloudConfig.sheetsUrl || '';
-      document.getElementById('config-sync-status').textContent = cloudConfig.sheetsUrl ? 'Configured' : 'Not connected';
+      document.getElementById('config-sync-status').innerHTML = '✅ Connected to Google Sheets<br><small style="color:#64748B;">Auto-sync is enabled</small>';
       document.getElementById('modal-config').classList.remove('hidden');
     }
     
     async function testConnection() {
-      const url = document.getElementById('config-sheets-url').value.trim();
-      
-      if (!url) {
-        document.getElementById('config-sync-status').textContent = '❌ Please enter the Web App URL';
-        return;
-      }
-      
       document.getElementById('config-sync-status').textContent = '🔄 Testing connection...';
       
       try {
-        const response = await fetch(url + '?t=' + Date.now());
+        const response = await fetch(SHEETS_URL + '?t=' + Date.now());
         const result = await response.json();
         
         if (result.success) {
-          document.getElementById('config-sync-status').textContent = '✅ Connected! ' + (result.data ? 'Data found in cloud.' : 'Ready to sync.');
+          document.getElementById('config-sync-status').innerHTML = '✅ Connected! ' + (result.data ? 'Data found in cloud.' : 'Ready to sync.') + '<br><small style="color:#64748B;">Last sync: ' + new Date().toLocaleTimeString() + '</small>';
         } else {
           document.getElementById('config-sync-status').textContent = '❌ Error: ' + (result.error || 'Unknown error');
         }
@@ -949,19 +1168,16 @@
       }
     }
     
-    async function saveConfig() {
-      const url = document.getElementById('config-sheets-url').value.trim();
-      
-      cloudConfig.sheetsUrl = url;
-      saveConfigLocal();
-      closeModal('config');
-      
-      if (url) {
-        showToast('Config saved! Syncing...');
-        await syncToCloud(data);
+    async function forceLoadFromCloud() {
+      showToast('Loading from cloud...');
+      const cloudData = await loadFromCloud();
+      if (cloudData) {
+        data = cloudData;
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+        showView(currentView);
+        showToast('Loaded from cloud!');
       } else {
-        updateSyncStatus('local', 'Local');
-        showToast('Cloud sync disabled');
+        showToast('No cloud data found');
       }
     }
     
@@ -1015,7 +1231,9 @@
       ],
       projectPool: ['p1', 'p2', 'p3'],
       memberProjects: {},
-      timeSlots: {}
+      timeSlots: {},
+      settings: { ganttTimeScale: 'daily', portfolioTimeScale: 'weekly' },
+      users: {} // Custom users added by admin (stored separately from DEFAULT_USERS)
     };
 
     let data = loadData();
@@ -1030,7 +1248,16 @@
         const saved = localStorage.getItem(STORAGE_KEY);
         if (saved) {
           const parsed = JSON.parse(saved);
-          return { teams: parsed.teams || ['Accounting', 'IT', 'Operations', 'HR', 'Finance'], projects: parsed.projects || [], members: parsed.members || [], projectPool: parsed.projectPool || [], memberProjects: parsed.memberProjects || {}, timeSlots: parsed.timeSlots || {} };
+          return { 
+            teams: parsed.teams || ['Accounting', 'IT', 'Operations', 'HR', 'Finance'], 
+            projects: parsed.projects || [], 
+            members: parsed.members || [], 
+            projectPool: parsed.projectPool || [], 
+            memberProjects: parsed.memberProjects || {}, 
+            timeSlots: parsed.timeSlots || {},
+            settings: parsed.settings || { ganttTimeScale: 'daily', portfolioTimeScale: 'weekly' },
+            users: parsed.users || {}
+          };
         }
       } catch (e) { console.error('Load error:', e); }
       return JSON.parse(JSON.stringify(defaultData));
@@ -1039,10 +1266,8 @@
     function saveData() { 
       try { 
         localStorage.setItem(STORAGE_KEY, JSON.stringify(data)); 
-        // Also sync to cloud if configured
-        if (cloudConfig.sheetsUrl && cloudConfig.autoSync) {
-          syncToCloud(data);
-        }
+        // Auto-sync to cloud on every change
+        syncToCloud(data);
       } catch (e) { console.error('Save error:', e); } 
     }
     function exportData() { const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' }); const url = URL.createObjectURL(blob); const a = document.createElement('a'); a.href = url; a.download = `project-hub-${new Date().toISOString().split('T')[0]}.json`; a.click(); URL.revokeObjectURL(url); showToast('Exported!'); }
@@ -1063,19 +1288,563 @@
     function generateId() { return 'id_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9); }
 
     // ==================== VIEWS ====================
+    let currentView = 'dashboard';
+    
     function showView(view) {
+      currentView = view;
       document.getElementById('view-dashboard').classList.add('hidden');
       document.getElementById('view-project').classList.add('hidden');
+      document.getElementById('view-portfolio').classList.add('hidden');
       document.getElementById('view-calendar').classList.add('hidden');
       document.querySelectorAll('.nav-link').forEach(l => l.classList.remove('active'));
       
       if (view === 'dashboard') { document.getElementById('view-dashboard').classList.remove('hidden'); document.getElementById('nav-dashboard').classList.add('active'); renderDashboard(); }
       else if (view === 'project') { document.getElementById('view-project').classList.remove('hidden'); renderProjectDetail(); }
+      else if (view === 'portfolio') { document.getElementById('view-portfolio').classList.remove('hidden'); document.getElementById('nav-portfolio').classList.add('active'); renderPortfolio(); }
       else if (view === 'calendar') { document.getElementById('view-calendar').classList.remove('hidden'); document.getElementById('nav-calendar').classList.add('active'); renderTimeManagement(); }
     }
 
     // ==================== DASHBOARD ====================
     function renderDashboard() { renderSummary(); renderProjectPool(); renderTeamBoards(); }
+    
+    // ==================== PORTFOLIO VIEW (All Projects Gantt) ====================
+    let portfolioMemberFilter = 'all';
+    
+    function getProjectRoleAssignments(projectId) {
+      // Get all members assigned to this project with their roles
+      const assignments = [];
+      Object.keys(data.memberProjects).forEach(mid => {
+        const memberAssignments = data.memberProjects[mid] || [];
+        memberAssignments.forEach(a => {
+          const aId = typeof a === 'string' ? a : a.id;
+          const aRole = typeof a === 'string' ? null : a.role;
+          if (aId === projectId) {
+            const member = getMemberById(mid);
+            if (member) {
+              assignments.push({ member, role: aRole, memberId: mid });
+            }
+          }
+        });
+      });
+      return assignments;
+    }
+    
+    function renderPortfolio() {
+      const container = document.getElementById('portfolio-gantt');
+      const filterSelect = document.getElementById('portfolio-member-filter');
+      
+      // Populate member filter dropdown
+      const currentFilter = filterSelect.value || 'all';
+      filterSelect.innerHTML = '<option value="all">All Members</option>' + 
+        data.members.map(m => `<option value="${m.id}" ${currentFilter === m.id ? 'selected' : ''}>${m.avatar} ${m.name}</option>`).join('');
+      
+      let allProjects = data.projects.filter(p => p.startDate && p.endDate);
+      
+      // Apply member filter
+      const selectedMember = filterSelect.value;
+      if (selectedMember && selectedMember !== 'all') {
+        // Filter to projects where selected member is assigned
+        allProjects = allProjects.filter(p => {
+          const assignments = getProjectRoleAssignments(p.id);
+          return assignments.some(a => a.memberId === selectedMember);
+        });
+      }
+      
+      if (!allProjects.length) {
+        container.innerHTML = '<div class="gantt-empty">No projects with dates set' + (selectedMember !== 'all' ? ' for selected member' : '') + '.</div>';
+        return;
+      }
+      
+      // Get timescale from settings
+      if (!data.settings) data.settings = {};
+      const portfolioTimeScale = data.settings.portfolioTimeScale || 'weekly';
+      
+      // Fixed date range: Jan 1, 2026 to Dec 31, 2026 (or later if projects extend)
+      const fixedStart = new Date('2026-01-01');
+      const allEnds = allProjects.map(p => new Date(p.endDate));
+      const maxProjectEnd = new Date(Math.max(...allEnds));
+      const fixedEnd = new Date(Math.max(new Date('2026-12-31').getTime(), maxProjectEnd.getTime() + 30 * 864e5));
+      
+      const today = new Date();
+      today.setHours(0, 0, 0, 0);
+      
+      // Color palette for projects
+      const colors = ['#3B82F6', '#10B981', '#F59E0B', '#EF4444', '#8B5CF6', '#EC4899', '#06B6D4', '#84CC16', '#F97316', '#6366F1'];
+      
+      // Sort projects by start date
+      const sortedProjects = [...allProjects].sort((a, b) => new Date(a.startDate) - new Date(b.startDate));
+      
+      // Build project data with role assignments
+      const projectsWithRoles = sortedProjects.map((p, idx) => {
+        const assignments = getProjectRoleAssignments(p.id);
+        const pmAssignments = assignments.filter(a => a.role === 'PM');
+        const devAssignments = assignments.filter(a => a.role === 'Dev');
+        const otherAssignments = assignments.filter(a => a.role !== 'PM' && a.role !== 'Dev');
+        return {
+          ...p,
+          color: colors[idx % colors.length],
+          pmMembers: pmAssignments,
+          devMembers: devAssignments,
+          otherMembers: otherAssignments,
+          allAssignments: assignments
+        };
+      });
+      
+      let html = `<div class="portfolio-gantt">
+        <div class="gantt-controls">
+          <span style="color:#64748B;font-size:12px;margin-right:8px;">📅 Scale:</span>
+          <button class="gantt-scale-btn ${portfolioTimeScale==='daily'?'active':''}" onclick="setPortfolioScale('daily')">Daily</button>
+          <button class="gantt-scale-btn ${portfolioTimeScale==='weekly'?'active':''}" onclick="setPortfolioScale('weekly')">Weekly</button>
+          <button class="gantt-scale-btn ${portfolioTimeScale==='monthly'?'active':''}" onclick="setPortfolioScale('monthly')">Monthly</button>
+          <span style="flex:1;"></span>
+          <span style="font-size:11px;color:#64748B;">📊 ${allProjects.length} projects</span>
+        </div>
+        <div class="gantt-scroll-container" id="portfolio-scroll">`;
+      
+      if (portfolioTimeScale === 'daily') {
+        html += renderPortfolioDaily(fixedStart, fixedEnd, projectsWithRoles, today, colors);
+      } else if (portfolioTimeScale === 'weekly') {
+        html += renderPortfolioWeekly(fixedStart, fixedEnd, projectsWithRoles, today, colors);
+      } else {
+        html += renderPortfolioMonthly(fixedStart, fixedEnd, projectsWithRoles, today, colors);
+      }
+      
+      html += `</div>
+        <div style="padding:12px;border-top:1px solid #475569;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px;">
+          <div style="font-size:11px;color:#64748B;">
+            ✅ ${allProjects.filter(p => p.status === 'Done' || p.status === 'Completed').length} completed • 
+            🔄 ${allProjects.filter(p => p.status === 'In Progress').length} in progress •
+            📋 ${allProjects.filter(p => p.status === 'Not Started').length} not started
+          </div>
+          <div style="display:flex;gap:12px;font-size:11px;">
+            <span style="color:#EF4444;">▌Today</span>
+            <span style="color:#64748B;">Click project to view details</span>
+          </div>
+        </div>
+      </div>`;
+      
+      container.innerHTML = html;
+      
+      // Auto-scroll to today
+      const scrollContainer = document.getElementById('portfolio-scroll');
+      if (scrollContainer) {
+        setTimeout(() => {
+          const todayDays = Math.ceil((today - fixedStart) / 864e5);
+          const cellWidth = portfolioTimeScale === 'daily' ? 28 : (portfolioTimeScale === 'weekly' ? 60 : 100);
+          const scrollTo = Math.max(0, (portfolioTimeScale === 'daily' ? todayDays * cellWidth : (portfolioTimeScale === 'weekly' ? todayDays / 7 * cellWidth : todayDays / 30 * cellWidth)) - 300);
+          scrollContainer.scrollLeft = scrollTo;
+        }, 100);
+      }
+    }
+    
+    function renderPortfolioDaily(start, end, projects, today, colors) {
+      const totalDays = Math.ceil((end - start) / 864e5) + 1;
+      const dayWidth = 28;
+      
+      let dates = [];
+      for (let i = 0; i < totalDays; i++) {
+        const d = new Date(start);
+        d.setDate(d.getDate() + i);
+        dates.push(d);
+      }
+      
+      // Group by month
+      let months = [];
+      let currentMonth = '';
+      let monthDays = 0;
+      dates.forEach((d, i) => {
+        const monthKey = d.toLocaleDateString('en-US', { month: 'short', year: 'numeric' });
+        if (monthKey !== currentMonth) {
+          if (currentMonth) months.push({ name: currentMonth, days: monthDays });
+          currentMonth = monthKey;
+          monthDays = 1;
+        } else {
+          monthDays++;
+        }
+      });
+      months.push({ name: currentMonth, days: monthDays });
+      
+      let html = `<div class="gantt-wrapper">
+        <div class="portfolio-project-column">
+          <div class="portfolio-header-cell">Project / Role</div>`;
+      
+      // Project names with role sub-rows
+      projects.forEach((p, idx) => {
+        const hasPM = p.pmMembers && p.pmMembers.length > 0;
+        const hasDev = p.devMembers && p.devMembers.length > 0;
+        const rowCount = 1 + (hasPM ? 1 : 0) + (hasDev ? 1 : 0);
+        
+        html += `<div class="portfolio-project-group">
+          <div class="portfolio-project-name" onclick="openProject('${p.id}')" title="${p.name}" style="font-weight:600;">
+            <span style="display:inline-block;width:8px;height:8px;border-radius:50%;background:${p.color};margin-right:8px;flex-shrink:0;"></span>
+            <span style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${p.name}</span>
+          </div>`;
+        
+        if (hasPM) {
+          const pmNames = p.pmMembers.map(a => a.member.name).join(', ');
+          html += `<div class="portfolio-role-name" title="${pmNames}">
+            <span style="background:#8B5CF6;color:white;padding:1px 6px;border-radius:3px;font-size:9px;margin-right:6px;">PM</span>
+            <span style="color:#94A3B8;font-size:10px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${pmNames}</span>
+          </div>`;
+        }
+        
+        if (hasDev) {
+          const devNames = p.devMembers.map(a => a.member.name).join(', ');
+          html += `<div class="portfolio-role-name" title="${devNames}">
+            <span style="background:#10B981;color:white;padding:1px 6px;border-radius:3px;font-size:9px;margin-right:6px;">Dev</span>
+            <span style="color:#94A3B8;font-size:10px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${devNames}</span>
+          </div>`;
+        }
+        
+        html += '</div>';
+      });
+      html += '</div>';
+      
+      html += '<div class="portfolio-timeline-column">';
+      
+      // Month headers
+      html += '<div class="gantt-header-months">';
+      months.forEach(m => {
+        html += `<div class="gantt-month-label" style="min-width:${m.days * dayWidth}px;">${m.name}</div>`;
+      });
+      html += '</div>';
+      
+      // Day headers
+      html += '<div class="gantt-timeline">';
+      dates.forEach(d => {
+        const isToday = d.toDateString() === today.toDateString();
+        const isWeekend = d.getDay() === 0 || d.getDay() === 6;
+        html += `<div class="gantt-date ${isWeekend ? 'weekend' : ''} ${isToday ? 'today' : ''}" style="min-width:${dayWidth}px;">
+          <div class="gantt-date-day" style="font-size:10px;">${d.getDate()}</div>
+        </div>`;
+      });
+      html += '</div>';
+      
+      // Project bars with role sub-bars
+      html += '<div class="portfolio-body-rows">';
+      projects.forEach((p, idx) => {
+        const pStart = new Date(p.startDate);
+        const pEnd = new Date(p.endDate);
+        const leftDays = Math.max(0, Math.ceil((pStart - start) / 864e5));
+        const widthDays = Math.max(1, Math.ceil((pEnd - pStart) / 864e5) + 1);
+        
+        const hasPM = p.pmMembers && p.pmMembers.length > 0;
+        const hasDev = p.devMembers && p.devMembers.length > 0;
+        
+        let progress = 0;
+        if (p.tasks && p.tasks.length > 0) {
+          progress = Math.round(p.tasks.reduce((sum, t) => sum + (t.progress || 0), 0) / p.tasks.length);
+        }
+        
+        // Today line position
+        const todayDays = Math.ceil((today - start) / 864e5);
+        const todayLineHtml = (todayDays >= 0 && todayDays <= totalDays) ? 
+          `<div class="gantt-today-line" style="left:${todayDays * dayWidth}px;"></div>` : '';
+        
+        // Main project bar row
+        html += `<div class="portfolio-row"><div class="portfolio-bar-container" style="min-width:${totalDays * dayWidth}px;">
+          ${todayLineHtml}
+          <div class="portfolio-bar" onclick="openProject('${p.id}')" 
+               style="left:${leftDays * dayWidth}px;width:${widthDays * dayWidth}px;background:linear-gradient(135deg,${p.color},${p.color}dd);"
+               title="${p.name}: ${formatDateShort(p.startDate)} - ${formatDateShort(p.endDate)} (${progress}%)">
+            ${widthDays * dayWidth > 50 ? `${progress}%` : ''}
+          </div>
+        </div></div>`;
+        
+        // PM role bar
+        if (hasPM) {
+          html += `<div class="portfolio-row portfolio-role-row"><div class="portfolio-bar-container" style="min-width:${totalDays * dayWidth}px;">
+            ${todayLineHtml}
+            <div class="portfolio-bar portfolio-role-bar" onclick="openProject('${p.id}')" 
+                 style="left:${leftDays * dayWidth}px;width:${widthDays * dayWidth}px;background:linear-gradient(135deg,#8B5CF6,#8B5CF6aa);height:18px;top:4px;"
+                 title="PM: ${p.pmMembers.map(a => a.member.name).join(', ')}">
+              ${widthDays * dayWidth > 60 ? 'PM' : ''}
+            </div>
+          </div></div>`;
+        }
+        
+        // Dev role bar
+        if (hasDev) {
+          html += `<div class="portfolio-row portfolio-role-row"><div class="portfolio-bar-container" style="min-width:${totalDays * dayWidth}px;">
+            ${todayLineHtml}
+            <div class="portfolio-bar portfolio-role-bar" onclick="openProject('${p.id}')" 
+                 style="left:${leftDays * dayWidth}px;width:${widthDays * dayWidth}px;background:linear-gradient(135deg,#10B981,#10B981aa);height:18px;top:4px;"
+                 title="Dev: ${p.devMembers.map(a => a.member.name).join(', ')}">
+              ${widthDays * dayWidth > 60 ? 'Dev' : ''}
+            </div>
+          </div></div>`;
+        }
+      });
+      html += '</div></div></div>';
+      
+      return html;
+    }
+    
+    function renderPortfolioWeekly(start, end, projects, today, colors) {
+      const totalDays = Math.ceil((end - start) / 864e5) + 1;
+      const totalWeeks = Math.ceil(totalDays / 7);
+      const weekWidth = 60;
+      
+      let weeks = [];
+      for (let i = 0; i < totalWeeks; i++) {
+        const weekStart = new Date(start);
+        weekStart.setDate(weekStart.getDate() + i * 7);
+        weeks.push(weekStart);
+      }
+      
+      // Group by month
+      let months = [];
+      let currentMonth = '';
+      let monthWeeks = 0;
+      weeks.forEach(w => {
+        const monthKey = w.toLocaleDateString('en-US', { month: 'short', year: 'numeric' });
+        if (monthKey !== currentMonth) {
+          if (currentMonth) months.push({ name: currentMonth, weeks: monthWeeks });
+          currentMonth = monthKey;
+          monthWeeks = 1;
+        } else {
+          monthWeeks++;
+        }
+      });
+      months.push({ name: currentMonth, weeks: monthWeeks });
+      
+      let html = `<div class="gantt-wrapper">
+        <div class="portfolio-project-column">
+          <div class="portfolio-header-cell">Project / Role</div>`;
+      
+      // Project names with role sub-rows
+      projects.forEach((p, idx) => {
+        const hasPM = p.pmMembers && p.pmMembers.length > 0;
+        const hasDev = p.devMembers && p.devMembers.length > 0;
+        
+        html += `<div class="portfolio-project-group">
+          <div class="portfolio-project-name" onclick="openProject('${p.id}')" title="${p.name}" style="font-weight:600;">
+            <span style="display:inline-block;width:8px;height:8px;border-radius:50%;background:${p.color};margin-right:8px;flex-shrink:0;"></span>
+            <span style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${p.name}</span>
+          </div>`;
+        
+        if (hasPM) {
+          const pmNames = p.pmMembers.map(a => a.member.name).join(', ');
+          html += `<div class="portfolio-role-name" title="${pmNames}">
+            <span style="background:#8B5CF6;color:white;padding:1px 6px;border-radius:3px;font-size:9px;margin-right:6px;">PM</span>
+            <span style="color:#94A3B8;font-size:10px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${pmNames}</span>
+          </div>`;
+        }
+        
+        if (hasDev) {
+          const devNames = p.devMembers.map(a => a.member.name).join(', ');
+          html += `<div class="portfolio-role-name" title="${devNames}">
+            <span style="background:#10B981;color:white;padding:1px 6px;border-radius:3px;font-size:9px;margin-right:6px;">Dev</span>
+            <span style="color:#94A3B8;font-size:10px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${devNames}</span>
+          </div>`;
+        }
+        
+        html += '</div>';
+      });
+      html += '</div>';
+      
+      html += '<div class="portfolio-timeline-column">';
+      
+      // Month headers
+      html += '<div class="gantt-header-months">';
+      months.forEach(m => {
+        html += `<div class="gantt-month-label" style="min-width:${m.weeks * weekWidth}px;">${m.name}</div>`;
+      });
+      html += '</div>';
+      
+      // Week headers
+      html += '<div class="gantt-timeline">';
+      weeks.forEach((w, i) => {
+        const weekEnd = new Date(w);
+        weekEnd.setDate(weekEnd.getDate() + 6);
+        const isThisWeek = today >= w && today <= weekEnd;
+        html += `<div class="gantt-date ${isThisWeek ? 'today' : ''}" style="min-width:${weekWidth}px;">
+          <div class="gantt-date-day" style="font-size:10px;">${w.getDate()}-${weekEnd.getDate()}</div>
+          <div class="gantt-date-week">W${i + 1}</div>
+        </div>`;
+      });
+      html += '</div>';
+      
+      // Project bars with role sub-bars
+      html += '<div class="portfolio-body-rows">';
+      projects.forEach((p, idx) => {
+        const pStart = new Date(p.startDate);
+        const pEnd = new Date(p.endDate);
+        const leftWeeks = Math.max(0, Math.floor((pStart - start) / 864e5 / 7));
+        const widthWeeks = Math.max(1, Math.ceil((pEnd - pStart) / 864e5 / 7) + 1);
+        
+        const hasPM = p.pmMembers && p.pmMembers.length > 0;
+        const hasDev = p.devMembers && p.devMembers.length > 0;
+        
+        let progress = 0;
+        if (p.tasks && p.tasks.length > 0) {
+          progress = Math.round(p.tasks.reduce((sum, t) => sum + (t.progress || 0), 0) / p.tasks.length);
+        }
+        
+        // Today line
+        const todayWeek = Math.floor((today - start) / 864e5 / 7);
+        const dayInWeek = ((today - start) / 864e5) % 7;
+        const todayLineHtml = (todayWeek >= 0 && todayWeek < totalWeeks) ? 
+          `<div class="gantt-today-line" style="left:${todayWeek * weekWidth + (dayInWeek / 7) * weekWidth}px;"></div>` : '';
+        
+        // Main project bar row
+        html += `<div class="portfolio-row"><div class="portfolio-bar-container" style="min-width:${totalWeeks * weekWidth}px;">
+          ${todayLineHtml}
+          <div class="portfolio-bar" onclick="openProject('${p.id}')" 
+               style="left:${leftWeeks * weekWidth}px;width:${widthWeeks * weekWidth}px;background:linear-gradient(135deg,${p.color},${p.color}dd);"
+               title="${p.name}: ${formatDateShort(p.startDate)} - ${formatDateShort(p.endDate)}">
+            ${progress}% • ${p.status}
+          </div>
+        </div></div>`;
+        
+        // PM role bar
+        if (hasPM) {
+          html += `<div class="portfolio-row portfolio-role-row"><div class="portfolio-bar-container" style="min-width:${totalWeeks * weekWidth}px;">
+            ${todayLineHtml}
+            <div class="portfolio-bar portfolio-role-bar" onclick="openProject('${p.id}')" 
+                 style="left:${leftWeeks * weekWidth}px;width:${widthWeeks * weekWidth}px;background:linear-gradient(135deg,#8B5CF6,#8B5CF6aa);height:18px;top:4px;"
+                 title="PM: ${p.pmMembers.map(a => a.member.name).join(', ')}">
+              PM: ${p.pmMembers.map(a => a.member.name.split(' ')[0]).join(', ')}
+            </div>
+          </div></div>`;
+        }
+        
+        // Dev role bar
+        if (hasDev) {
+          html += `<div class="portfolio-row portfolio-role-row"><div class="portfolio-bar-container" style="min-width:${totalWeeks * weekWidth}px;">
+            ${todayLineHtml}
+            <div class="portfolio-bar portfolio-role-bar" onclick="openProject('${p.id}')" 
+                 style="left:${leftWeeks * weekWidth}px;width:${widthWeeks * weekWidth}px;background:linear-gradient(135deg,#10B981,#10B981aa);height:18px;top:4px;"
+                 title="Dev: ${p.devMembers.map(a => a.member.name).join(', ')}">
+              Dev: ${p.devMembers.map(a => a.member.name.split(' ')[0]).join(', ')}
+            </div>
+          </div></div>`;
+        }
+      });
+      html += '</div></div></div>';
+      
+      return html;
+    }
+    
+    function renderPortfolioMonthly(start, end, projects, today, colors) {
+      const monthWidth = 100;
+      let months = [];
+      let d = new Date(start);
+      while (d <= end) {
+        months.push(new Date(d));
+        d.setMonth(d.getMonth() + 1);
+      }
+      
+      let html = `<div class="gantt-wrapper">
+        <div class="portfolio-project-column">
+          <div class="portfolio-header-cell" style="height:52px;">Project / Role</div>`;
+      
+      // Project names with role sub-rows
+      projects.forEach((p, idx) => {
+        const hasPM = p.pmMembers && p.pmMembers.length > 0;
+        const hasDev = p.devMembers && p.devMembers.length > 0;
+        
+        html += `<div class="portfolio-project-group">
+          <div class="portfolio-project-name" onclick="openProject('${p.id}')" title="${p.name}" style="font-weight:600;">
+            <span style="display:inline-block;width:8px;height:8px;border-radius:50%;background:${p.color};margin-right:8px;flex-shrink:0;"></span>
+            <span style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${p.name}</span>
+          </div>`;
+        
+        if (hasPM) {
+          const pmNames = p.pmMembers.map(a => a.member.name).join(', ');
+          html += `<div class="portfolio-role-name" title="${pmNames}">
+            <span style="background:#8B5CF6;color:white;padding:1px 6px;border-radius:3px;font-size:9px;margin-right:6px;">PM</span>
+            <span style="color:#94A3B8;font-size:10px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${pmNames}</span>
+          </div>`;
+        }
+        
+        if (hasDev) {
+          const devNames = p.devMembers.map(a => a.member.name).join(', ');
+          html += `<div class="portfolio-role-name" title="${devNames}">
+            <span style="background:#10B981;color:white;padding:1px 6px;border-radius:3px;font-size:9px;margin-right:6px;">Dev</span>
+            <span style="color:#94A3B8;font-size:10px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${devNames}</span>
+          </div>`;
+        }
+        
+        html += '</div>';
+      });
+      html += '</div>';
+      
+      html += '<div class="portfolio-timeline-column">';
+      
+      // Month headers
+      html += '<div class="gantt-timeline">';
+      months.forEach(m => {
+        const isThisMonth = today.getMonth() === m.getMonth() && today.getFullYear() === m.getFullYear();
+        html += `<div class="gantt-date ${isThisMonth ? 'today' : ''}" style="min-width:${monthWidth}px;">
+          <div class="gantt-date-day">${m.toLocaleDateString('en-US', { month: 'short' })}</div>
+          <div class="gantt-date-month">${m.getFullYear()}</div>
+        </div>`;
+      });
+      html += '</div>';
+      
+      // Project bars with role sub-bars
+      html += '<div class="portfolio-body-rows">';
+      projects.forEach((p, idx) => {
+        const pStart = new Date(p.startDate);
+        const pEnd = new Date(p.endDate);
+        const startMonthIdx = (pStart.getFullYear() - start.getFullYear()) * 12 + pStart.getMonth() - start.getMonth();
+        const endMonthIdx = (pEnd.getFullYear() - start.getFullYear()) * 12 + pEnd.getMonth() - start.getMonth();
+        const leftPos = Math.max(0, startMonthIdx + pStart.getDate() / 30) * monthWidth;
+        const widthMonths = Math.max(0.5, endMonthIdx - startMonthIdx + 1);
+        
+        const hasPM = p.pmMembers && p.pmMembers.length > 0;
+        const hasDev = p.devMembers && p.devMembers.length > 0;
+        
+        let progress = 0;
+        if (p.tasks && p.tasks.length > 0) {
+          progress = Math.round(p.tasks.reduce((sum, t) => sum + (t.progress || 0), 0) / p.tasks.length);
+        }
+        
+        // Today line
+        const todayMonthIdx = (today.getFullYear() - start.getFullYear()) * 12 + today.getMonth() - start.getMonth();
+        const todayPos = todayMonthIdx * monthWidth + (today.getDate() / 30) * monthWidth;
+        const todayLineHtml = (todayMonthIdx >= 0 && todayMonthIdx < months.length) ? 
+          `<div class="gantt-today-line" style="left:${todayPos}px;"></div>` : '';
+        
+        // Main project bar row
+        html += `<div class="portfolio-row"><div class="portfolio-bar-container" style="min-width:${months.length * monthWidth}px;">
+          ${todayLineHtml}
+          <div class="portfolio-bar" onclick="openProject('${p.id}')" 
+               style="left:${leftPos}px;width:${widthMonths * monthWidth}px;background:linear-gradient(135deg,${p.color},${p.color}dd);"
+               title="${p.name}: ${formatDateShort(p.startDate)} - ${formatDateShort(p.endDate)}">
+            ${progress}% • ${p.status}
+          </div>
+        </div></div>`;
+        
+        // PM role bar
+        if (hasPM) {
+          html += `<div class="portfolio-row portfolio-role-row"><div class="portfolio-bar-container" style="min-width:${months.length * monthWidth}px;">
+            ${todayLineHtml}
+            <div class="portfolio-bar portfolio-role-bar" onclick="openProject('${p.id}')" 
+                 style="left:${leftPos}px;width:${widthMonths * monthWidth}px;background:linear-gradient(135deg,#8B5CF6,#8B5CF6aa);height:18px;top:4px;"
+                 title="PM: ${p.pmMembers.map(a => a.member.name).join(', ')}">
+              PM: ${p.pmMembers.map(a => a.member.name.split(' ')[0]).join(', ')}
+            </div>
+          </div></div>`;
+        }
+        
+        // Dev role bar
+        if (hasDev) {
+          html += `<div class="portfolio-row portfolio-role-row"><div class="portfolio-bar-container" style="min-width:${months.length * monthWidth}px;">
+            ${todayLineHtml}
+            <div class="portfolio-bar portfolio-role-bar" onclick="openProject('${p.id}')" 
+                 style="left:${leftPos}px;width:${widthMonths * monthWidth}px;background:linear-gradient(135deg,#10B981,#10B981aa);height:18px;top:4px;"
+                 title="Dev: ${p.devMembers.map(a => a.member.name).join(', ')}">
+              Dev: ${p.devMembers.map(a => a.member.name.split(' ')[0]).join(', ')}
+            </div>
+          </div></div>`;
+        }
+      });
+      html += '</div></div></div>';
+      
+      return html;
+    }
     
     function getWeeklyHoursSummary() { const s = {}; Object.values(data.timeSlots).forEach(ms => Object.values(ms).forEach(ds => Object.values(ds).forEach(pid => { if(pid) s[pid] = (s[pid]||0)+1; }))); return s; }
     
@@ -1091,46 +1860,350 @@
       const projects = data.projectPool.map(id => getProjectById(id)).filter(Boolean);
       if (!projects.length) { c.innerHTML = '<div class="pool-empty">No projects in pool. Click + to create one.</div>'; return; }
       c.innerHTML = projects.map(p => `
-        <div class="pool-project" onclick="openProject('${p.id}')">
+        <div class="pool-project" draggable="true" data-project-id="${p.id}"
+             ondragstart="handleDragStart(event, '${p.id}')"
+             ondragend="handleDragEnd(event)">
           <div class="pool-project-header">
-            <span class="pool-project-name">${p.name}</span>
+            <span class="pool-project-name" onclick="openProject('${p.id}')">${p.name}</span>
             <span class="${getPriorityClass(p.priority)}">${p.priority}</span>
           </div>
-          <p class="pool-project-desc">${p.description || 'No description'}</p>
+          <p class="pool-project-desc" onclick="openProject('${p.id}')">${p.description || 'No description'}</p>
           <div class="pool-project-meta">
             <span class="pool-project-date">📅 ${formatDateShort(p.startDate)} - ${formatDateShort(p.endDate)}</span>
             <span class="pool-project-date">${p.status}</span>
             ${p.team ? `<span class="pool-project-date">👥 ${p.team}</span>` : ''}
             ${p.savingHours ? `<span class="pool-project-date" style="background:#10B981;color:white;">⏱️ ${p.savingHours}h/mo</span>` : ''}
+            <button class="btn btn-primary btn-sm" onclick="openQuickAssign('${p.id}', event)" style="margin-left:auto;padding:4px 8px;font-size:10px;">👥 Assign</button>
           </div>
         </div>
       `).join('');
     }
 
     function renderTeamBoards() {
-      document.getElementById('team-boards').innerHTML = data.members.map(m => {
-        const pIds = data.memberProjects[m.id] || [];
-        const projects = pIds.map(id => getProjectById(id)).filter(Boolean);
-        return `<div class="board" style="border-color:${m.color}">
+      // Define available roles
+      const PROJECT_ROLES = ['PM', 'Dev', 'QA', 'Support', 'Lead'];
+      
+      // Sort members: current user's member first (for mobile), then others
+      const currentMemberId = getCurrentUserMemberId();
+      const sortedMembers = [...data.members].sort((a, b) => {
+        if (a.id === currentMemberId) return -1;
+        if (b.id === currentMemberId) return 1;
+        return 0;
+      });
+      
+      document.getElementById('team-boards').innerHTML = sortedMembers.map(m => {
+        const assignments = data.memberProjects[m.id] || [];
+        const isCurrentUser = m.id === currentMemberId;
+        // Handle both old format (array of IDs) and new format (array of objects with id and role)
+        const projectsWithRoles = assignments.map(a => {
+          if (typeof a === 'string') {
+            // Old format - just project ID
+            return { project: getProjectById(a), role: null };
+          } else {
+            // New format - object with id and role
+            return { project: getProjectById(a.id), role: a.role };
+          }
+        }).filter(pr => pr.project);
+        
+        return `<div class="board ${isCurrentUser ? 'current-user-board' : ''}" style="border-color:${m.color}${isCurrentUser ? ';box-shadow:0 0 20px '+m.color+'40;' : ''}" data-member-id="${m.id}"
+                     ondragover="handleDragOver(event)" ondragleave="handleDragLeave(event)" ondrop="handleDropWithRole(event, '${m.id}')">
           <div class="board-header">
             <div class="board-member">
               <span class="board-avatar" style="background:${m.color}">${m.avatar}</span>
-              <div><div class="board-name">${m.name}</div><div class="board-role">${m.role}</div></div>
+              <div>
+                <div class="board-name">${m.name} ${isCurrentUser ? '<span style="font-size:10px;background:#10B981;color:white;padding:2px 6px;border-radius:10px;margin-left:6px;">You</span>' : ''}</div>
+                <div class="board-role">${m.role}</div>
+              </div>
             </div>
-            <div class="board-actions">
+            ${isAdmin() ? `<div class="board-actions">
               <button class="btn btn-secondary btn-icon btn-sm" onclick="editMember('${m.id}')">✏️</button>
               <button class="btn btn-danger btn-icon btn-sm" onclick="deleteMember('${m.id}')">🗑️</button>
-            </div>
+            </div>` : ''}
           </div>
-          <div class="board-count">${projects.length} project${projects.length!==1?'s':''}</div>
-          ${projects.length ? `<div class="board-projects">${projects.map(p => `
-            <div class="board-project-item" onclick="openProject('${p.id}')">
-              <div class="board-project-name">${p.name}</div>
-              <div class="board-project-status">${p.status} • ${p.priority}</div>
-            </div>
-          `).join('')}</div>` : '<div class="board-empty">Drag projects here</div>'}
+          <div class="board-count">${projectsWithRoles.length} project${projectsWithRoles.length!==1?'s':''}</div>
+          ${projectsWithRoles.length ? `<div class="board-projects">${projectsWithRoles.map(pr => {
+            const p = pr.project;
+            const role = pr.role;
+            return `
+            <div class="board-project-item" draggable="true" data-project-id="${p.id}"
+                 style="border-left-color:${m.color};background:linear-gradient(135deg, ${m.color}15 0%, #0F172A 100%);"
+                 ondragstart="handleDragStart(event, '${p.id}')" ondragend="handleDragEnd(event)">
+              <div class="board-project-header">
+                <span class="board-project-name" onclick="openProject('${p.id}')">${p.name}</span>
+                <span class="${getPriorityClass(p.priority)}" style="font-size:10px;padding:2px 6px;">${p.priority}</span>
+              </div>
+              <div class="board-project-meta">
+                ${role ? `<span class="board-project-role">${role}</span>` : ''}
+                <span class="board-project-status">${p.status}</span>
+                ${p.savingHours ? `<span class="board-project-status" style="background:#10B981;color:white;">⏱️ ${p.savingHours}h/mo</span>` : ''}
+                <button class="btn btn-secondary btn-sm" onclick="openQuickAssign('${p.id}', event)" style="margin-left:auto;padding:2px 6px;font-size:9px;">↔️</button>
+              </div>
+            </div>`;
+          }).join('')}</div>` : ''}
+          <div class="board-dropzone" ondragover="handleDragOver(event)" ondragleave="handleDragLeave(event)" ondrop="handleDropWithRole(event, '${m.id}')">
+            📥 Drop project here
+          </div>
         </div>`;
       }).join('');
+    }
+    
+    // Drag and Drop Handlers
+    let draggedProjectId = null;
+    
+    function handleDragStart(e, projectId) {
+      draggedProjectId = projectId;
+      e.target.classList.add('dragging');
+      e.dataTransfer.effectAllowed = 'move';
+      e.dataTransfer.setData('text/plain', projectId);
+    }
+    
+    function handleDragEnd(e) {
+      e.target.classList.remove('dragging');
+      draggedProjectId = null;
+      document.querySelectorAll('.drag-over').forEach(el => el.classList.remove('drag-over'));
+    }
+    
+    function handleDragOver(e) {
+      e.preventDefault();
+      e.dataTransfer.dropEffect = 'move';
+      const board = e.target.closest('.board') || e.target.closest('.board-dropzone');
+      if (board) board.classList.add('drag-over');
+    }
+    
+    function handleDragLeave(e) {
+      const board = e.target.closest('.board') || e.target.closest('.board-dropzone');
+      if (board && !board.contains(e.relatedTarget)) {
+        board.classList.remove('drag-over');
+      }
+    }
+    
+    function handleDrop(e, memberId) {
+      e.preventDefault();
+      const board = e.target.closest('.board');
+      if (board) board.classList.remove('drag-over');
+      
+      const projectId = e.dataTransfer.getData('text/plain') || draggedProjectId;
+      if (!projectId || !memberId) return;
+      
+      // For backward compatibility, assign without role
+      assignProjectToMember(projectId, memberId, null);
+    }
+    
+    // New drop handler that shows role selection
+    function handleDropWithRole(e, memberId) {
+      e.preventDefault();
+      const board = e.target.closest('.board');
+      if (board) board.classList.remove('drag-over');
+      
+      const projectId = e.dataTransfer.getData('text/plain') || draggedProjectId;
+      if (!projectId || !memberId) return;
+      
+      // Show role selection modal
+      openRoleSelectModal(projectId, memberId);
+    }
+    
+    // Role selection modal
+    let pendingAssignment = { projectId: null, memberId: null };
+    
+    function openRoleSelectModal(projectId, memberId) {
+      pendingAssignment = { projectId, memberId };
+      const p = getProjectById(projectId);
+      const m = data.members.find(x => x.id === memberId);
+      if (!p || !m) return;
+      
+      const roles = ['PM', 'Dev', 'QA', 'Support', 'Lead'];
+      const roleButtons = roles.map(role => 
+        `<button class="btn btn-secondary" style="flex:1;min-width:60px;" onclick="confirmRoleAssignment('${role}')">${role}</button>`
+      ).join('');
+      
+      document.getElementById('roleselect-content').innerHTML = `
+        <p style="margin-bottom:12px;color:#94A3B8;">Assign "<b>${p.name}</b>" to <b>${m.name}</b> as:</p>
+        <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:16px;">
+          ${roleButtons}
+        </div>
+        <button class="btn btn-primary" style="width:100%;" onclick="confirmRoleAssignment(null)">
+          Assign without role
+        </button>
+      `;
+      document.getElementById('modal-roleselect').classList.remove('hidden');
+    }
+    
+    function confirmRoleAssignment(role) {
+      const { projectId, memberId } = pendingAssignment;
+      if (projectId && memberId) {
+        assignProjectToMember(projectId, memberId, role);
+      }
+      closeModal('roleselect');
+      pendingAssignment = { projectId: null, memberId: null };
+    }
+    
+    function assignProjectToMember(projectId, memberId, role) {
+      // Remove from pool (project is now assigned)
+      data.projectPool = data.projectPool.filter(id => id !== projectId);
+      
+      // Initialize member's project array if needed
+      if (!data.memberProjects[memberId]) data.memberProjects[memberId] = [];
+      
+      // Check if already assigned to this member
+      const existingIdx = data.memberProjects[memberId].findIndex(a => {
+        if (typeof a === 'string') return a === projectId;
+        return a.id === projectId;
+      });
+      
+      if (existingIdx >= 0) {
+        // Update role if already assigned
+        data.memberProjects[memberId][existingIdx] = { id: projectId, role: role };
+        showToast('Role updated!');
+      } else {
+        // Add new assignment
+        data.memberProjects[memberId].push({ id: projectId, role: role });
+        showToast('Project assigned!');
+      }
+      
+      saveData();
+      renderDashboard();
+    }
+    
+    // Mobile-friendly quick assign modal
+    function openQuickAssign(projectId, e) {
+      if (e) e.stopPropagation();
+      const p = getProjectById(projectId);
+      if (!p) return;
+      
+      // Find current assignments for this project
+      const currentAssignments = [];
+      Object.keys(data.memberProjects).forEach(mid => {
+        const assignments = data.memberProjects[mid] || [];
+        assignments.forEach(a => {
+          const aId = typeof a === 'string' ? a : a.id;
+          const aRole = typeof a === 'string' ? null : a.role;
+          if (aId === projectId) {
+            const member = data.members.find(m => m.id === mid);
+            if (member) {
+              currentAssignments.push({ member, role: aRole });
+            }
+          }
+        });
+      });
+      
+      // Show current assignments
+      let currentHtml = '';
+      if (currentAssignments.length > 0) {
+        currentHtml = `
+          <div style="margin-bottom:16px;padding:12px;background:#334155;border-radius:8px;">
+            <div style="font-size:11px;color:#94A3B8;margin-bottom:8px;">Currently assigned to:</div>
+            ${currentAssignments.map(ca => `
+              <div style="display:flex;align-items:center;gap:8px;margin-bottom:6px;">
+                <span style="background:${ca.member.color};width:20px;height:20px;border-radius:50%;display:inline-flex;align-items:center;justify-content:center;font-size:10px;">${ca.member.avatar}</span>
+                <span style="flex:1;">${ca.member.name}</span>
+                ${ca.role ? `<span class="board-project-role">${ca.role}</span>` : ''}
+                <button class="btn btn-danger btn-sm" style="padding:2px 6px;font-size:9px;" onclick="removeAssignment('${projectId}','${ca.member.id}')">✕</button>
+              </div>
+            `).join('')}
+          </div>
+        `;
+      }
+      
+      const roles = ['PM', 'Dev', 'QA', 'Support', 'Lead'];
+      const memberOptions = data.members.map(m => {
+        const isAssigned = currentAssignments.some(ca => ca.member.id === m.id);
+        return `
+          <div style="margin-bottom:8px;padding:8px;background:#1E293B;border-radius:8px;border-left:4px solid ${m.color};">
+            <div style="display:flex;align-items:center;gap:8px;margin-bottom:6px;">
+              <span style="background:${m.color};width:24px;height:24px;border-radius:50%;display:inline-flex;align-items:center;justify-content:center;">${m.avatar}</span>
+              <span style="flex:1;font-weight:500;">${m.name}</span>
+              ${isAssigned ? '<span style="font-size:10px;color:#10B981;">✓ Assigned</span>' : ''}
+            </div>
+            <div style="display:flex;gap:4px;flex-wrap:wrap;">
+              ${roles.map(role => `<button class="btn btn-secondary btn-sm" style="padding:3px 8px;font-size:10px;" onclick="assignProjectToMember('${projectId}','${m.id}','${role}');closeModal('quickassign');">${role}</button>`).join('')}
+              <button class="btn btn-primary btn-sm" style="padding:3px 8px;font-size:10px;" onclick="assignProjectToMember('${projectId}','${m.id}',null);closeModal('quickassign');">No Role</button>
+            </div>
+          </div>
+        `;
+      }).join('');
+      
+      document.getElementById('quickassign-content').innerHTML = `
+        <p style="margin-bottom:12px;color:#94A3B8;font-size:13px;">Assign "<b>${p.name}</b>"</p>
+        ${currentHtml}
+        <div style="max-height:300px;overflow-y:auto;">
+          ${memberOptions}
+        </div>
+        <button class="btn btn-secondary" style="width:100%;margin-top:12px;" 
+                onclick="returnToPool('${projectId}');closeModal('quickassign');">
+          📦 Return to Pool (Remove All)
+        </button>
+      `;
+      document.getElementById('modal-quickassign').classList.remove('hidden');
+    }
+    
+    function removeAssignment(projectId, memberId) {
+      if (!data.memberProjects[memberId]) return;
+      
+      data.memberProjects[memberId] = data.memberProjects[memberId].filter(a => {
+        const aId = typeof a === 'string' ? a : a.id;
+        return aId !== projectId;
+      });
+      
+      // If no more assignments, add back to pool
+      let hasAssignments = false;
+      Object.keys(data.memberProjects).forEach(mid => {
+        const assignments = data.memberProjects[mid] || [];
+        if (assignments.some(a => (typeof a === 'string' ? a : a.id) === projectId)) {
+          hasAssignments = true;
+        }
+      });
+      
+      if (!hasAssignments && !data.projectPool.includes(projectId)) {
+        data.projectPool.push(projectId);
+      }
+      
+      saveData();
+      renderDashboard();
+      // Refresh the modal
+      openQuickAssign(projectId);
+      showToast('Assignment removed!');
+    }
+    
+    function returnToPool(projectId) {
+      // Remove from all members
+      Object.keys(data.memberProjects).forEach(mid => {
+        data.memberProjects[mid] = data.memberProjects[mid].filter(a => {
+          const aId = typeof a === 'string' ? a : a.id;
+          return aId !== projectId;
+        });
+      });
+      
+      // Add to pool if not there
+      if (!data.projectPool.includes(projectId)) {
+        data.projectPool.push(projectId);
+      }
+      
+      saveData();
+      renderDashboard();
+      showToast('Project returned to pool!');
+    }
+    
+    // Pool drag handlers - to return projects to pool
+    function handlePoolDragOver(e) {
+      e.preventDefault();
+      e.dataTransfer.dropEffect = 'move';
+      e.currentTarget.classList.add('drag-over');
+    }
+    
+    function handlePoolDragLeave(e) {
+      if (!e.currentTarget.contains(e.relatedTarget)) {
+        e.currentTarget.classList.remove('drag-over');
+      }
+    }
+    
+    function handlePoolDrop(e) {
+      e.preventDefault();
+      e.currentTarget.classList.remove('drag-over');
+      
+      const projectId = e.dataTransfer.getData('text/plain') || draggedProjectId;
+      if (!projectId) return;
+      
+      returnToPool(projectId);
     }
 
     // ==================== PROJECT DETAIL ====================
@@ -1143,24 +2216,49 @@
       document.getElementById('project-title').innerHTML = `
         <h1 class="detail-name">${p.name}</h1>
         <span class="${getPriorityClass(p.priority)}">${p.priority}</span>
-        <span class="status-badge" onclick="cycleStatus()">${p.status}</span>
+        <span class="status-badge" onclick="cycleStatus()" title="Click to change status">${p.status}</span>
         ${p.team ? `<span style="background:#1E293B;padding:6px 12px;border-radius:16px;font-size:11px;color:#38BDF8;">👥 ${p.team}</span>` : ''}
         ${p.savingHours ? `<span style="background:#10B981;padding:6px 12px;border-radius:16px;font-size:11px;color:white;">⏱️ ${p.savingHours}h/mo saved</span>` : ''}
         ${p.lockedTimeline ? `<span style="background:#F59E0B;padding:6px 12px;border-radius:16px;font-size:11px;color:white;">🔒 Timeline Locked</span>` : ''}
       `;
       document.getElementById('project-desc').textContent = p.description || '';
       
-      // Check if project is assigned to someone
-      let assignedTo = null;
-      for (const [mid, pids] of Object.entries(data.memberProjects)) {
-        if (pids.includes(p.id)) { assignedTo = getMemberById(mid); break; }
+      // Get all assignments for this project
+      const projectAssignments = [];
+      for (const [mid, assignments] of Object.entries(data.memberProjects)) {
+        const memberAssignments = assignments || [];
+        memberAssignments.forEach(a => {
+          const aId = typeof a === 'string' ? a : a.id;
+          const aRole = typeof a === 'string' ? null : a.role;
+          if (aId === p.id) {
+            const member = getMemberById(mid);
+            if (member) projectAssignments.push({ member, role: aRole });
+          }
+        });
+      }
+      
+      // Build assignments display
+      let assignmentsHtml = '';
+      if (projectAssignments.length > 0) {
+        assignmentsHtml = `<div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center;">
+          ${projectAssignments.map(pa => `
+            <span style="display:inline-flex;align-items:center;gap:4px;background:#334155;padding:4px 8px;border-radius:16px;font-size:11px;">
+              <span style="background:${pa.member.color};width:18px;height:18px;border-radius:50%;display:inline-flex;align-items:center;justify-content:center;font-size:9px;">${pa.member.avatar}</span>
+              ${pa.member.name}
+              ${pa.role ? `<span class="board-project-role" style="margin-left:2px;">${pa.role}</span>` : ''}
+            </span>
+          `).join('')}
+          <button class="btn btn-secondary btn-sm" onclick="openQuickAssign('${p.id}')" style="padding:4px 8px;font-size:10px;">+ Add</button>
+        </div>`;
+      } else {
+        assignmentsHtml = `<button class="btn btn-secondary btn-sm" onclick="openQuickAssign('${p.id}')">👤 Assign Team</button>`;
       }
       
       let actionsHtml = '';
       if (isAdmin()) {
         actionsHtml = `
           <button class="btn btn-primary btn-sm" onclick="openEditProjectModal()">✏️ Edit</button>
-          ${!assignedTo ? `<button class="btn btn-secondary btn-sm" onclick="showAssignModal()">👤 Assign</button>` : `<span style="color:#64748B;font-size:12px;">Assigned to: ${assignedTo.name}</span>`}
+          ${assignmentsHtml}
           <button class="btn ${p.lockedTimeline ? 'btn-secondary' : 'lock-btn'} btn-sm" onclick="toggleProjectLock()">
             ${p.lockedTimeline ? '🔓 Unlock Timeline' : '🔒 Lock Timeline'}
           </button>
@@ -1168,7 +2266,7 @@
         `;
       } else {
         actionsHtml = `
-          ${!assignedTo ? `<button class="btn btn-secondary btn-sm" onclick="showAssignModal()">👤 Assign</button>` : `<span style="color:#64748B;font-size:12px;">Assigned to: ${assignedTo.name}</span>`}
+          ${assignmentsHtml}
           <span style="color:#64748B;font-size:11px;font-style:italic;">Contact admin to edit project details</span>
         `;
       }
@@ -1192,8 +2290,27 @@
     function cycleStatus() {
       const p = getProjectById(currentProjectId);
       const statuses = ['Not Started', 'Planning', 'In Progress', 'On Hold', 'Completed'];
-      p.status = statuses[(statuses.indexOf(p.status) + 1) % statuses.length];
-      saveData(); renderProjectDetail(); showToast('Status updated');
+      const currentIdx = statuses.indexOf(p.status);
+      
+      // Show simple menu for status selection
+      const choice = prompt(`Select status (1-5):
+1. Not Started
+2. Planning  
+3. In Progress
+4. On Hold
+5. Completed
+
+Current: ${p.status}`, currentIdx + 1);
+      
+      if (choice !== null) {
+        const idx = parseInt(choice) - 1;
+        if (idx >= 0 && idx < statuses.length) {
+          p.status = statuses[idx];
+          saveData(); 
+          renderProjectDetail(); 
+          showToast('Status updated to: ' + p.status);
+        }
+      }
     }
 
     function switchTab(t) { activeTab = t; renderProjectDetail(); }
@@ -1232,29 +2349,161 @@
     }
 
     // ==================== GANTT ====================
+    function setGanttScale(scale) {
+      if (!data.settings) data.settings = {};
+      data.settings.ganttTimeScale = scale;
+      saveData();
+      renderGantt(document.getElementById('tab-content'));
+    }
+    
+    function setPortfolioScale(scale) {
+      if (!data.settings) data.settings = {};
+      data.settings.portfolioTimeScale = scale;
+      saveData();
+      renderPortfolio();
+    }
+    
     function renderGantt(c) {
       const p = getProjectById(currentProjectId);
       const tasks = p.tasks || [];
       
-      if (!p.startDate || !p.endDate) { c.innerHTML = '<div class="gantt-empty">Set project dates first.</div>'; return; }
-
-      const start = new Date(p.startDate), end = new Date(p.endDate);
-      const totalDays = Math.ceil((end - start) / 864e5) + 1;
-      const dayWidth = window.innerWidth < 480 ? 32 : 36;
-      let dates = []; for (let i = 0; i < totalDays; i++) { const d = new Date(start); d.setDate(d.getDate() + i); dates.push(d); }
+      // Get timescale from settings
+      if (!data.settings) data.settings = {};
+      const ganttTimeScale = data.settings.ganttTimeScale || 'daily';
       
-      // Check if user can add tasks (admin always can, user can if timeline not locked)
+      // Fixed start date: Jan 1, 2026
+      const fixedStart = new Date('2026-01-01');
+      // End date: Dec 31, 2026 or project end + 30 days, whichever is later
+      const projectEnd = p.endDate ? new Date(p.endDate) : new Date('2026-12-31');
+      const fixedEnd = new Date(Math.max(new Date('2026-12-31').getTime(), projectEnd.getTime() + 30 * 864e5));
+      
+      const today = new Date();
+      today.setHours(0, 0, 0, 0);
+      
+      // Check if user can add tasks
       const canAddTask = isAdmin() || !p.lockedTimeline;
       
-      let html = `<div class="gantt" id="gantt-container" data-project-start="${p.startDate}" data-project-end="${p.endDate}" data-day-width="${dayWidth}">
-        <div class="gantt-header">
-          <div class="gantt-task-col">Tasks ${canAddTask ? `<button class="btn btn-primary btn-sm" onclick="openTaskModal()">+</button>` : ''}</div>
-          <div class="gantt-timeline" id="gantt-timeline">`;
-      dates.forEach(d => { html += `<div class="gantt-date ${d.getDay()===0||d.getDay()===6?'weekend':''}" style="min-width:${dayWidth}px"><div class="gantt-date-day">${d.getDate()}</div><div class="gantt-date-month">${d.toLocaleDateString('en-US',{month:'short'})}</div></div>`; });
-      html += '</div></div><div class="gantt-body">';
+      let html = `<div class="gantt" id="gantt-container" data-project-start="${p.startDate}" data-project-end="${p.endDate}">
+        <div class="gantt-controls">
+          <span style="color:#64748B;font-size:12px;margin-right:8px;">📅 Scale:</span>
+          <button class="gantt-scale-btn ${ganttTimeScale==='daily'?'active':''}" onclick="setGanttScale('daily')">Daily</button>
+          <button class="gantt-scale-btn ${ganttTimeScale==='weekly'?'active':''}" onclick="setGanttScale('weekly')">Weekly</button>
+          <button class="gantt-scale-btn ${ganttTimeScale==='monthly'?'active':''}" onclick="setGanttScale('monthly')">Monthly</button>
+          <span style="flex:1;"></span>
+          ${canAddTask ? `<button class="btn btn-primary btn-sm" onclick="openTaskModal()">+ Add Task</button>` : ''}
+        </div>
+        <div class="gantt-scroll-container" id="gantt-scroll">`;
       
-      if (!tasks.length) { html += '<div class="gantt-empty">No tasks yet.</div>'; }
-      else {
+      if (ganttTimeScale === 'daily') {
+        html += renderGanttDaily(fixedStart, fixedEnd, tasks, p, today, canAddTask);
+      } else if (ganttTimeScale === 'weekly') {
+        html += renderGanttWeekly(fixedStart, fixedEnd, tasks, p, today, canAddTask);
+      } else {
+        html += renderGanttMonthly(fixedStart, fixedEnd, tasks, p, today, canAddTask);
+      }
+      
+      html += '</div>'; // end gantt-scroll-container
+      
+      const hintText = isAdmin() ? 'Drag bars to move • Drag edges to resize • Double-tap to edit • 🔒 = Lock task' : 'Double-tap to update progress • 🔒 = Locked by admin';
+      html += `<div class="gantt-hint">${hintText}</div></div>`;
+      c.innerHTML = html;
+      
+      // Sync scroll between header and body
+      const scrollContainer = document.getElementById('gantt-scroll');
+      if (scrollContainer) {
+        // Auto-scroll to today or project start
+        const todayOffset = Math.ceil((today - fixedStart) / 864e5);
+        setTimeout(() => {
+          const cellWidth = ganttTimeScale === 'daily' ? 36 : (ganttTimeScale === 'weekly' ? 80 : 120);
+          const scrollTo = Math.max(0, (ganttTimeScale === 'daily' ? todayOffset * cellWidth : todayOffset / 7 * cellWidth) - 200);
+          scrollContainer.scrollLeft = scrollTo;
+        }, 100);
+      }
+    }
+    
+    function renderGanttDaily(start, end, tasks, p, today, canAddTask) {
+      const totalDays = Math.ceil((end - start) / 864e5) + 1;
+      const dayWidth = 36;
+      
+      let dates = [];
+      for (let i = 0; i < totalDays; i++) {
+        const d = new Date(start);
+        d.setDate(d.getDate() + i);
+        dates.push(d);
+      }
+      
+      // Group dates by month for header
+      let months = [];
+      let currentMonth = '';
+      let monthDays = 0;
+      dates.forEach((d, i) => {
+        const monthKey = d.toLocaleDateString('en-US', { month: 'short', year: 'numeric' });
+        if (monthKey !== currentMonth) {
+          if (currentMonth) months.push({ name: currentMonth, days: monthDays });
+          currentMonth = monthKey;
+          monthDays = 1;
+        } else {
+          monthDays++;
+        }
+      });
+      months.push({ name: currentMonth, days: monthDays });
+      
+      let html = `<div class="gantt-wrapper">
+        <div class="gantt-task-column">
+          <div class="gantt-task-col-spacer"></div>
+          <div class="gantt-task-col">Tasks</div>`;
+      
+      // Task names
+      if (!tasks.length) {
+        html += '<div class="gantt-task-name" style="min-height:60px;color:#64748B;">No tasks yet</div>';
+      } else {
+        tasks.forEach(t => {
+          const isLocked = t.locked || false;
+          const canEditThisTask = isAdmin() || (!isLocked && !p.lockedTimeline);
+          html += `<div class="gantt-task-name">
+            <span class="gantt-task-text">${t.name}${isLocked ? ' 🔒' : ''}</span>
+            <div class="gantt-task-actions">
+              ${isAdmin() ? `<button class="btn ${isLocked ? 'lock-btn' : 'btn-secondary'} btn-icon btn-sm" onclick="toggleTaskLock('${t.id}')" style="width:22px;height:22px;font-size:10px;">${isLocked ? '🔓' : '🔒'}</button>` : ''}
+              ${canEditThisTask ? `<button class="btn btn-secondary btn-icon btn-sm" onclick="editTask('${t.id}')" style="width:22px;height:22px;font-size:10px;">✏️</button>` : ''}
+              ${isAdmin() ? `<button class="btn btn-danger btn-icon btn-sm" onclick="deleteTask('${t.id}')" style="width:22px;height:22px;font-size:10px;">🗑️</button>` : ''}
+            </div>
+          </div>`;
+        });
+      }
+      html += '</div>'; // end task-column
+      
+      // Timeline column
+      html += '<div class="gantt-timeline-column">';
+      
+      // Month headers
+      html += '<div class="gantt-header-months">';
+      months.forEach(m => {
+        html += `<div class="gantt-month-label" style="min-width:${m.days * dayWidth}px;">${m.name}</div>`;
+      });
+      html += '</div>';
+      
+      // Day headers
+      html += '<div class="gantt-timeline">';
+      dates.forEach(d => {
+        const isToday = d.toDateString() === today.toDateString();
+        const isWeekend = d.getDay() === 0 || d.getDay() === 6;
+        html += `<div class="gantt-date ${isWeekend ? 'weekend' : ''} ${isToday ? 'today' : ''}" style="min-width:${dayWidth}px;">
+          <div class="gantt-date-day">${d.getDate()}</div>
+          <div class="gantt-date-month">${['Su','Mo','Tu','We','Th','Fr','Sa'][d.getDay()]}</div>
+        </div>`;
+      });
+      html += '</div>';
+      
+      // Task bars
+      html += '<div class="gantt-body-rows">';
+      if (!tasks.length) {
+        html += `<div class="gantt-row"><div class="gantt-bar-container" style="min-width:${totalDays * dayWidth}px;">`;
+        dates.forEach(d => {
+          const isWeekend = d.getDay() === 0 || d.getDay() === 6;
+          html += `<div class="gantt-bar-cell ${isWeekend ? 'weekend' : ''}" style="min-width:${dayWidth}px;"></div>`;
+        });
+        html += '</div></div>';
+      } else {
         tasks.forEach(t => {
           const ts = new Date(t.start), te = new Date(t.end);
           const leftDays = Math.max(0, Math.ceil((ts - start) / 864e5));
@@ -1263,42 +2512,218 @@
           const isLocked = t.locked || false;
           const canEditThisTask = isAdmin() || (!isLocked && !p.lockedTimeline);
           const canDragThisTask = canEditThisTask;
-          const cursorStyle = canDragThisTask ? 'move' : 'not-allowed';
           
-          html += `<div class="gantt-row">
-            <div class="gantt-task-name">
-              <span class="gantt-task-text">${t.name}${isLocked ? '<span class="lock-icon">🔒</span>' : ''}</span>
-              <div class="gantt-task-actions">
-                ${isAdmin() ? `<button class="btn ${isLocked ? 'lock-btn' : 'btn-secondary'} btn-icon btn-sm" onclick="toggleTaskLock('${t.id}')" style="width:24px;height:24px;font-size:11px;" title="${isLocked ? 'Unlock' : 'Lock'}">${isLocked ? '🔓' : '🔒'}</button>` : ''}
-                ${canEditThisTask ? `<button class="btn btn-secondary btn-icon btn-sm" onclick="editTask('${t.id}')" style="width:24px;height:24px;font-size:11px;">✏️</button>` : ''}
-                ${isAdmin() ? `<button class="btn btn-danger btn-icon btn-sm" onclick="deleteTask('${t.id}')" style="width:24px;height:24px;font-size:11px;">🗑️</button>` : ''}
-              </div>
-            </div>
-            <div class="gantt-bar-container">`;
-          dates.forEach(d => { html += `<div class="gantt-bar-cell ${d.getDay()===0||d.getDay()===6?'weekend':''}" style="min-width:${dayWidth}px"></div>`; });
+          html += `<div class="gantt-row"><div class="gantt-bar-container" style="min-width:${totalDays * dayWidth}px;" data-day-width="${dayWidth}" data-start-date="${start.toISOString()}">`;
+          dates.forEach(d => {
+            const isWeekend = d.getDay() === 0 || d.getDay() === 6;
+            html += `<div class="gantt-bar-cell ${isWeekend ? 'weekend' : ''}" style="min-width:${dayWidth}px;"></div>`;
+          });
+          
+          // Today line
+          const todayDays = Math.ceil((today - start) / 864e5);
+          if (todayDays >= 0 && todayDays <= totalDays) {
+            html += `<div class="gantt-today-line" style="left:${todayDays * dayWidth + dayWidth/2}px;"></div>`;
+          }
           
           if (canDragThisTask) {
             html += `<div class="gantt-bar" id="bar-${t.id}" data-task-id="${t.id}" data-start="${t.start}" data-end="${t.end}" data-locked="${isLocked}"
-                  style="left:${leftDays*dayWidth}px;width:${widthDays*dayWidth}px;background:${getProgressColor(t.progress)};cursor:${cursorStyle}"
+                  style="left:${leftDays*dayWidth}px;width:${widthDays*dayWidth}px;background:${getProgressColor(t.progress)};cursor:move"
                   onmousedown="startGanttDrag(event,'${t.id}','move')" ontouchstart="startGanttDrag(event,'${t.id}','move')" ondblclick="editTask('${t.id}')">
                 <div class="gantt-bar-handle gantt-bar-handle-left" onmousedown="event.stopPropagation();startGanttDrag(event,'${t.id}','resize-left')" ontouchstart="event.stopPropagation();startGanttDrag(event,'${t.id}','resize-left')"></div>
-                <span class="gantt-bar-label">${t.progress}%${isLocked ? ' 🔒' : ''}</span>
+                <span class="gantt-bar-label">${t.progress}%</span>
                 <div class="gantt-bar-handle gantt-bar-handle-right" onmousedown="event.stopPropagation();startGanttDrag(event,'${t.id}','resize-right')" ontouchstart="event.stopPropagation();startGanttDrag(event,'${t.id}','resize-right')"></div>
               </div>`;
           } else {
-            html += `<div class="gantt-bar" id="bar-${t.id}" data-task-id="${t.id}" data-start="${t.start}" data-end="${t.end}" data-locked="true"
-                  style="left:${leftDays*dayWidth}px;width:${widthDays*dayWidth}px;background:${getProgressColor(t.progress)};cursor:not-allowed;opacity:0.8"
-                  onclick="showToast('This task is locked by admin')" ondblclick="updateTaskProgress('${t.id}')">
+            html += `<div class="gantt-bar" id="bar-${t.id}" style="left:${leftDays*dayWidth}px;width:${widthDays*dayWidth}px;background:${getProgressColor(t.progress)};cursor:not-allowed;opacity:0.8" ondblclick="updateTaskProgress('${t.id}')">
                 <span class="gantt-bar-label">${t.progress}% 🔒</span>
               </div>`;
           }
           html += '</div></div>';
         });
       }
+      html += '</div>'; // end gantt-body-rows
+      html += '</div>'; // end timeline-column
+      html += '</div>'; // end wrapper
       
-      const hintText = isAdmin() ? 'Drag bars to move • Drag edges to resize • Double-tap to edit • 🔒 = Lock task' : 'Double-tap to update progress • 🔒 = Locked by admin';
-      html += `</div><div class="gantt-hint">${hintText}</div></div>`;
-      c.innerHTML = html;
+      return html;
+    }
+    
+    function renderGanttWeekly(start, end, tasks, p, today, canAddTask) {
+      const totalDays = Math.ceil((end - start) / 864e5) + 1;
+      const totalWeeks = Math.ceil(totalDays / 7);
+      const weekWidth = 80;
+      
+      let weeks = [];
+      for (let i = 0; i < totalWeeks; i++) {
+        const weekStart = new Date(start);
+        weekStart.setDate(weekStart.getDate() + i * 7);
+        weeks.push(weekStart);
+      }
+      
+      // Group weeks by month
+      let months = [];
+      let currentMonth = '';
+      let monthWeeks = 0;
+      weeks.forEach(w => {
+        const monthKey = w.toLocaleDateString('en-US', { month: 'short', year: 'numeric' });
+        if (monthKey !== currentMonth) {
+          if (currentMonth) months.push({ name: currentMonth, weeks: monthWeeks });
+          currentMonth = monthKey;
+          monthWeeks = 1;
+        } else {
+          monthWeeks++;
+        }
+      });
+      months.push({ name: currentMonth, weeks: monthWeeks });
+      
+      let html = `<div class="gantt-wrapper">
+        <div class="gantt-task-column">
+          <div class="gantt-task-col-spacer"></div>
+          <div class="gantt-task-col">Tasks</div>`;
+      
+      if (!tasks.length) {
+        html += '<div class="gantt-task-name" style="min-height:60px;color:#64748B;">No tasks yet</div>';
+      } else {
+        tasks.forEach(t => {
+          const isLocked = t.locked || false;
+          const canEditThisTask = isAdmin() || (!isLocked && !p.lockedTimeline);
+          html += `<div class="gantt-task-name">
+            <span class="gantt-task-text">${t.name}${isLocked ? ' 🔒' : ''}</span>
+            <div class="gantt-task-actions">
+              ${canEditThisTask ? `<button class="btn btn-secondary btn-icon btn-sm" onclick="editTask('${t.id}')" style="width:22px;height:22px;font-size:10px;">✏️</button>` : ''}
+            </div>
+          </div>`;
+        });
+      }
+      html += '</div>';
+      
+      html += '<div class="gantt-timeline-column">';
+      html += '<div class="gantt-header-months">';
+      months.forEach(m => {
+        html += `<div class="gantt-month-label" style="min-width:${m.weeks * weekWidth}px;">${m.name}</div>`;
+      });
+      html += '</div>';
+      
+      html += '<div class="gantt-timeline">';
+      weeks.forEach(w => {
+        const weekEnd = new Date(w);
+        weekEnd.setDate(weekEnd.getDate() + 6);
+        const isThisWeek = today >= w && today <= weekEnd;
+        html += `<div class="gantt-date ${isThisWeek ? 'today' : ''}" style="min-width:${weekWidth}px;">
+          <div class="gantt-date-day">${w.getDate()}-${weekEnd.getDate()}</div>
+          <div class="gantt-date-week">W${Math.ceil((w - new Date(w.getFullYear(), 0, 1)) / 864e5 / 7) + 1}</div>
+        </div>`;
+      });
+      html += '</div>';
+      
+      html += '<div class="gantt-body-rows">';
+      if (!tasks.length) {
+        html += `<div class="gantt-row"><div class="gantt-bar-container" style="min-width:${totalWeeks * weekWidth}px;">`;
+        weeks.forEach(() => html += `<div class="gantt-bar-cell" style="min-width:${weekWidth}px;"></div>`);
+        html += '</div></div>';
+      } else {
+        tasks.forEach(t => {
+          const ts = new Date(t.start), te = new Date(t.end);
+          const leftWeeks = Math.max(0, Math.floor((ts - start) / 864e5 / 7));
+          const widthWeeks = Math.max(1, Math.ceil((te - ts) / 864e5 / 7) + 1);
+          const isLocked = t.locked || false;
+          const canEditThisTask = isAdmin() || (!isLocked && !p.lockedTimeline);
+          
+          html += `<div class="gantt-row"><div class="gantt-bar-container" style="min-width:${totalWeeks * weekWidth}px;">`;
+          weeks.forEach(() => html += `<div class="gantt-bar-cell" style="min-width:${weekWidth}px;"></div>`);
+          
+          // Today line
+          const todayWeek = Math.floor((today - start) / 864e5 / 7);
+          if (todayWeek >= 0 && todayWeek < totalWeeks) {
+            html += `<div class="gantt-today-line" style="left:${todayWeek * weekWidth + weekWidth/2}px;"></div>`;
+          }
+          
+          html += `<div class="gantt-bar" style="left:${leftWeeks*weekWidth}px;width:${widthWeeks*weekWidth}px;background:${getProgressColor(t.progress)};${canEditThisTask?'':'opacity:0.8;'}" ondblclick="${canEditThisTask?`editTask('${t.id}')`:`updateTaskProgress('${t.id}')`}">
+              <span class="gantt-bar-label">${t.progress}%${isLocked?' 🔒':''}</span>
+            </div>`;
+          html += '</div></div>';
+        });
+      }
+      html += '</div></div></div>';
+      
+      return html;
+    }
+    
+    function renderGanttMonthly(start, end, tasks, p, today, canAddTask) {
+      const monthWidth = 120;
+      let months = [];
+      let d = new Date(start);
+      while (d <= end) {
+        months.push(new Date(d));
+        d.setMonth(d.getMonth() + 1);
+      }
+      
+      let html = `<div class="gantt-wrapper">
+        <div class="gantt-task-column">
+          <div class="gantt-task-col" style="height:52px;">Tasks</div>`;
+      
+      if (!tasks.length) {
+        html += '<div class="gantt-task-name" style="min-height:60px;color:#64748B;">No tasks yet</div>';
+      } else {
+        tasks.forEach(t => {
+          const isLocked = t.locked || false;
+          const canEditThisTask = isAdmin() || (!isLocked && !p.lockedTimeline);
+          html += `<div class="gantt-task-name">
+            <span class="gantt-task-text">${t.name}${isLocked ? ' 🔒' : ''}</span>
+            <div class="gantt-task-actions">
+              ${canEditThisTask ? `<button class="btn btn-secondary btn-icon btn-sm" onclick="editTask('${t.id}')" style="width:22px;height:22px;font-size:10px;">✏️</button>` : ''}
+            </div>
+          </div>`;
+        });
+      }
+      html += '</div>';
+      
+      html += '<div class="gantt-timeline-column">';
+      html += '<div class="gantt-timeline">';
+      months.forEach(m => {
+        const isThisMonth = today.getMonth() === m.getMonth() && today.getFullYear() === m.getFullYear();
+        html += `<div class="gantt-date ${isThisMonth ? 'today' : ''}" style="min-width:${monthWidth}px;">
+          <div class="gantt-date-day">${m.toLocaleDateString('en-US', { month: 'short' })}</div>
+          <div class="gantt-date-month">${m.getFullYear()}</div>
+        </div>`;
+      });
+      html += '</div>';
+      
+      html += '<div class="gantt-body-rows">';
+      if (!tasks.length) {
+        html += `<div class="gantt-row"><div class="gantt-bar-container" style="min-width:${months.length * monthWidth}px;">`;
+        months.forEach(() => html += `<div class="gantt-bar-cell" style="min-width:${monthWidth}px;"></div>`);
+        html += '</div></div>';
+      } else {
+        tasks.forEach(t => {
+          const ts = new Date(t.start), te = new Date(t.end);
+          // Calculate position in months
+          const startMonthIdx = (ts.getFullYear() - start.getFullYear()) * 12 + ts.getMonth() - start.getMonth();
+          const endMonthIdx = (te.getFullYear() - start.getFullYear()) * 12 + te.getMonth() - start.getMonth();
+          const leftMonths = Math.max(0, startMonthIdx + ts.getDate() / 30);
+          const widthMonths = Math.max(0.5, endMonthIdx - startMonthIdx + 1);
+          const isLocked = t.locked || false;
+          const canEditThisTask = isAdmin() || (!isLocked && !p.lockedTimeline);
+          
+          html += `<div class="gantt-row"><div class="gantt-bar-container" style="min-width:${months.length * monthWidth}px;">`;
+          months.forEach(() => html += `<div class="gantt-bar-cell" style="min-width:${monthWidth}px;"></div>`);
+          
+          // Today line
+          const todayMonthIdx = (today.getFullYear() - start.getFullYear()) * 12 + today.getMonth() - start.getMonth();
+          if (todayMonthIdx >= 0 && todayMonthIdx < months.length) {
+            const todayPos = todayMonthIdx * monthWidth + (today.getDate() / 30) * monthWidth;
+            html += `<div class="gantt-today-line" style="left:${todayPos}px;"></div>`;
+          }
+          
+          html += `<div class="gantt-bar" style="left:${leftMonths*monthWidth}px;width:${widthMonths*monthWidth}px;background:${getProgressColor(t.progress)};${canEditThisTask?'':'opacity:0.8;'}" ondblclick="${canEditThisTask?`editTask('${t.id}')`:`updateTaskProgress('${t.id}')`}">
+              <span class="gantt-bar-label">${t.progress}%${isLocked?' 🔒':''}</span>
+            </div>`;
+          html += '</div></div>';
+        });
+      }
+      html += '</div></div></div>';
+      
+      return html;
     }
     
     function toggleTaskLock(taskId) {
@@ -1451,15 +2876,20 @@
     function renderTimeManagement() { if (!selectedMember && data.members.length) selectedMember = data.members[0].id; renderMemberSelector(); renderProjectLegend(); renderWeekLabel(); renderCalendar(); }
     function renderMemberSelector() { document.getElementById('member-selector').innerHTML = data.members.map(m => `<button class="member-tab ${m.id===selectedMember?'active':''}" style="${m.id===selectedMember?'background:'+m.color:''}" onclick="selectMember('${m.id}')">${m.avatar} ${m.name}</button>`).join(''); }
     function selectMember(mid) { selectedMember = mid; renderTimeManagement(); }
-    function renderProjectLegend() { const pIds = data.memberProjects[selectedMember] || []; const projects = pIds.map(id => getProjectById(id)).filter(Boolean); const hrs = getMemberProjectHours(); document.getElementById('project-legend').innerHTML = `<span class="legend-label">Projects:</span>${!projects.length?'<span style="color:#64748B;font-size:12px;">None assigned</span>':projects.map(p=>`<div class="legend-item"><span class="legend-color" style="background:${getProjectColor(p.id,projects)}"></span><span>${p.name}</span><span class="legend-hours">${hrs[p.id]||0}h</span></div>`).join('')}`; }
+    function renderProjectLegend() { 
+      const assignments = data.memberProjects[selectedMember] || []; 
+      const projects = assignments.map(a => getProjectById(typeof a === 'string' ? a : a.id)).filter(Boolean); 
+      const hrs = getMemberProjectHours(); 
+      document.getElementById('project-legend').innerHTML = `<span class="legend-label">Projects:</span>${!projects.length?'<span style="color:#64748B;font-size:12px;">None assigned</span>':projects.map(p=>`<div class="legend-item"><span class="legend-color" style="background:${getProjectColor(p.id,projects)}"></span><span>${p.name}</span><span class="legend-hours">${hrs[p.id]||0}h</span></div>`).join('')}`; 
+    }
     function getMemberProjectHours() { const hrs = {}, ms = data.timeSlots[selectedMember] || {}; Object.values(ms).forEach(ds => Object.values(ds).forEach(pid => { if(pid) hrs[pid] = (hrs[pid]||0)+1; })); return hrs; }
     function getWeekDays() { const days = [], s = new Date(selectedWeek); s.setDate(s.getDate() - s.getDay() + 1); for (let i = 0; i < 5; i++) { const d = new Date(s); d.setDate(d.getDate() + i); days.push(d); } return days; }
     function renderWeekLabel() { const wd = getWeekDays(); document.getElementById('week-label').textContent = `${wd[0].toLocaleDateString('en-US',{month:'short',day:'numeric'})} - ${wd[4].toLocaleDateString('en-US',{month:'short',day:'numeric'})}`; }
     function changeWeek(delta) { selectedWeek.setDate(selectedWeek.getDate() + delta * 7); renderTimeManagement(); }
     function renderCalendar() {
       const wd = getWeekDays(), hrs = [8,9,10,11,12,13,14,15,16,17];
-      const pIds = data.memberProjects[selectedMember] || [];
-      const projects = pIds.map(id => getProjectById(id)).filter(Boolean);
+      const assignments = data.memberProjects[selectedMember] || [];
+      const projects = assignments.map(a => getProjectById(typeof a === 'string' ? a : a.id)).filter(Boolean);
       let html = '<div class="calendar-header"><div class="time-col">Time</div>';
       wd.forEach(d => { html += `<div class="day-col"><div class="day-name">${d.toLocaleDateString('en-US',{weekday:'short'})}</div><div class="day-date">${d.getDate()}</div></div>`; });
       html += '</div><div class="calendar-body">';
@@ -1580,7 +3010,9 @@
       const id = document.getElementById('edit-project-id').value;
       if (!id || !confirm('Delete project?')) return;
       data.projectPool = data.projectPool.filter(pid => pid !== id);
-      Object.keys(data.memberProjects).forEach(mid => { data.memberProjects[mid] = data.memberProjects[mid].filter(pid => pid !== id); });
+      Object.keys(data.memberProjects).forEach(mid => { 
+        data.memberProjects[mid] = data.memberProjects[mid].filter(a => (typeof a === 'string' ? a : a.id) !== id); 
+      });
       data.projects = data.projects.filter(p => p.id !== id);
       saveData(); closeModal('project'); currentProjectId = null; showView('dashboard'); showToast('Deleted');
     }
@@ -1592,22 +3024,17 @@
       }
       if (!confirm('Delete project?')) return;
       data.projectPool = data.projectPool.filter(id => id !== currentProjectId);
-      Object.keys(data.memberProjects).forEach(mid => { data.memberProjects[mid] = data.memberProjects[mid].filter(id => id !== currentProjectId); });
+      Object.keys(data.memberProjects).forEach(mid => { 
+        data.memberProjects[mid] = data.memberProjects[mid].filter(a => (typeof a === 'string' ? a : a.id) !== currentProjectId); 
+      });
       data.projects = data.projects.filter(p => p.id !== currentProjectId);
       saveData(); showView('dashboard'); showToast('Deleted');
     }
 
     function showAssignModal() {
-      const memberList = data.members.map(m => `${m.name}`).join('\n');
-      const choice = prompt(`Assign to which member?\n\n${data.members.map((m,i) => `${i+1}. ${m.name}`).join('\n')}\n\nEnter number:`);
-      if (!choice) return;
-      const idx = parseInt(choice) - 1;
-      if (idx >= 0 && idx < data.members.length) {
-        const mid = data.members[idx].id;
-        data.projectPool = data.projectPool.filter(id => id !== currentProjectId);
-        if (!data.memberProjects[mid]) data.memberProjects[mid] = [];
-        if (!data.memberProjects[mid].includes(currentProjectId)) data.memberProjects[mid].push(currentProjectId);
-        saveData(); renderProjectDetail(); showToast('Assigned!');
+      // Redirect to the new quick assign modal
+      if (currentProjectId) {
+        openQuickAssign(currentProjectId);
       }
     }
 
@@ -1662,9 +3089,16 @@
     }
 
     // Member Modal
-    function openMemberModal() { document.getElementById('edit-member-id').value = ''; document.getElementById('member-name').value = ''; document.getElementById('member-role').value = ''; document.getElementById('member-avatar').value = '👨‍💻'; document.getElementById('member-color').value = '#3B82F6'; document.getElementById('member-modal-title').textContent = 'Add Member'; document.getElementById('modal-member').classList.remove('hidden'); }
-    function editMember(mid) { const m = getMemberById(mid); if (!m) return; document.getElementById('edit-member-id').value = m.id; document.getElementById('member-name').value = m.name; document.getElementById('member-role').value = m.role; document.getElementById('member-avatar').value = m.avatar; document.getElementById('member-color').value = m.color; document.getElementById('member-modal-title').textContent = 'Edit Member'; document.getElementById('modal-member').classList.remove('hidden'); }
+    function openMemberModal() { 
+      if (!isAdmin()) { showToast('Only admin can add members'); return; }
+      document.getElementById('edit-member-id').value = ''; document.getElementById('member-name').value = ''; document.getElementById('member-role').value = ''; document.getElementById('member-avatar').value = '👨‍💻'; document.getElementById('member-color').value = '#3B82F6'; document.getElementById('member-modal-title').textContent = 'Add Member'; document.getElementById('modal-member').classList.remove('hidden'); 
+    }
+    function editMember(mid) { 
+      if (!isAdmin()) { showToast('Only admin can edit members'); return; }
+      const m = getMemberById(mid); if (!m) return; document.getElementById('edit-member-id').value = m.id; document.getElementById('member-name').value = m.name; document.getElementById('member-role').value = m.role; document.getElementById('member-avatar').value = m.avatar; document.getElementById('member-color').value = m.color; document.getElementById('member-modal-title').textContent = 'Edit Member'; document.getElementById('modal-member').classList.remove('hidden'); 
+    }
     function saveMember() {
+      if (!isAdmin()) { showToast('Only admin can save members'); return; }
       const id = document.getElementById('edit-member-id').value;
       const name = document.getElementById('member-name').value.trim();
       if (!name) { alert('Name required'); return; }
@@ -1673,7 +3107,214 @@
       else { const nm = { id: generateId(), ...memberData }; data.members.push(nm); data.timeSlots[nm.id] = {}; showToast('Added'); }
       saveData(); closeModal('member'); renderDashboard();
     }
-    function deleteMember(mid) { if (confirm('Delete member?')) { const assigned = data.memberProjects[mid] || []; data.projectPool = [...data.projectPool, ...assigned]; delete data.memberProjects[mid]; delete data.timeSlots[mid]; data.members = data.members.filter(m => m.id !== mid); if (selectedMember === mid) selectedMember = data.members[0]?.id || null; saveData(); renderDashboard(); showToast('Deleted'); } }
+    function deleteMember(mid) { 
+      if (!isAdmin()) { showToast('Only admin can delete members'); return; } 
+      if (confirm('Delete member?')) { 
+        const assigned = data.memberProjects[mid] || []; 
+        // Handle both old (string) and new (object) formats
+        const projectIds = assigned.map(a => typeof a === 'string' ? a : a.id);
+        // Return projects to pool that are not assigned to anyone else
+        projectIds.forEach(pid => {
+          let stillAssigned = false;
+          Object.keys(data.memberProjects).forEach(otherId => {
+            if (otherId !== mid) {
+              const otherAssignments = data.memberProjects[otherId] || [];
+              if (otherAssignments.some(a => (typeof a === 'string' ? a : a.id) === pid)) {
+                stillAssigned = true;
+              }
+            }
+          });
+          if (!stillAssigned && !data.projectPool.includes(pid)) {
+            data.projectPool.push(pid);
+          }
+        });
+        delete data.memberProjects[mid]; 
+        delete data.timeSlots[mid]; 
+        data.members = data.members.filter(m => m.id !== mid); 
+        if (selectedMember === mid) selectedMember = data.members[0]?.id || null; 
+        saveData(); 
+        renderDashboard(); 
+        showToast('Deleted'); 
+      } 
+    }
+
+    // ==================== USER MANAGEMENT ====================
+    function openUsersModal() {
+      if (!isAdmin()) { showToast('Only admin can manage users'); return; }
+      renderUsersContent();
+      document.getElementById('modal-users').classList.remove('hidden');
+    }
+    
+    function renderUsersContent() {
+      const allUsers = getAllUsers();
+      let html = `
+        <div style="margin-bottom:16px;display:flex;justify-content:space-between;align-items:center;">
+          <span style="color:#94A3B8;font-size:12px;">${Object.keys(allUsers).length} users total</span>
+          <button class="btn btn-primary btn-sm" onclick="openAddUserModal()">+ Add User</button>
+        </div>
+        <div style="display:flex;flex-direction:column;gap:8px;">
+      `;
+      
+      // Sort: admins first, then by username
+      const sortedUsers = Object.entries(allUsers).sort((a, b) => {
+        if (a[1].role === 'admin' && b[1].role !== 'admin') return -1;
+        if (a[1].role !== 'admin' && b[1].role === 'admin') return 1;
+        return a[0].localeCompare(b[0]);
+      });
+      
+      sortedUsers.forEach(([username, user]) => {
+        const member = user.memberId ? getMemberById(user.memberId) : null;
+        const isDefault = user.isDefault || DEFAULT_USERS[username];
+        
+        html += `
+          <div style="display:flex;align-items:center;gap:12px;padding:12px;background:#334155;border-radius:8px;${user.role==='admin'?'border-left:3px solid #F59E0B;':''}">
+            <span style="font-size:24px;">${user.icon || '👤'}</span>
+            <div style="flex:1;min-width:0;">
+              <div style="font-weight:600;display:flex;align-items:center;gap:8px;">
+                ${user.name}
+                ${user.role === 'admin' ? '<span style="background:#F59E0B;color:#0F172A;font-size:9px;padding:2px 6px;border-radius:4px;">ADMIN</span>' : ''}
+                ${isDefault ? '<span style="background:#64748B;color:white;font-size:9px;padding:2px 6px;border-radius:4px;">DEFAULT</span>' : ''}
+              </div>
+              <div style="font-size:11px;color:#94A3B8;display:flex;gap:12px;margin-top:2px;">
+                <span>@${username}</span>
+                <span>🔑 ${user.password}</span>
+                ${member ? `<span style="color:#38BDF8;">👤 ${member.name}</span>` : ''}
+              </div>
+            </div>
+            <div style="display:flex;gap:4px;">
+              ${!isDefault ? `
+                <button class="btn btn-secondary btn-icon btn-sm" onclick="openEditUserModal('${username}')" title="Edit">✏️</button>
+                <button class="btn btn-danger btn-icon btn-sm" onclick="deleteUser('${username}')" title="Delete">🗑️</button>
+              ` : `
+                <span style="font-size:10px;color:#64748B;">Protected</span>
+              `}
+            </div>
+          </div>
+        `;
+      });
+      
+      html += `</div>
+        <div style="margin-top:16px;padding:12px;background:#1E293B;border-radius:8px;font-size:11px;color:#64748B;">
+          <div style="font-weight:600;color:#94A3B8;margin-bottom:8px;">💡 Tips:</div>
+          <ul style="margin:0;padding-left:20px;">
+            <li>Default users (admin, user) cannot be edited or deleted</li>
+            <li>Link a user to a team member to show their card first on mobile</li>
+            <li>Users can change project status and task progress</li>
+            <li>Only admins can edit project details and manage users</li>
+          </ul>
+        </div>
+      `;
+      
+      document.getElementById('users-content').innerHTML = html;
+    }
+    
+    function openAddUserModal() {
+      document.getElementById('edit-user-original-username').value = '';
+      document.getElementById('user-username').value = '';
+      document.getElementById('user-password').value = '';
+      document.getElementById('user-displayname').value = '';
+      document.getElementById('user-role').value = 'user';
+      document.getElementById('user-icon').value = '👤';
+      
+      // Populate member dropdown
+      const memberSelect = document.getElementById('user-member-link');
+      memberSelect.innerHTML = '<option value="">-- Not Linked --</option>' + 
+        data.members.map(m => `<option value="${m.id}">${m.avatar} ${m.name}</option>`).join('');
+      memberSelect.value = '';
+      
+      document.getElementById('user-edit-title').textContent = 'Add User';
+      document.getElementById('modal-user-edit').classList.remove('hidden');
+    }
+    
+    function openEditUserModal(username) {
+      const allUsers = getAllUsers();
+      const user = allUsers[username];
+      if (!user) return;
+      
+      document.getElementById('edit-user-original-username').value = username;
+      document.getElementById('user-username').value = username;
+      document.getElementById('user-password').value = user.password;
+      document.getElementById('user-displayname').value = user.name;
+      document.getElementById('user-role').value = user.role;
+      document.getElementById('user-icon').value = user.icon || '👤';
+      
+      // Populate member dropdown
+      const memberSelect = document.getElementById('user-member-link');
+      memberSelect.innerHTML = '<option value="">-- Not Linked --</option>' + 
+        data.members.map(m => `<option value="${m.id}">${m.avatar} ${m.name}</option>`).join('');
+      memberSelect.value = user.memberId || '';
+      
+      document.getElementById('user-edit-title').textContent = 'Edit User';
+      document.getElementById('modal-user-edit').classList.remove('hidden');
+    }
+    
+    function saveUser() {
+      const originalUsername = document.getElementById('edit-user-original-username').value;
+      const username = document.getElementById('user-username').value.trim().toLowerCase().replace(/[^a-z0-9]/g, '');
+      const password = document.getElementById('user-password').value;
+      const displayName = document.getElementById('user-displayname').value.trim();
+      const role = document.getElementById('user-role').value;
+      const icon = document.getElementById('user-icon').value;
+      const memberId = document.getElementById('user-member-link').value || null;
+      
+      // Validation
+      if (!username) { alert('Username is required'); return; }
+      if (username.length < 3) { alert('Username must be at least 3 characters'); return; }
+      if (!password) { alert('Password is required'); return; }
+      if (password.length < 4) { alert('Password must be at least 4 characters'); return; }
+      if (!displayName) { alert('Display name is required'); return; }
+      
+      // Check if username already exists (for new users or username change)
+      const allUsers = getAllUsers();
+      if (username !== originalUsername && allUsers[username]) {
+        alert('Username already exists');
+        return;
+      }
+      
+      // Cannot override default users
+      if (!originalUsername && DEFAULT_USERS[username]) {
+        alert('Cannot use this username (reserved)');
+        return;
+      }
+      
+      // Initialize users object if needed
+      if (!data.users) data.users = {};
+      
+      // If editing and username changed, delete old entry
+      if (originalUsername && originalUsername !== username) {
+        delete data.users[originalUsername];
+      }
+      
+      // Save user
+      data.users[username] = {
+        password,
+        name: displayName,
+        role,
+        icon,
+        memberId
+      };
+      
+      saveData();
+      closeModal('user-edit');
+      renderUsersContent();
+      showToast(originalUsername ? 'User updated!' : 'User created!');
+    }
+    
+    function deleteUser(username) {
+      if (DEFAULT_USERS[username]) {
+        showToast('Cannot delete default users');
+        return;
+      }
+      
+      if (!confirm(`Delete user "${username}"?`)) return;
+      
+      if (data.users && data.users[username]) {
+        delete data.users[username];
+        saveData();
+        renderUsersContent();
+        showToast('User deleted!');
+      }
+    }
 
     // ==================== BRIEF EDITOR ====================
     function execBriefCmd(cmd) { document.execCommand(cmd, false, null); document.getElementById('brief-content').focus(); }
@@ -1724,20 +3365,16 @@
     async function initApp() {
       document.getElementById('current-date').textContent = new Date().toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' });
       
-      // Check if cloud sync is configured
-      if (cloudConfig.sheetsUrl) {
-        updateSyncStatus('syncing');
-        const cloudData = await loadFromCloud();
-        if (cloudData) {
-          // Use cloud data
-          data = cloudData;
-          localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
-          showToast('Loaded from cloud');
-        } else {
-          updateSyncStatus('synced', 'Ready');
-        }
+      // Auto-load from cloud on startup
+      updateSyncStatus('syncing');
+      const cloudData = await loadFromCloud();
+      if (cloudData) {
+        data = cloudData;
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+        showToast('Loaded from cloud');
       } else {
-        updateSyncStatus('local', 'Local');
+        // No cloud data yet, sync local data to cloud
+        await syncToCloud(data);
       }
       
       showView('dashboard');
