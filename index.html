@@ -344,7 +344,7 @@
   <div class="login-page" id="login-page">
     <div class="login-container">
       <div class="login-logo">
-        <img src="/mnt/user-data/uploads/1768300095372_image.png" alt="CP AXTRA" class="login-logo-img" style="height:60px;margin-bottom:16px;">
+        <img src="logo.png" alt="CP AXTRA" class="login-logo-img" style="height:60px;margin-bottom:16px;">
         <div class="login-logo-title">Accounting Tech Project Hub</div>
         <div class="login-logo-subtitle">Team Dashboard</div>
       </div>
@@ -370,7 +370,7 @@
   <div id="app-container" class="hidden">
     <nav class="nav">
       <div class="nav-brand">
-        <span class="nav-logo">◈</span>
+        <img src="logo.png" alt="Logo" style="height:28px;">
         <span class="nav-title">Project Hub</span>
       </div>
       <div class="nav-links">
@@ -673,32 +673,33 @@
   <div class="modal-overlay hidden" id="modal-config" onclick="closeModal('config')">
     <div class="modal" style="max-width:500px;" onclick="event.stopPropagation()">
       <div class="modal-header">
-        <h3 class="modal-title">⚙️ Cloud Storage Settings</h3>
+        <h3 class="modal-title">⚙️ Google Sheets Sync</h3>
         <button class="modal-close" onclick="closeModal('config')">×</button>
       </div>
       <div class="modal-body">
         <div class="config-section">
-          <label class="config-label">Storage Type</label>
-          <div style="padding:12px;background:#1E3A5F;border-radius:8px;color:#7DD3FC;">
-            ☁️ <b>Claude Persistent Storage</b><br>
-            <small style="color:#94A3B8;">Data automatically syncs and persists across sessions</small>
+          <label class="config-label">Google Apps Script Web App URL</label>
+          <input class="config-input" id="config-sheets-url" placeholder="https://script.google.com/macros/s/xxxxx/exec">
+          <div class="config-hint">
+            📋 <b>Setup Instructions:</b><br>
+            1. Create a Google Sheet named "Project Hub Database"<br>
+            2. Rename first sheet tab to "Data"<br>
+            3. Go to Extensions → Apps Script<br>
+            4. Paste the script code and click Save<br>
+            5. Deploy → New deployment → Web app<br>
+            6. Set "Who has access" to "Anyone"<br>
+            7. Copy the URL and paste here
           </div>
         </div>
         <div class="config-section">
           <label class="config-label">Connection Status</label>
-          <div id="config-sync-status" style="padding:8px 0;color:#94A3B8;">Checking...</div>
-        </div>
-        <div class="config-section">
-          <label class="config-label">Actions</label>
-          <div style="display:flex;gap:8px;flex-wrap:wrap;">
-            <button class="btn btn-primary btn-sm" onclick="testConnection()">🔍 Test Storage</button>
-            <button class="btn btn-danger btn-sm" onclick="clearCloudData()">🗑️ Clear Cloud Data</button>
-          </div>
+          <div id="config-sync-status" style="padding:8px 0;color:#94A3B8;">Not connected</div>
         </div>
       </div>
       <div class="modal-footer">
-        <button class="btn btn-secondary" onclick="closeModal('config')">Close</button>
-        <button class="btn btn-success" onclick="saveConfig()">Sync Now</button>
+        <button class="btn btn-secondary" onclick="closeModal('config')">Cancel</button>
+        <button class="btn btn-primary" onclick="testConnection()">Test Connection</button>
+        <button class="btn btn-success" onclick="saveConfig()">Save & Sync</button>
       </div>
     </div>
   </div>
@@ -798,13 +799,22 @@
       if (e.key === 'Enter') document.getElementById('login-password').focus();
     });
 
-    // ==================== CLOUD SYNC (Claude Persistent Storage) ====================
+    // ==================== CLOUD SYNC (Google Sheets) ====================
     const CONFIG_KEY = 'projectHubConfig';
-    const STORAGE_DATA_KEY = 'project-hub-data';
-    let cloudConfig = { autoSync: true, useCloudStorage: true };
+    let cloudConfig = loadConfig();
     let isSyncing = false;
     let lastSyncTime = null;
-    let hasCloudStorage = typeof window.storage !== 'undefined';
+    
+    function loadConfig() {
+      try {
+        const saved = localStorage.getItem(CONFIG_KEY);
+        return saved ? JSON.parse(saved) : { sheetsUrl: '', autoSync: true };
+      } catch (e) { return { sheetsUrl: '', autoSync: true }; }
+    }
+    
+    function saveConfigLocal() {
+      localStorage.setItem(CONFIG_KEY, JSON.stringify(cloudConfig));
+    }
     
     function updateSyncStatus(status, message) {
       const statusEl = document.getElementById('sync-status');
@@ -832,33 +842,43 @@
       }
     }
     
+    // Base64 encode for URL safety
+    function base64Encode(str) {
+      return btoa(unescape(encodeURIComponent(str)));
+    }
+    
     async function syncToCloud(dataToSync) {
-      if (!hasCloudStorage || isSyncing) return false;
+      if (!cloudConfig.sheetsUrl || isSyncing) return false;
       
       isSyncing = true;
       updateSyncStatus('syncing');
       
       try {
-        const result = await window.storage.set(STORAGE_DATA_KEY, JSON.stringify(dataToSync), true);
+        const jsonStr = JSON.stringify(dataToSync);
+        const base64Data = base64Encode(jsonStr);
+        const url = cloudConfig.sheetsUrl + '?action=save&data=' + encodeURIComponent(base64Data) + '&t=' + Date.now();
         
-        if (result) {
+        const response = await fetch(url);
+        const result = await response.json();
+        
+        if (result.success) {
           lastSyncTime = new Date();
-          updateSyncStatus('synced', 'Saved');
+          updateSyncStatus('synced', 'Synced');
           isSyncing = false;
           return true;
         } else {
-          throw new Error('Storage save failed');
+          throw new Error(result.error || 'Save failed');
         }
       } catch (error) {
         console.error('Sync error:', error);
-        updateSyncStatus('error', 'Save failed');
+        updateSyncStatus('error', 'Sync failed');
         isSyncing = false;
         return false;
       }
     }
     
     async function loadFromCloud() {
-      if (!hasCloudStorage) {
+      if (!cloudConfig.sheetsUrl) {
         updateSyncStatus('local', 'Local');
         return null;
       }
@@ -866,91 +886,82 @@
       updateSyncStatus('syncing');
       
       try {
-        const result = await window.storage.get(STORAGE_DATA_KEY, true);
+        const response = await fetch(cloudConfig.sheetsUrl + '?t=' + Date.now());
+        const result = await response.json();
         
-        if (result && result.value) {
+        if (result.success && result.data) {
           updateSyncStatus('synced', 'Loaded');
-          return JSON.parse(result.value);
+          return result.data;
         } else {
           updateSyncStatus('local', 'No cloud data');
           return null;
         }
       } catch (error) {
         console.error('Load from cloud error:', error);
-        updateSyncStatus('local', 'Local only');
+        updateSyncStatus('error', 'Load failed');
         return null;
       }
     }
     
     async function syncNow() {
-      if (!hasCloudStorage) {
-        showToast('Cloud storage not available');
+      if (!cloudConfig.sheetsUrl) {
+        openConfigModal();
         return;
       }
       
       showToast('Syncing...');
       const success = await syncToCloud(data);
       if (success) {
-        showToast('Data saved to cloud!');
+        showToast('Synced to Google Sheets!');
       } else {
-        showToast('Sync failed');
+        showToast('Sync failed - check settings');
       }
     }
     
     function openConfigModal() {
-      document.getElementById('config-sync-status').innerHTML = hasCloudStorage 
-        ? '✅ Claude Cloud Storage is available<br><small style="color:#64748B;">Data persists across sessions and can be shared</small>'
-        : '❌ Cloud storage not available in this environment<br><small style="color:#64748B;">Data will only be saved locally</small>';
+      document.getElementById('config-sheets-url').value = cloudConfig.sheetsUrl || '';
+      document.getElementById('config-sync-status').textContent = cloudConfig.sheetsUrl ? 'Configured' : 'Not connected';
       document.getElementById('modal-config').classList.remove('hidden');
     }
     
     async function testConnection() {
-      document.getElementById('config-sync-status').textContent = '🔄 Testing...';
+      const url = document.getElementById('config-sheets-url').value.trim();
       
-      try {
-        if (!hasCloudStorage) {
-          document.getElementById('config-sync-status').textContent = '❌ Cloud storage not available';
-          return;
-        }
-        
-        // Try to read/write
-        const testKey = 'project-hub-test-' + Date.now();
-        await window.storage.set(testKey, 'test', false);
-        const result = await window.storage.get(testKey, false);
-        await window.storage.delete(testKey, false);
-        
-        if (result && result.value === 'test') {
-          document.getElementById('config-sync-status').innerHTML = '✅ Cloud storage working!<br><small style="color:#64748B;">Your data will persist across sessions</small>';
-        } else {
-          document.getElementById('config-sync-status').textContent = '⚠️ Storage available but test failed';
-        }
-      } catch (error) {
-        document.getElementById('config-sync-status').textContent = '❌ Test failed: ' + error.message;
-        console.error('Test error:', error);
+      if (!url) {
+        document.getElementById('config-sync-status').textContent = '❌ Please enter the Web App URL';
+        return;
       }
-    }
-    
-    async function clearCloudData() {
-      if (!confirm('Delete all cloud data? Local data will remain.')) return;
+      
+      document.getElementById('config-sync-status').textContent = '🔄 Testing connection...';
       
       try {
-        await window.storage.delete(STORAGE_DATA_KEY, true);
-        showToast('Cloud data cleared');
-        document.getElementById('config-sync-status').textContent = '✅ Cloud data cleared';
+        const response = await fetch(url + '?t=' + Date.now());
+        const result = await response.json();
+        
+        if (result.success) {
+          document.getElementById('config-sync-status').textContent = '✅ Connected! ' + (result.data ? 'Data found in cloud.' : 'Ready to sync.');
+        } else {
+          document.getElementById('config-sync-status').textContent = '❌ Error: ' + (result.error || 'Unknown error');
+        }
       } catch (error) {
-        showToast('Failed to clear: ' + error.message);
+        document.getElementById('config-sync-status').textContent = '❌ Failed: ' + error.message;
+        console.error('Test connection error:', error);
       }
     }
     
     async function saveConfig() {
+      const url = document.getElementById('config-sheets-url').value.trim();
+      
+      cloudConfig.sheetsUrl = url;
+      saveConfigLocal();
       closeModal('config');
       
-      if (hasCloudStorage) {
-        showToast('Syncing to cloud...');
+      if (url) {
+        showToast('Config saved! Syncing...');
         await syncToCloud(data);
       } else {
         updateSyncStatus('local', 'Local');
-        showToast('Using local storage only');
+        showToast('Cloud sync disabled');
       }
     }
     
@@ -1028,8 +1039,8 @@
     function saveData() { 
       try { 
         localStorage.setItem(STORAGE_KEY, JSON.stringify(data)); 
-        // Also sync to cloud if available
-        if (hasCloudStorage && cloudConfig.autoSync) {
+        // Also sync to cloud if configured
+        if (cloudConfig.sheetsUrl && cloudConfig.autoSync) {
           syncToCloud(data);
         }
       } catch (e) { console.error('Save error:', e); } 
@@ -1713,8 +1724,8 @@
     async function initApp() {
       document.getElementById('current-date').textContent = new Date().toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' });
       
-      // Check if cloud storage is available
-      if (hasCloudStorage) {
+      // Check if cloud sync is configured
+      if (cloudConfig.sheetsUrl) {
         updateSyncStatus('syncing');
         const cloudData = await loadFromCloud();
         if (cloudData) {
@@ -1723,8 +1734,7 @@
           localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
           showToast('Loaded from cloud');
         } else {
-          // First time - sync local to cloud
-          await syncToCloud(data);
+          updateSyncStatus('synced', 'Ready');
         }
       } else {
         updateSyncStatus('local', 'Local');
