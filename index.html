@@ -295,6 +295,14 @@
     .gantt-tooltip { position: fixed; background: #1E293B; border: 1px solid #38BDF8; border-radius: 8px; padding: 8px 12px; font-size: 11px; z-index: 1000; pointer-events: none; box-shadow: 0 4px 12px rgba(0,0,0,0.3); }
     .gantt-tooltip-dates { color: #38BDF8; font-weight: 600; }
     .gantt-tooltip-duration { color: #94A3B8; margin-top: 2px; }
+    
+    /* Loading Overlay */
+    .loading-overlay { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(15, 23, 42, 0.85); display: flex; flex-direction: column; align-items: center; justify-content: center; z-index: 9999; backdrop-filter: blur(4px); }
+    .loading-overlay.hidden { display: none; }
+    .loading-spinner { width: 50px; height: 50px; border: 4px solid #334155; border-top-color: #38BDF8; border-radius: 50%; animation: spin 1s linear infinite; }
+    .loading-text { margin-top: 16px; color: #94A3B8; font-size: 14px; font-weight: 500; }
+    .loading-subtext { margin-top: 4px; color: #64748B; font-size: 12px; }
+    @keyframes spin { to { transform: rotate(360deg); } }
     .gantt-empty { padding: 30px; text-align: center; color: #64748B; font-size: 13px; }
     .gantt-hint { text-align: center; padding: 8px; background: #334155; color: #94A3B8; font-size: 11px; border-top: 1px solid #475569; }
     
@@ -927,6 +935,13 @@
 
   <div id="gantt-tooltip" class="gantt-tooltip hidden"></div>
   <div id="toast-container"></div>
+  
+  <!-- Loading Overlay -->
+  <div id="loading-overlay" class="loading-overlay hidden">
+    <div class="loading-spinner"></div>
+    <div class="loading-text" id="loading-text">Syncing...</div>
+    <div class="loading-subtext" id="loading-subtext">Please wait</div>
+  </div>
 
   <script>
     // ==================== AUTHENTICATION ====================
@@ -1084,11 +1099,22 @@
       return btoa(unescape(encodeURIComponent(str)));
     }
     
-    async function syncToCloud(dataToSync) {
+    function showLoading(text = 'Syncing...', subtext = 'Please wait') {
+      document.getElementById('loading-text').textContent = text;
+      document.getElementById('loading-subtext').textContent = subtext;
+      document.getElementById('loading-overlay').classList.remove('hidden');
+    }
+    
+    function hideLoading() {
+      document.getElementById('loading-overlay').classList.add('hidden');
+    }
+    
+    async function syncToCloud(dataToSync, showSpinner = false) {
       if (isSyncing) return false;
       
       isSyncing = true;
       updateSyncStatus('syncing');
+      if (showSpinner) showLoading('Syncing to Cloud...', 'Saving your data');
       
       try {
         const jsonStr = JSON.stringify(dataToSync);
@@ -1102,6 +1128,7 @@
           lastSyncTime = new Date();
           updateSyncStatus('synced', 'Synced');
           isSyncing = false;
+          if (showSpinner) hideLoading();
           return true;
         } else {
           throw new Error(result.error || 'Save failed');
@@ -1110,12 +1137,14 @@
         console.error('Sync error:', error);
         updateSyncStatus('error', 'Sync failed');
         isSyncing = false;
+        if (showSpinner) hideLoading();
         return false;
       }
     }
     
-    async function loadFromCloud() {
+    async function loadFromCloud(showSpinner = true) {
       updateSyncStatus('syncing');
+      if (showSpinner) showLoading('Loading from Cloud...', 'Fetching your data');
       
       try {
         const response = await fetch(SHEETS_URL + '?t=' + Date.now());
@@ -1123,21 +1152,23 @@
         
         if (result.success && result.data) {
           updateSyncStatus('synced', 'Loaded');
+          if (showSpinner) hideLoading();
           return result.data;
         } else {
           updateSyncStatus('synced', 'Ready');
+          if (showSpinner) hideLoading();
           return null;
         }
       } catch (error) {
         console.error('Load from cloud error:', error);
         updateSyncStatus('error', 'Load failed');
+        if (showSpinner) hideLoading();
         return null;
       }
     }
     
     async function syncNow() {
-      showToast('Syncing...');
-      const success = await syncToCloud(data);
+      const success = await syncToCloud(data, true);
       if (success) {
         showToast('Synced to Google Sheets!');
       } else {
@@ -1152,25 +1183,27 @@
     
     async function testConnection() {
       document.getElementById('config-sync-status').textContent = '🔄 Testing connection...';
+      showLoading('Testing Connection...', 'Checking Google Sheets');
       
       try {
         const response = await fetch(SHEETS_URL + '?t=' + Date.now());
         const result = await response.json();
         
+        hideLoading();
         if (result.success) {
           document.getElementById('config-sync-status').innerHTML = '✅ Connected! ' + (result.data ? 'Data found in cloud.' : 'Ready to sync.') + '<br><small style="color:#64748B;">Last sync: ' + new Date().toLocaleTimeString() + '</small>';
         } else {
           document.getElementById('config-sync-status').textContent = '❌ Error: ' + (result.error || 'Unknown error');
         }
       } catch (error) {
+        hideLoading();
         document.getElementById('config-sync-status').textContent = '❌ Failed: ' + error.message;
         console.error('Test connection error:', error);
       }
     }
     
     async function forceLoadFromCloud() {
-      showToast('Loading from cloud...');
-      const cloudData = await loadFromCloud();
+      const cloudData = await loadFromCloud(true);
       if (cloudData) {
         data = cloudData;
         localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
@@ -3366,15 +3399,18 @@ Current: ${p.status}`, currentIdx + 1);
       document.getElementById('current-date').textContent = new Date().toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' });
       
       // Auto-load from cloud on startup
+      showLoading('Loading...', 'Connecting to cloud');
       updateSyncStatus('syncing');
-      const cloudData = await loadFromCloud();
+      const cloudData = await loadFromCloud(false); // Don't show second spinner
+      hideLoading();
+      
       if (cloudData) {
         data = cloudData;
         localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
         showToast('Loaded from cloud');
       } else {
         // No cloud data yet, sync local data to cloud
-        await syncToCloud(data);
+        await syncToCloud(data, false);
       }
       
       showView('dashboard');
