@@ -558,12 +558,12 @@
             <h2 class="section-title">📦 Project Pool</h2>
             <button class="btn btn-primary btn-sm" onclick="openProjectModal()" id="btn-new-project">+ New Project</button>
           </div>
-          <div class="pool" id="project-pool" 
-               ondragover="handlePoolDragOver(event)" 
-               ondragleave="handlePoolDragLeave(event)" 
+          <div class="pool" id="project-pool"
+               ondragover="handlePoolDragOver(event)"
+               ondragleave="handlePoolDragLeave(event)"
                ondrop="handlePoolDrop(event)"></div>
-      </div>
-      <div class="section">
+        </div>
+        <div class="section">
         <div class="section-header">
           <h2 class="section-title">👥 Team</h2>
           <button class="btn btn-primary btn-sm" id="btn-add-member" onclick="openMemberModal()">+ Add Member</button>
@@ -1192,7 +1192,7 @@
     });
 
     // ==================== CLOUD SYNC (Google Sheets) ====================
-    const SHEETS_URL = 'https://script.google.com/macros/s/AKfycby8y1w7fGnFgnvEJfDVWHwJjXa2CTWQaVtmJjfyevA-eJJADQzWCvkio9txYP3u1i1cEw/exec';
+    const SHEETS_URL = 'https://script.google.com/macros/s/AKfycbzTdIUieXXMFviwzwhDNCM02ts7ParaB9caLTz-qmAiS2wbaMutElfFrzXye8lynnVrEA/exec';
     let isSyncing = false;
     let lastSyncTime = null;
     
@@ -1240,9 +1240,17 @@
     // Track if cloud sync is available (set to false after first failure to avoid spam)
     let cloudSyncAvailable = true;
 
-    async function syncToCloud(dataToSync, showSpinner = false) {
-      // Skip cloud sync if already known to be unavailable
-      if (!cloudSyncAvailable || isSyncing) return false;
+    async function syncToCloud(dataToSync, showSpinner = false, forceRetry = false) {
+      // Skip cloud sync if already known to be unavailable (unless force retry)
+      if (!forceRetry && !cloudSyncAvailable) {
+        if (showSpinner) {
+          updateSyncStatus('error', 'Offline');
+          showToast('Cloud sync unavailable - click sync status to retry');
+        }
+        return false;
+      }
+
+      if (isSyncing) return false;
 
       isSyncing = true;
       updateSyncStatus('syncing');
@@ -1251,35 +1259,53 @@
       try {
         const jsonStr = JSON.stringify(dataToSync);
         const base64Data = base64Encode(jsonStr);
-        const url = SHEETS_URL + '?action=save&data=' + encodeURIComponent(base64Data) + '&t=' + Date.now();
 
-        const response = await fetch(url);
-        const result = await response.json();
+        // Use POST method to avoid URL length limits (GET URLs have ~2000 char limit)
+        const formData = new FormData();
+        formData.append('action', 'save');
+        formData.append('data', base64Data);
 
-        if (result.success) {
+        const response = await fetch(SHEETS_URL, {
+          method: 'POST',
+          body: formData
+        });
+
+        if (!response.ok) {
+          throw new Error('Network response was not ok: ' + response.status);
+        }
+
+        const text = await response.text();
+        let result;
+        try {
+          result = JSON.parse(text);
+        } catch (parseErr) {
+          console.error('Failed to parse response:', text);
+          throw new Error('Invalid response from server');
+        }
+
+        if (result && result.success) {
           lastSyncTime = new Date();
+          cloudSyncAvailable = true; // Re-enable cloud sync on success
           updateSyncStatus('synced', 'Synced');
           isSyncing = false;
           if (showSpinner) hideLoading();
           return true;
         } else {
-          throw new Error(result.error || 'Save failed');
+          throw new Error(result?.error || 'Save failed - check Google Apps Script configuration');
         }
-      } catch (error) {
-        console.warn('Cloud sync unavailable, using local storage only:', error.message);
-        // Disable cloud sync to prevent repeated errors
-        cloudSyncAvailable = false;
-        updateSyncStatus('synced', 'Local');
+      } catch (err) {
+        console.error('Sync error:', err);
+        updateSyncStatus('error', 'Sync failed');
         isSyncing = false;
         if (showSpinner) hideLoading();
         return false;
       }
     }
-    
-    async function loadFromCloud(showSpinner = true) {
-      // Skip if cloud sync already known to be unavailable
-      if (!cloudSyncAvailable) {
-        updateSyncStatus('synced', 'Local');
+
+    async function loadFromCloud(showSpinner = true, forceRetry = false) {
+      // Skip if cloud sync already known to be unavailable (unless force retry)
+      if (!forceRetry && !cloudSyncAvailable) {
+        updateSyncStatus('error', 'Offline');
         return null;
       }
 
@@ -1291,68 +1317,84 @@
         const result = await response.json();
 
         if (result.success && result.data) {
+          cloudSyncAvailable = true; // Re-enable cloud sync on success
           updateSyncStatus('synced', 'Loaded');
           if (showSpinner) hideLoading();
           return result.data;
         } else {
+          cloudSyncAvailable = true; // Connection works, just no data
           updateSyncStatus('synced', 'Ready');
           if (showSpinner) hideLoading();
           return null;
         }
       } catch (error) {
         console.warn('Cloud sync unavailable:', error.message);
-        // Disable cloud sync to prevent repeated errors
-        cloudSyncAvailable = false;
-        updateSyncStatus('synced', 'Local');
+        // Only disable auto-sync, but allow manual retry
+        if (!forceRetry) {
+          cloudSyncAvailable = false;
+        }
+        updateSyncStatus('error', 'Load Fail');
         if (showSpinner) hideLoading();
         return null;
       }
     }
     
     async function syncNow() {
-      const success = await syncToCloud(data, true);
+      // Force retry even if cloud sync was previously disabled
+      cloudSyncAvailable = true;
+      const success = await syncToCloud(data, true, true);
       if (success) {
         showToast('Synced to Google Sheets!');
       } else {
-        showToast('Sync failed');
+        showToast('Sync failed - check your connection');
       }
     }
     
     function openConfigModal() {
-      document.getElementById('config-sync-status').innerHTML = '✅ Connected to Google Sheets<br><small style="color:#64748B;">Auto-sync is enabled</small>';
+      if (cloudSyncAvailable) {
+        document.getElementById('config-sync-status').innerHTML = '✅ Connected to Google Sheets<br><small style="color:#64748B;">Auto-sync is enabled</small>';
+      } else {
+        document.getElementById('config-sync-status').innerHTML = '⚠️ Cloud sync unavailable<br><small style="color:#FCA5A5;">Click "Test Connection" to retry</small>';
+      }
       document.getElementById('modal-config').classList.remove('hidden');
     }
     
     async function testConnection() {
       document.getElementById('config-sync-status').textContent = '🔄 Testing connection...';
       showLoading('Testing Connection...', 'Checking Google Sheets');
-      
+
       try {
         const response = await fetch(SHEETS_URL + '?t=' + Date.now());
         const result = await response.json();
-        
+
         hideLoading();
         if (result.success) {
-          document.getElementById('config-sync-status').innerHTML = '✅ Connected! ' + (result.data ? 'Data found in cloud.' : 'Ready to sync.') + '<br><small style="color:#64748B;">Last sync: ' + new Date().toLocaleTimeString() + '</small>';
+          cloudSyncAvailable = true; // Re-enable cloud sync on successful test
+          updateSyncStatus('synced', 'Ready');
+          document.getElementById('config-sync-status').innerHTML = '✅ Connected! ' + (result.data ? 'Data found in cloud.' : 'Ready to sync.') + '<br><small style="color:#64748B;">Cloud sync re-enabled</small>';
         } else {
           document.getElementById('config-sync-status').textContent = '❌ Error: ' + (result.error || 'Unknown error');
         }
       } catch (error) {
         hideLoading();
+        cloudSyncAvailable = false;
+        updateSyncStatus('error', 'Offline');
         document.getElementById('config-sync-status').textContent = '❌ Failed: ' + error.message;
         console.error('Test connection error:', error);
       }
     }
     
     async function forceLoadFromCloud() {
-      const cloudData = await loadFromCloud(true);
+      // Force retry even if cloud sync was previously disabled
+      cloudSyncAvailable = true;
+      const cloudData = await loadFromCloud(true, true);
       if (cloudData) {
         data = cloudData;
         localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
         showView(currentView);
         showToast('Loaded from cloud!');
       } else {
-        showToast('No cloud data found');
+        showToast('No cloud data found or connection failed');
       }
     }
     
