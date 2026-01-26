@@ -247,7 +247,9 @@
     .gantt-scale-btn.active { background: #3B82F6; color: white; }
     .gantt-scroll-container { overflow-x: auto; overflow-y: hidden; -webkit-overflow-scrolling: touch; }
     .gantt-wrapper { display: flex; min-width: max-content; }
-    .gantt-task-column { min-width: 180px; max-width: 180px; flex-shrink: 0; position: sticky; left: 0; z-index: 20; background: #1E293B; }
+    .gantt-task-column { min-width: 250px; max-width: 250px; flex-shrink: 0; position: sticky; left: 0; z-index: 20; background: #1E293B; }
+    .gantt-pic-column { min-width: 80px; max-width: 80px; flex-shrink: 0; position: sticky; left: 250px; z-index: 19; background: #1E293B; }
+    .gantt-pic-cell { min-width: 80px; max-width: 80px; padding: 6px 8px; font-size: 12px; background: #1E293B; border-right: 1px solid #334155; border-bottom: 1px solid #334155; display: flex; align-items: center; justify-content: center; height: 44px; box-sizing: border-box; }
     .gantt-timeline-column { flex: 1; }
     .gantt-header { display: flex; border-bottom: 1px solid #334155; }
     .gantt-header-months { display: flex; border-bottom: 1px solid #334155; background: #0F172A; }
@@ -265,21 +267,33 @@
     .gantt-body { max-height: 400px; overflow-y: auto; overflow-x: hidden; }
     .gantt-body-rows { }
     .gantt-row { display: flex; border-bottom: 1px solid #334155; min-height: 44px; }
-    .gantt-task-name { min-width: 180px; max-width: 180px; padding: 6px 8px; font-size: 12px; font-weight: 500; background: #1E293B; border-right: 1px solid #334155; border-bottom: 1px solid #334155; display: flex; align-items: center; justify-content: space-between; gap: 4px; position: sticky; left: 0; z-index: 10; height: 44px; box-sizing: border-box; }
+    .gantt-task-name { min-width: 250px; max-width: 250px; padding: 6px 8px; font-size: 12px; font-weight: 500; background: #1E293B; border-right: 1px solid #334155; border-bottom: 1px solid #334155; display: flex; align-items: center; justify-content: space-between; gap: 4px; position: sticky; left: 0; z-index: 10; height: 44px; box-sizing: border-box; }
     .gantt-task-name[draggable="true"] { cursor: grab; }
     .gantt-task-name[draggable="true"]:active { cursor: grabbing; }
     .gantt-task-name.drag-over { background: #334155; border-top: 2px solid #38BDF8; }
     .gantt-task-name.dragging { opacity: 0.5; background: #0F172A; }
     .gantt-task-drag-handle { cursor: grab; padding: 4px; margin-right: 4px; color: #64748B; font-size: 10px; }
     .gantt-task-drag-handle:hover { color: #38BDF8; }
-    .gantt-task-text { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; flex: 1; }
+    .gantt-task-text { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; flex: 1; cursor: default; position: relative; }
+    .gantt-task-text:hover { overflow: visible; }
+    .gantt-task-text:hover::after { content: attr(data-full-text); position: absolute; left: 0; top: 100%; background: #0F172A; color: #F1F5F9; padding: 8px 12px; border-radius: 6px; white-space: nowrap; z-index: 1000; box-shadow: 0 4px 12px rgba(0,0,0,0.3); font-size: 12px; border: 1px solid #334155; max-width: 400px; white-space: normal; word-wrap: break-word; }
 
     /* Subtask styles */
-    .subtask-item { display: flex; align-items: center; gap: 8px; padding: 8px; background: #1E293B; border-radius: 6px; margin-bottom: 6px; }
-    .subtask-item input[type="checkbox"] { width: 16px; height: 16px; cursor: pointer; accent-color: #38BDF8; }
-    .subtask-item .subtask-name { flex: 1; font-size: 13px; }
+    .subtask-item { display: flex; align-items: center; gap: 8px; padding: 8px; background: #1E293B; border-radius: 6px; margin-bottom: 6px; transition: background 0.2s, transform 0.2s; }
+    .subtask-item[draggable="true"] { cursor: grab; }
+    .subtask-item[draggable="true"]:active { cursor: grabbing; }
+    .subtask-item.dragging { opacity: 0.5; background: #0F172A; }
+    .subtask-item.drag-over { background: #334155; border-top: 2px solid #38BDF8; }
+    .subtask-item input[type="checkbox"] { width: 16px; height: 16px; cursor: pointer; accent-color: #38BDF8; flex-shrink: 0; }
+    .subtask-item .subtask-drag-handle { cursor: grab; color: #64748B; font-size: 12px; padding: 2px 4px; flex-shrink: 0; }
+    .subtask-item .subtask-drag-handle:hover { color: #38BDF8; }
+    .subtask-item .subtask-name { flex: 1; font-size: 13px; cursor: text; padding: 2px 4px; border-radius: 4px; min-width: 0; word-break: break-word; }
+    .subtask-item .subtask-name:hover { background: rgba(255,255,255,0.05); }
     .subtask-item .subtask-name.completed { text-decoration: line-through; color: #64748B; }
-    .subtask-item .subtask-delete { background: none; border: none; color: #EF4444; cursor: pointer; font-size: 14px; padding: 2px 6px; }
+    .subtask-item .subtask-name-input { flex: 1; font-size: 13px; padding: 4px 8px; background: #0F172A; border: 1px solid #3B82F6; border-radius: 4px; color: #F1F5F9; outline: none; }
+    .subtask-item .subtask-edit { background: none; border: none; color: #3B82F6; cursor: pointer; font-size: 12px; padding: 2px 6px; flex-shrink: 0; }
+    .subtask-item .subtask-edit:hover { background: rgba(59,130,246,0.2); border-radius: 4px; }
+    .subtask-item .subtask-delete { background: none; border: none; color: #EF4444; cursor: pointer; font-size: 14px; padding: 2px 6px; flex-shrink: 0; }
     .subtask-item .subtask-delete:hover { background: rgba(239,68,68,0.2); border-radius: 4px; }
     .gantt-task-row-wrapper { display: contents; }
     .subtask-expand { cursor: pointer; color: #64748B; font-size: 10px; margin-right: 4px; transition: transform 0.2s; display: inline-block; }
@@ -401,7 +415,8 @@
       .main { padding: 24px; }
       .section { padding: 24px; }
       .detail-name { font-size: 28px; }
-      .gantt-task-col, .gantt-task-name, .gantt-task-column { min-width: 220px; max-width: 220px; }
+      .gantt-task-col, .gantt-task-name, .gantt-task-column { min-width: 280px; max-width: 280px; }
+      .gantt-pic-column, .gantt-pic-cell { left: 280px; }
       .gantt-date, .gantt-bar-cell { min-width: 40px; }
     }
     
@@ -442,6 +457,7 @@
       .modal { margin: 10px; border-radius: 12px; max-height: 90vh; }
       .modal-body { padding: 16px; max-height: 60vh; overflow-y: auto; }
       .gantt-task-col, .gantt-task-name, .gantt-task-column { min-width: 120px; max-width: 120px; padding: 6px; font-size: 10px; }
+      .gantt-pic-column, .gantt-pic-cell { min-width: 60px; max-width: 60px; left: 120px; }
       .gantt-controls { flex-direction: column; align-items: stretch; }
       .gantt-scale-btn { padding: 8px 12px; }
       .gantt-date, .gantt-bar-cell { min-width: 28px; }
@@ -592,6 +608,32 @@
           </div>
 
           <div style="display:flex;flex-direction:column;gap:4px;">
+            <span style="color:#94A3B8;font-size:11px;">🏷️ Roles:</span>
+            <div id="portfolio-role-filter" style="display:flex;flex-wrap:wrap;gap:6px;background:#1E293B;padding:8px;border-radius:6px;border:1px solid #475569;">
+              <label style="display:flex;align-items:center;gap:4px;cursor:pointer;font-size:11px;">
+                <input type="checkbox" value="PM" onchange="renderPortfolio()" checked style="accent-color:#8B5CF6;">
+                <span style="background:#8B5CF6;color:white;padding:1px 6px;border-radius:3px;">PM</span>
+              </label>
+              <label style="display:flex;align-items:center;gap:4px;cursor:pointer;font-size:11px;">
+                <input type="checkbox" value="Dev" onchange="renderPortfolio()" checked style="accent-color:#10B981;">
+                <span style="background:#10B981;color:white;padding:1px 6px;border-radius:3px;">Dev</span>
+              </label>
+              <label style="display:flex;align-items:center;gap:4px;cursor:pointer;font-size:11px;">
+                <input type="checkbox" value="QA" onchange="renderPortfolio()" checked style="accent-color:#F59E0B;">
+                <span style="background:#F59E0B;color:white;padding:1px 6px;border-radius:3px;">QA</span>
+              </label>
+              <label style="display:flex;align-items:center;gap:4px;cursor:pointer;font-size:11px;">
+                <input type="checkbox" value="Support" onchange="renderPortfolio()" checked style="accent-color:#EF4444;">
+                <span style="background:#EF4444;color:white;padding:1px 6px;border-radius:3px;">Support</span>
+              </label>
+              <label style="display:flex;align-items:center;gap:4px;cursor:pointer;font-size:11px;">
+                <input type="checkbox" value="Lead" onchange="renderPortfolio()" checked style="accent-color:#3B82F6;">
+                <span style="background:#3B82F6;color:white;padding:1px 6px;border-radius:3px;">Lead</span>
+              </label>
+            </div>
+          </div>
+
+          <div style="display:flex;flex-direction:column;gap:4px;">
             <span style="color:#94A3B8;font-size:11px;">📋 Status:</span>
             <select id="portfolio-status-filter" onchange="renderPortfolio()" style="background:#1E293B;border:1px solid #475569;color:#E2E8F0;padding:6px 12px;border-radius:6px;font-size:12px;">
               <option value="all">All Statuses</option>
@@ -609,13 +651,6 @@
           </div>
 
           <button onclick="clearPortfolioFilters()" style="background:#475569;border:none;color:#E2E8F0;padding:6px 12px;border-radius:6px;font-size:11px;cursor:pointer;margin-top:16px;">Clear Filters</button>
-
-          <div style="flex:1;"></div>
-          <div style="display:flex;gap:8px;align-items:center;">
-            <span style="font-size:10px;background:#8B5CF6;color:white;padding:2px 8px;border-radius:4px;">PM</span>
-            <span style="font-size:10px;background:#10B981;color:white;padding:2px 8px;border-radius:4px;">Dev</span>
-            <span style="font-size:10px;color:#64748B;">= Role assignments</span>
-          </div>
         </div>
         <div id="portfolio-gantt"></div>
       </div>
@@ -763,6 +798,12 @@
             <label class="form-label">End Date</label>
             <input type="date" class="form-input" id="task-end">
           </div>
+        </div>
+        <div class="form-group">
+          <label class="form-label">PIC (Person In Charge)</label>
+          <select class="form-select" id="task-pic">
+            <option value="">-- Select PIC --</option>
+          </select>
         </div>
         <div class="form-group">
           <label class="form-label">Progress: <span id="progress-display">0</span>%</label>
@@ -1502,7 +1543,15 @@
       document.getElementById('portfolio-member-filter').selectedIndex = -1;
       document.getElementById('portfolio-status-filter').value = 'all';
       document.getElementById('portfolio-name-filter').value = '';
+      // Reset all role checkboxes to checked
+      document.querySelectorAll('#portfolio-role-filter input[type="checkbox"]').forEach(cb => cb.checked = true);
       renderPortfolio();
+    }
+
+    // Get selected roles from checkboxes
+    function getSelectedPortfolioRoles() {
+      const checkboxes = document.querySelectorAll('#portfolio-role-filter input[type="checkbox"]:checked');
+      return Array.from(checkboxes).map(cb => cb.value);
     }
 
     function renderPortfolio() {
@@ -1510,6 +1559,7 @@
       const filterSelect = document.getElementById('portfolio-member-filter');
       const statusFilter = document.getElementById('portfolio-status-filter');
       const nameFilter = document.getElementById('portfolio-name-filter');
+      const selectedRoles = getSelectedPortfolioRoles();
 
       // Portfolio SUG-1: Populate multi-select member filter
       const selectedMembers = Array.from(filterSelect.selectedOptions).map(opt => opt.value);
@@ -1600,20 +1650,44 @@
       
       // Sort projects by start date
       const sortedProjects = [...allProjects].sort((a, b) => new Date(a.startDate) - new Date(b.startDate));
-      
-      // Build project data with role assignments
+
+      // All available roles with their colors
+      const PORTFOLIO_ROLES = [
+        { role: 'PM', color: '#8B5CF6' },
+        { role: 'Dev', color: '#10B981' },
+        { role: 'QA', color: '#F59E0B' },
+        { role: 'Support', color: '#EF4444' },
+        { role: 'Lead', color: '#3B82F6' }
+      ];
+
+      // Build project data with role assignments - filter by selected members and roles
       const projectsWithRoles = sortedProjects.map((p, idx) => {
-        const assignments = getProjectRoleAssignments(p.id);
-        const pmAssignments = assignments.filter(a => a.role === 'PM');
-        const devAssignments = assignments.filter(a => a.role === 'Dev');
-        const otherAssignments = assignments.filter(a => a.role !== 'PM' && a.role !== 'Dev');
+        let assignments = getProjectRoleAssignments(p.id);
+
+        // Filter assignments to only show selected members (if member filter is active)
+        if (selectedMemberIds.length > 0) {
+          assignments = assignments.filter(a => selectedMemberIds.includes(a.memberId));
+        }
+
+        // Filter assignments to only show selected roles
+        if (selectedRoles.length > 0) {
+          assignments = assignments.filter(a => selectedRoles.includes(a.role));
+        }
+
+        // Group assignments by role (only include selected roles)
+        const roleGroups = {};
+        PORTFOLIO_ROLES.forEach(r => {
+          if (selectedRoles.includes(r.role)) {
+            roleGroups[r.role] = assignments.filter(a => a.role === r.role);
+          }
+        });
+
         return {
           ...p,
           color: colors[idx % colors.length],
-          pmMembers: pmAssignments,
-          devMembers: devAssignments,
-          otherMembers: otherAssignments,
-          allAssignments: assignments
+          roleGroups: roleGroups,
+          allAssignments: assignments,
+          selectedRoles: selectedRoles
         };
       });
       
@@ -1690,38 +1764,36 @@
         }
       });
       months.push({ name: currentMonth, days: monthDays });
-      
+
+      // Role colors for portfolio
+      const ROLE_COLORS = { PM: '#8B5CF6', Dev: '#10B981', QA: '#F59E0B', Support: '#EF4444', Lead: '#3B82F6' };
+      const ROLE_ORDER = ['PM', 'Dev', 'QA', 'Support', 'Lead'];
+      // Get selected roles from first project (they all have the same selection)
+      const selectedRoles = projects.length > 0 ? (projects[0].selectedRoles || ROLE_ORDER) : ROLE_ORDER;
+
       let html = `<div class="gantt-wrapper">
         <div class="portfolio-project-column">
           <div class="portfolio-header-cell">Project / Role</div>`;
 
       // Project names with role sub-rows
       projects.forEach((p, idx) => {
-        const hasPM = p.pmMembers && p.pmMembers.length > 0;
-        const hasDev = p.devMembers && p.devMembers.length > 0;
-        const rowCount = 1 + (hasPM ? 1 : 0) + (hasDev ? 1 : 0);
-
         html += `<div class="portfolio-project-group">
           <div class="portfolio-project-name" onclick="openProject('${p.id}')" title="${p.name}" style="font-weight:600;">
             <span style="display:inline-block;width:8px;height:8px;border-radius:50%;background:${p.color};margin-right:8px;flex-shrink:0;"></span>
             <span style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${p.name}</span>
           </div>`;
 
-        if (hasPM) {
-          const pmNames = p.pmMembers.map(a => a.member.name).join(', ');
-          html += `<div class="portfolio-role-name" title="${pmNames}">
-            <span style="background:#8B5CF6;color:white;padding:1px 6px;border-radius:3px;font-size:9px;margin-right:6px;">PM</span>
-            <span style="color:#94A3B8;font-size:10px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${pmNames}</span>
-          </div>`;
-        }
-
-        if (hasDev) {
-          const devNames = p.devMembers.map(a => a.member.name).join(', ');
-          html += `<div class="portfolio-role-name" title="${devNames}">
-            <span style="background:#10B981;color:white;padding:1px 6px;border-radius:3px;font-size:9px;margin-right:6px;">Dev</span>
-            <span style="color:#94A3B8;font-size:10px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${devNames}</span>
-          </div>`;
-        }
+        // Render only selected roles that have members assigned
+        selectedRoles.forEach(role => {
+          const roleMembers = p.roleGroups[role] || [];
+          if (roleMembers.length > 0) {
+            const memberNames = roleMembers.map(a => a.member.name).join(', ');
+            html += `<div class="portfolio-role-name" title="${memberNames}">
+              <span style="background:${ROLE_COLORS[role]};color:white;padding:1px 6px;border-radius:3px;font-size:9px;margin-right:6px;">${role}</span>
+              <span style="color:#94A3B8;font-size:10px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${memberNames}</span>
+            </div>`;
+          }
+        });
 
         html += '</div>';
       });
@@ -1732,23 +1804,17 @@
         <div class="portfolio-header-cell" style="min-width:70px;max-width:70px;font-size:9px;padding:6px;text-align:center;">Start</div>`;
 
       projects.forEach((p, idx) => {
-        const hasPM = p.pmMembers && p.pmMembers.length > 0;
-        const hasDev = p.devMembers && p.devMembers.length > 0;
-
         // Main project row - 32px height to match Gantt
         html += `<div class="portfolio-row" style="height:32px;display:flex;align-items:center;justify-content:center;border-right:1px solid #334155;background:#1E293B;font-size:9px;color:#94A3B8;">
           ${formatDateShort(p.startDate)}
         </div>`;
 
-        // PM role row - empty, 32px height to match Gantt
-        if (hasPM) {
-          html += `<div class="portfolio-row portfolio-role-row" style="height:32px;border-right:1px solid #334155;background:#1a2235;"></div>`;
-        }
-
-        // Dev role row - empty, 32px height to match Gantt
-        if (hasDev) {
-          html += `<div class="portfolio-row portfolio-role-row" style="height:32px;border-right:1px solid #334155;background:#1a2235;"></div>`;
-        }
+        // Role rows - empty, 32px height to match Gantt
+        selectedRoles.forEach(role => {
+          if (p.roleGroups[role] && p.roleGroups[role].length > 0) {
+            html += `<div class="portfolio-row portfolio-role-row" style="height:32px;border-right:1px solid #334155;background:#1a2235;"></div>`;
+          }
+        });
       });
       html += '</div>';
 
@@ -1757,23 +1823,17 @@
         <div class="portfolio-header-cell" style="min-width:70px;max-width:70px;font-size:9px;padding:6px;text-align:center;">End</div>`;
 
       projects.forEach((p, idx) => {
-        const hasPM = p.pmMembers && p.pmMembers.length > 0;
-        const hasDev = p.devMembers && p.devMembers.length > 0;
-
         // Main project row - 32px height to match Gantt
         html += `<div class="portfolio-row" style="height:32px;display:flex;align-items:center;justify-content:center;border-right:1px solid #334155;background:#1E293B;font-size:9px;color:#94A3B8;">
           ${formatDateShort(p.endDate)}
         </div>`;
 
-        // PM role row - empty, 32px height to match Gantt
-        if (hasPM) {
-          html += `<div class="portfolio-row portfolio-role-row" style="height:32px;border-right:1px solid #334155;background:#1a2235;"></div>`;
-        }
-
-        // Dev role row - empty, 32px height to match Gantt
-        if (hasDev) {
-          html += `<div class="portfolio-row portfolio-role-row" style="height:32px;border-right:1px solid #334155;background:#1a2235;"></div>`;
-        }
+        // Role rows - empty, 32px height to match Gantt
+        selectedRoles.forEach(role => {
+          if (p.roleGroups[role] && p.roleGroups[role].length > 0) {
+            html += `<div class="portfolio-row portfolio-role-row" style="height:32px;border-right:1px solid #334155;background:#1a2235;"></div>`;
+          }
+        });
       });
       html += '</div>';
 
@@ -1804,56 +1864,45 @@
         const pEnd = new Date(p.endDate);
         const leftDays = Math.max(0, Math.ceil((pStart - start) / 864e5));
         const widthDays = Math.max(1, Math.ceil((pEnd - pStart) / 864e5) + 1);
-        
-        const hasPM = p.pmMembers && p.pmMembers.length > 0;
-        const hasDev = p.devMembers && p.devMembers.length > 0;
-        
+
         let progress = 0;
         if (p.tasks && p.tasks.length > 0) {
           progress = Math.round(p.tasks.reduce((sum, t) => sum + (t.progress || 0), 0) / p.tasks.length);
         }
-        
+
         // Today line position
         const todayDays = Math.ceil((today - start) / 864e5);
-        const todayLineHtml = (todayDays >= 0 && todayDays <= totalDays) ? 
+        const todayLineHtml = (todayDays >= 0 && todayDays <= totalDays) ?
           `<div class="gantt-today-line" style="left:${todayDays * dayWidth}px;"></div>` : '';
-        
+
         // Main project bar row
         html += `<div class="portfolio-row"><div class="portfolio-bar-container" style="min-width:${totalDays * dayWidth}px;">
           ${todayLineHtml}
-          <div class="portfolio-bar" onclick="openProject('${p.id}')" 
+          <div class="portfolio-bar" onclick="openProject('${p.id}')"
                style="left:${leftDays * dayWidth}px;width:${widthDays * dayWidth}px;background:linear-gradient(135deg,${p.color},${p.color}dd);"
                title="${p.name}: ${formatDateShort(p.startDate)} - ${formatDateShort(p.endDate)} (${progress}%)">
             ${widthDays * dayWidth > 50 ? `${progress}%` : ''}
           </div>
         </div></div>`;
-        
-        // PM role bar
-        if (hasPM) {
-          html += `<div class="portfolio-row portfolio-role-row"><div class="portfolio-bar-container" style="min-width:${totalDays * dayWidth}px;">
-            ${todayLineHtml}
-            <div class="portfolio-bar portfolio-role-bar" onclick="openProject('${p.id}')" 
-                 style="left:${leftDays * dayWidth}px;width:${widthDays * dayWidth}px;background:linear-gradient(135deg,#8B5CF6,#8B5CF6aa);height:18px;top:4px;"
-                 title="PM: ${p.pmMembers.map(a => a.member.name).join(', ')}">
-              ${widthDays * dayWidth > 60 ? 'PM' : ''}
-            </div>
-          </div></div>`;
-        }
-        
-        // Dev role bar
-        if (hasDev) {
-          html += `<div class="portfolio-row portfolio-role-row"><div class="portfolio-bar-container" style="min-width:${totalDays * dayWidth}px;">
-            ${todayLineHtml}
-            <div class="portfolio-bar portfolio-role-bar" onclick="openProject('${p.id}')" 
-                 style="left:${leftDays * dayWidth}px;width:${widthDays * dayWidth}px;background:linear-gradient(135deg,#10B981,#10B981aa);height:18px;top:4px;"
-                 title="Dev: ${p.devMembers.map(a => a.member.name).join(', ')}">
-              ${widthDays * dayWidth > 60 ? 'Dev' : ''}
-            </div>
-          </div></div>`;
-        }
+
+        // Role bars for selected roles
+        selectedRoles.forEach(role => {
+          const roleMembers = p.roleGroups[role] || [];
+          if (roleMembers.length > 0) {
+            const memberNames = roleMembers.map(a => a.member.name).join(', ');
+            html += `<div class="portfolio-row portfolio-role-row"><div class="portfolio-bar-container" style="min-width:${totalDays * dayWidth}px;">
+              ${todayLineHtml}
+              <div class="portfolio-bar portfolio-role-bar" onclick="openProject('${p.id}')"
+                   style="left:${leftDays * dayWidth}px;width:${widthDays * dayWidth}px;background:linear-gradient(135deg,${ROLE_COLORS[role]},${ROLE_COLORS[role]}aa);height:18px;top:4px;"
+                   title="${role}: ${memberNames}">
+                ${widthDays * dayWidth > 60 ? role : ''}
+              </div>
+            </div></div>`;
+          }
+        });
       });
       html += '</div></div></div>';
-      
+
       return html;
     }
     
@@ -1885,36 +1934,35 @@
       });
       months.push({ name: currentMonth, weeks: monthWeeks });
       
+      // Role colors for portfolio
+      const ROLE_COLORS = { PM: '#8B5CF6', Dev: '#10B981', QA: '#F59E0B', Support: '#EF4444', Lead: '#3B82F6' };
+      const ROLE_ORDER = ['PM', 'Dev', 'QA', 'Support', 'Lead'];
+      // Get selected roles from first project (they all have the same selection)
+      const selectedRoles = projects.length > 0 ? (projects[0].selectedRoles || ROLE_ORDER) : ROLE_ORDER;
+
       let html = `<div class="gantt-wrapper">
         <div class="portfolio-project-column">
           <div class="portfolio-header-cell">Project / Role</div>`;
 
       // Project names with role sub-rows
       projects.forEach((p, idx) => {
-        const hasPM = p.pmMembers && p.pmMembers.length > 0;
-        const hasDev = p.devMembers && p.devMembers.length > 0;
-
         html += `<div class="portfolio-project-group">
           <div class="portfolio-project-name" onclick="openProject('${p.id}')" title="${p.name}" style="font-weight:600;">
             <span style="display:inline-block;width:8px;height:8px;border-radius:50%;background:${p.color};margin-right:8px;flex-shrink:0;"></span>
             <span style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${p.name}</span>
           </div>`;
 
-        if (hasPM) {
-          const pmNames = p.pmMembers.map(a => a.member.name).join(', ');
-          html += `<div class="portfolio-role-name" title="${pmNames}">
-            <span style="background:#8B5CF6;color:white;padding:1px 6px;border-radius:3px;font-size:9px;margin-right:6px;">PM</span>
-            <span style="color:#94A3B8;font-size:10px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${pmNames}</span>
-          </div>`;
-        }
-
-        if (hasDev) {
-          const devNames = p.devMembers.map(a => a.member.name).join(', ');
-          html += `<div class="portfolio-role-name" title="${devNames}">
-            <span style="background:#10B981;color:white;padding:1px 6px;border-radius:3px;font-size:9px;margin-right:6px;">Dev</span>
-            <span style="color:#94A3B8;font-size:10px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${devNames}</span>
-          </div>`;
-        }
+        // Render only selected roles that have members assigned
+        selectedRoles.forEach(role => {
+          const roleMembers = p.roleGroups[role] || [];
+          if (roleMembers.length > 0) {
+            const memberNames = roleMembers.map(a => a.member.name).join(', ');
+            html += `<div class="portfolio-role-name" title="${memberNames}">
+              <span style="background:${ROLE_COLORS[role]};color:white;padding:1px 6px;border-radius:3px;font-size:9px;margin-right:6px;">${role}</span>
+              <span style="color:#94A3B8;font-size:10px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${memberNames}</span>
+            </div>`;
+          }
+        });
 
         html += '</div>';
       });
@@ -1925,23 +1973,17 @@
         <div class="portfolio-header-cell" style="min-width:70px;max-width:70px;font-size:9px;padding:6px;text-align:center;">Start</div>`;
 
       projects.forEach((p, idx) => {
-        const hasPM = p.pmMembers && p.pmMembers.length > 0;
-        const hasDev = p.devMembers && p.devMembers.length > 0;
-
         // Main project row - 32px height to match Gantt
         html += `<div class="portfolio-row" style="height:32px;display:flex;align-items:center;justify-content:center;border-right:1px solid #334155;background:#1E293B;font-size:9px;color:#94A3B8;">
           ${formatDateShort(p.startDate)}
         </div>`;
 
-        // PM role row - empty, 32px height to match Gantt
-        if (hasPM) {
-          html += `<div class="portfolio-row portfolio-role-row" style="height:32px;border-right:1px solid #334155;background:#1a2235;"></div>`;
-        }
-
-        // Dev role row - empty, 32px height to match Gantt
-        if (hasDev) {
-          html += `<div class="portfolio-row portfolio-role-row" style="height:32px;border-right:1px solid #334155;background:#1a2235;"></div>`;
-        }
+        // Role rows - empty, 32px height to match Gantt
+        selectedRoles.forEach(role => {
+          if (p.roleGroups[role] && p.roleGroups[role].length > 0) {
+            html += `<div class="portfolio-row portfolio-role-row" style="height:32px;border-right:1px solid #334155;background:#1a2235;"></div>`;
+          }
+        });
       });
       html += '</div>';
 
@@ -1950,35 +1992,29 @@
         <div class="portfolio-header-cell" style="min-width:70px;max-width:70px;font-size:9px;padding:6px;text-align:center;">End</div>`;
 
       projects.forEach((p, idx) => {
-        const hasPM = p.pmMembers && p.pmMembers.length > 0;
-        const hasDev = p.devMembers && p.devMembers.length > 0;
-
         // Main project row - 32px height to match Gantt
         html += `<div class="portfolio-row" style="height:32px;display:flex;align-items:center;justify-content:center;border-right:1px solid #334155;background:#1E293B;font-size:9px;color:#94A3B8;">
           ${formatDateShort(p.endDate)}
         </div>`;
 
-        // PM role row - empty, 32px height to match Gantt
-        if (hasPM) {
-          html += `<div class="portfolio-row portfolio-role-row" style="height:32px;border-right:1px solid #334155;background:#1a2235;"></div>`;
-        }
-
-        // Dev role row - empty, 32px height to match Gantt
-        if (hasDev) {
-          html += `<div class="portfolio-row portfolio-role-row" style="height:32px;border-right:1px solid #334155;background:#1a2235;"></div>`;
-        }
+        // Role rows - empty, 32px height to match Gantt
+        selectedRoles.forEach(role => {
+          if (p.roleGroups[role] && p.roleGroups[role].length > 0) {
+            html += `<div class="portfolio-row portfolio-role-row" style="height:32px;border-right:1px solid #334155;background:#1a2235;"></div>`;
+          }
+        });
       });
       html += '</div>';
 
       html += '<div class="portfolio-timeline-column">';
-      
+
       // Month headers
       html += '<div class="gantt-header-months">';
       months.forEach(m => {
         html += `<div class="gantt-month-label" style="min-width:${m.weeks * weekWidth}px;">${m.name}</div>`;
       });
       html += '</div>';
-      
+
       // Week headers
       html += '<div class="gantt-timeline">';
       weeks.forEach((w, i) => {
@@ -1991,7 +2027,7 @@
         </div>`;
       });
       html += '</div>';
-      
+
       // Project bars with role sub-bars
       html += '<div class="portfolio-body-rows">';
       projects.forEach((p, idx) => {
@@ -1999,57 +2035,47 @@
         const pEnd = new Date(p.endDate);
         const leftWeeks = Math.max(0, Math.floor((pStart - start) / 864e5 / 7));
         const widthWeeks = Math.max(1, Math.ceil((pEnd - pStart) / 864e5 / 7) + 1);
-        
-        const hasPM = p.pmMembers && p.pmMembers.length > 0;
-        const hasDev = p.devMembers && p.devMembers.length > 0;
-        
+
         let progress = 0;
         if (p.tasks && p.tasks.length > 0) {
           progress = Math.round(p.tasks.reduce((sum, t) => sum + (t.progress || 0), 0) / p.tasks.length);
         }
-        
+
         // Today line
         const todayWeek = Math.floor((today - start) / 864e5 / 7);
         const dayInWeek = ((today - start) / 864e5) % 7;
-        const todayLineHtml = (todayWeek >= 0 && todayWeek < totalWeeks) ? 
+        const todayLineHtml = (todayWeek >= 0 && todayWeek < totalWeeks) ?
           `<div class="gantt-today-line" style="left:${todayWeek * weekWidth + (dayInWeek / 7) * weekWidth}px;"></div>` : '';
-        
+
         // Main project bar row
         html += `<div class="portfolio-row"><div class="portfolio-bar-container" style="min-width:${totalWeeks * weekWidth}px;">
           ${todayLineHtml}
-          <div class="portfolio-bar" onclick="openProject('${p.id}')" 
+          <div class="portfolio-bar" onclick="openProject('${p.id}')"
                style="left:${leftWeeks * weekWidth}px;width:${widthWeeks * weekWidth}px;background:linear-gradient(135deg,${p.color},${p.color}dd);"
                title="${p.name}: ${formatDateShort(p.startDate)} - ${formatDateShort(p.endDate)}">
             ${progress}% • ${p.status}
           </div>
         </div></div>`;
-        
-        // PM role bar
-        if (hasPM) {
-          html += `<div class="portfolio-row portfolio-role-row"><div class="portfolio-bar-container" style="min-width:${totalWeeks * weekWidth}px;">
-            ${todayLineHtml}
-            <div class="portfolio-bar portfolio-role-bar" onclick="openProject('${p.id}')" 
-                 style="left:${leftWeeks * weekWidth}px;width:${widthWeeks * weekWidth}px;background:linear-gradient(135deg,#8B5CF6,#8B5CF6aa);height:18px;top:4px;"
-                 title="PM: ${p.pmMembers.map(a => a.member.name).join(', ')}">
-              PM: ${p.pmMembers.map(a => a.member.name.split(' ')[0]).join(', ')}
-            </div>
-          </div></div>`;
-        }
-        
-        // Dev role bar
-        if (hasDev) {
-          html += `<div class="portfolio-row portfolio-role-row"><div class="portfolio-bar-container" style="min-width:${totalWeeks * weekWidth}px;">
-            ${todayLineHtml}
-            <div class="portfolio-bar portfolio-role-bar" onclick="openProject('${p.id}')" 
-                 style="left:${leftWeeks * weekWidth}px;width:${widthWeeks * weekWidth}px;background:linear-gradient(135deg,#10B981,#10B981aa);height:18px;top:4px;"
-                 title="Dev: ${p.devMembers.map(a => a.member.name).join(', ')}">
-              Dev: ${p.devMembers.map(a => a.member.name.split(' ')[0]).join(', ')}
-            </div>
-          </div></div>`;
-        }
+
+        // Role bars for selected roles
+        selectedRoles.forEach(role => {
+          const roleMembers = p.roleGroups[role] || [];
+          if (roleMembers.length > 0) {
+            const memberNames = roleMembers.map(a => a.member.name).join(', ');
+            const shortNames = roleMembers.map(a => a.member.name.split(' ')[0]).join(', ');
+            html += `<div class="portfolio-row portfolio-role-row"><div class="portfolio-bar-container" style="min-width:${totalWeeks * weekWidth}px;">
+              ${todayLineHtml}
+              <div class="portfolio-bar portfolio-role-bar" onclick="openProject('${p.id}')"
+                   style="left:${leftWeeks * weekWidth}px;width:${widthWeeks * weekWidth}px;background:linear-gradient(135deg,${ROLE_COLORS[role]},${ROLE_COLORS[role]}aa);height:18px;top:4px;"
+                   title="${role}: ${memberNames}">
+                ${role}: ${shortNames}
+              </div>
+            </div></div>`;
+          }
+        });
       });
       html += '</div></div></div>';
-      
+
       return html;
     }
     
@@ -2062,36 +2088,35 @@
         d.setMonth(d.getMonth() + 1);
       }
       
+      // Role colors for portfolio
+      const ROLE_COLORS = { PM: '#8B5CF6', Dev: '#10B981', QA: '#F59E0B', Support: '#EF4444', Lead: '#3B82F6' };
+      const ROLE_ORDER = ['PM', 'Dev', 'QA', 'Support', 'Lead'];
+      // Get selected roles from first project (they all have the same selection)
+      const selectedRoles = projects.length > 0 ? (projects[0].selectedRoles || ROLE_ORDER) : ROLE_ORDER;
+
       let html = `<div class="gantt-wrapper">
         <div class="portfolio-project-column">
           <div class="portfolio-header-cell" style="height:52px;">Project / Role</div>`;
 
       // Project names with role sub-rows
       projects.forEach((p, idx) => {
-        const hasPM = p.pmMembers && p.pmMembers.length > 0;
-        const hasDev = p.devMembers && p.devMembers.length > 0;
-
         html += `<div class="portfolio-project-group">
           <div class="portfolio-project-name" onclick="openProject('${p.id}')" title="${p.name}" style="font-weight:600;">
             <span style="display:inline-block;width:8px;height:8px;border-radius:50%;background:${p.color};margin-right:8px;flex-shrink:0;"></span>
             <span style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${p.name}</span>
           </div>`;
 
-        if (hasPM) {
-          const pmNames = p.pmMembers.map(a => a.member.name).join(', ');
-          html += `<div class="portfolio-role-name" title="${pmNames}">
-            <span style="background:#8B5CF6;color:white;padding:1px 6px;border-radius:3px;font-size:9px;margin-right:6px;">PM</span>
-            <span style="color:#94A3B8;font-size:10px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${pmNames}</span>
-          </div>`;
-        }
-
-        if (hasDev) {
-          const devNames = p.devMembers.map(a => a.member.name).join(', ');
-          html += `<div class="portfolio-role-name" title="${devNames}">
-            <span style="background:#10B981;color:white;padding:1px 6px;border-radius:3px;font-size:9px;margin-right:6px;">Dev</span>
-            <span style="color:#94A3B8;font-size:10px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${devNames}</span>
-          </div>`;
-        }
+        // Render only selected roles that have members assigned
+        selectedRoles.forEach(role => {
+          const roleMembers = p.roleGroups[role] || [];
+          if (roleMembers.length > 0) {
+            const memberNames = roleMembers.map(a => a.member.name).join(', ');
+            html += `<div class="portfolio-role-name" title="${memberNames}">
+              <span style="background:${ROLE_COLORS[role]};color:white;padding:1px 6px;border-radius:3px;font-size:9px;margin-right:6px;">${role}</span>
+              <span style="color:#94A3B8;font-size:10px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${memberNames}</span>
+            </div>`;
+          }
+        });
 
         html += '</div>';
       });
@@ -2102,23 +2127,17 @@
         <div class="portfolio-header-cell" style="min-width:70px;max-width:70px;height:52px;font-size:9px;padding:6px;text-align:center;display:flex;align-items:center;justify-content:center;">Start</div>`;
 
       projects.forEach((p, idx) => {
-        const hasPM = p.pmMembers && p.pmMembers.length > 0;
-        const hasDev = p.devMembers && p.devMembers.length > 0;
-
         // Main project row - 32px height to match Gantt
         html += `<div class="portfolio-row" style="height:32px;display:flex;align-items:center;justify-content:center;border-right:1px solid #334155;background:#1E293B;font-size:9px;color:#94A3B8;">
           ${formatDateShort(p.startDate)}
         </div>`;
 
-        // PM role row - empty, 32px height to match Gantt
-        if (hasPM) {
-          html += `<div class="portfolio-row portfolio-role-row" style="height:32px;border-right:1px solid #334155;background:#1a2235;"></div>`;
-        }
-
-        // Dev role row - empty, 32px height to match Gantt
-        if (hasDev) {
-          html += `<div class="portfolio-row portfolio-role-row" style="height:32px;border-right:1px solid #334155;background:#1a2235;"></div>`;
-        }
+        // Role rows - empty, 32px height to match Gantt
+        selectedRoles.forEach(role => {
+          if (p.roleGroups[role] && p.roleGroups[role].length > 0) {
+            html += `<div class="portfolio-row portfolio-role-row" style="height:32px;border-right:1px solid #334155;background:#1a2235;"></div>`;
+          }
+        });
       });
       html += '</div>';
 
@@ -2127,28 +2146,22 @@
         <div class="portfolio-header-cell" style="min-width:70px;max-width:70px;height:52px;font-size:9px;padding:6px;text-align:center;display:flex;align-items:center;justify-content:center;">End</div>`;
 
       projects.forEach((p, idx) => {
-        const hasPM = p.pmMembers && p.pmMembers.length > 0;
-        const hasDev = p.devMembers && p.devMembers.length > 0;
-
         // Main project row - 32px height to match Gantt
         html += `<div class="portfolio-row" style="height:32px;display:flex;align-items:center;justify-content:center;border-right:1px solid #334155;background:#1E293B;font-size:9px;color:#94A3B8;">
           ${formatDateShort(p.endDate)}
         </div>`;
 
-        // PM role row - empty, 32px height to match Gantt
-        if (hasPM) {
-          html += `<div class="portfolio-row portfolio-role-row" style="height:32px;border-right:1px solid #334155;background:#1a2235;"></div>`;
-        }
-
-        // Dev role row - empty, 32px height to match Gantt
-        if (hasDev) {
-          html += `<div class="portfolio-row portfolio-role-row" style="height:32px;border-right:1px solid #334155;background:#1a2235;"></div>`;
-        }
+        // Role rows - empty, 32px height to match Gantt
+        selectedRoles.forEach(role => {
+          if (p.roleGroups[role] && p.roleGroups[role].length > 0) {
+            html += `<div class="portfolio-row portfolio-role-row" style="height:32px;border-right:1px solid #334155;background:#1a2235;"></div>`;
+          }
+        });
       });
       html += '</div>';
 
       html += '<div class="portfolio-timeline-column">';
-      
+
       // Month headers
       html += '<div class="gantt-timeline">';
       months.forEach(m => {
@@ -2159,7 +2172,7 @@
         </div>`;
       });
       html += '</div>';
-      
+
       // Project bars with role sub-bars
       html += '<div class="portfolio-body-rows">';
       projects.forEach((p, idx) => {
@@ -2169,57 +2182,47 @@
         const endMonthIdx = (pEnd.getFullYear() - start.getFullYear()) * 12 + pEnd.getMonth() - start.getMonth();
         const leftPos = Math.max(0, startMonthIdx + pStart.getDate() / 30) * monthWidth;
         const widthMonths = Math.max(0.5, endMonthIdx - startMonthIdx + 1);
-        
-        const hasPM = p.pmMembers && p.pmMembers.length > 0;
-        const hasDev = p.devMembers && p.devMembers.length > 0;
-        
+
         let progress = 0;
         if (p.tasks && p.tasks.length > 0) {
           progress = Math.round(p.tasks.reduce((sum, t) => sum + (t.progress || 0), 0) / p.tasks.length);
         }
-        
+
         // Today line
         const todayMonthIdx = (today.getFullYear() - start.getFullYear()) * 12 + today.getMonth() - start.getMonth();
         const todayPos = todayMonthIdx * monthWidth + (today.getDate() / 30) * monthWidth;
-        const todayLineHtml = (todayMonthIdx >= 0 && todayMonthIdx < months.length) ? 
+        const todayLineHtml = (todayMonthIdx >= 0 && todayMonthIdx < months.length) ?
           `<div class="gantt-today-line" style="left:${todayPos}px;"></div>` : '';
-        
+
         // Main project bar row
         html += `<div class="portfolio-row"><div class="portfolio-bar-container" style="min-width:${months.length * monthWidth}px;">
           ${todayLineHtml}
-          <div class="portfolio-bar" onclick="openProject('${p.id}')" 
+          <div class="portfolio-bar" onclick="openProject('${p.id}')"
                style="left:${leftPos}px;width:${widthMonths * monthWidth}px;background:linear-gradient(135deg,${p.color},${p.color}dd);"
                title="${p.name}: ${formatDateShort(p.startDate)} - ${formatDateShort(p.endDate)}">
             ${progress}% • ${p.status}
           </div>
         </div></div>`;
-        
-        // PM role bar
-        if (hasPM) {
-          html += `<div class="portfolio-row portfolio-role-row"><div class="portfolio-bar-container" style="min-width:${months.length * monthWidth}px;">
-            ${todayLineHtml}
-            <div class="portfolio-bar portfolio-role-bar" onclick="openProject('${p.id}')" 
-                 style="left:${leftPos}px;width:${widthMonths * monthWidth}px;background:linear-gradient(135deg,#8B5CF6,#8B5CF6aa);height:18px;top:4px;"
-                 title="PM: ${p.pmMembers.map(a => a.member.name).join(', ')}">
-              PM: ${p.pmMembers.map(a => a.member.name.split(' ')[0]).join(', ')}
-            </div>
-          </div></div>`;
-        }
-        
-        // Dev role bar
-        if (hasDev) {
-          html += `<div class="portfolio-row portfolio-role-row"><div class="portfolio-bar-container" style="min-width:${months.length * monthWidth}px;">
-            ${todayLineHtml}
-            <div class="portfolio-bar portfolio-role-bar" onclick="openProject('${p.id}')" 
-                 style="left:${leftPos}px;width:${widthMonths * monthWidth}px;background:linear-gradient(135deg,#10B981,#10B981aa);height:18px;top:4px;"
-                 title="Dev: ${p.devMembers.map(a => a.member.name).join(', ')}">
-              Dev: ${p.devMembers.map(a => a.member.name.split(' ')[0]).join(', ')}
-            </div>
-          </div></div>`;
-        }
+
+        // Role bars for selected roles
+        selectedRoles.forEach(role => {
+          const roleMembers = p.roleGroups[role] || [];
+          if (roleMembers.length > 0) {
+            const memberNames = roleMembers.map(a => a.member.name).join(', ');
+            const shortNames = roleMembers.map(a => a.member.name.split(' ')[0]).join(', ');
+            html += `<div class="portfolio-row portfolio-role-row"><div class="portfolio-bar-container" style="min-width:${months.length * monthWidth}px;">
+              ${todayLineHtml}
+              <div class="portfolio-bar portfolio-role-bar" onclick="openProject('${p.id}')"
+                   style="left:${leftPos}px;width:${widthMonths * monthWidth}px;background:linear-gradient(135deg,${ROLE_COLORS[role]},${ROLE_COLORS[role]}aa);height:18px;top:4px;"
+                   title="${role}: ${memberNames}">
+                ${role}: ${shortNames}
+              </div>
+            </div></div>`;
+          }
+        });
       });
       html += '</div></div></div>';
-      
+
       return html;
     }
     
@@ -2494,75 +2497,150 @@
     }
     
     // Mobile-friendly quick assign modal
+    // Store pending role changes for quickassign modal
+    let pendingRoleChanges = {};
+
     function openQuickAssign(projectId, e) {
       if (e) e.stopPropagation();
       const p = getProjectById(projectId);
       if (!p) return;
-      
+
       // Find current assignments for this project
-      const currentAssignments = [];
+      const currentAssignments = {};
       Object.keys(data.memberProjects).forEach(mid => {
         const assignments = data.memberProjects[mid] || [];
         assignments.forEach(a => {
           const aId = typeof a === 'string' ? a : a.id;
           const aRole = typeof a === 'string' ? null : a.role;
           if (aId === projectId) {
-            const member = data.members.find(m => m.id === mid);
-            if (member) {
-              currentAssignments.push({ member, role: aRole });
-            }
+            currentAssignments[mid] = aRole;
           }
         });
       });
-      
-      // Show current assignments
-      let currentHtml = '';
-      if (currentAssignments.length > 0) {
-        currentHtml = `
-          <div style="margin-bottom:16px;padding:12px;background:#334155;border-radius:8px;">
-            <div style="font-size:11px;color:#94A3B8;margin-bottom:8px;">Currently assigned to:</div>
-            ${currentAssignments.map(ca => `
-              <div style="display:flex;align-items:center;gap:8px;margin-bottom:6px;">
-                <span style="background:${ca.member.color};width:20px;height:20px;border-radius:50%;display:inline-flex;align-items:center;justify-content:center;font-size:10px;">${ca.member.avatar}</span>
-                <span style="flex:1;">${ca.member.name}</span>
-                ${ca.role ? `<span class="board-project-role">${ca.role}</span>` : ''}
-                <button class="btn btn-danger btn-sm" style="padding:2px 6px;font-size:9px;" onclick="removeAssignment('${projectId}','${ca.member.id}')">✕</button>
-              </div>
-            `).join('')}
-          </div>
-        `;
-      }
-      
+
+      // Initialize pending changes with current state
+      pendingRoleChanges = { ...currentAssignments };
+
+      renderQuickAssignContent(projectId, p);
+      document.getElementById('modal-quickassign').classList.remove('hidden');
+    }
+
+    function renderQuickAssignContent(projectId, p) {
       const roles = ['PM', 'Dev', 'QA', 'Support', 'Lead'];
+      const roleColors = { PM: '#8B5CF6', Dev: '#10B981', QA: '#F59E0B', Support: '#EF4444', Lead: '#3B82F6' };
+
       const memberOptions = data.members.map(m => {
-        const isAssigned = currentAssignments.some(ca => ca.member.id === m.id);
+        const currentRole = pendingRoleChanges[m.id];
+        const isAssigned = currentRole !== undefined;
+
         return `
-          <div style="margin-bottom:8px;padding:8px;background:#1E293B;border-radius:8px;border-left:4px solid ${m.color};">
-            <div style="display:flex;align-items:center;gap:8px;margin-bottom:6px;">
-              <span style="background:${m.color};width:24px;height:24px;border-radius:50%;display:inline-flex;align-items:center;justify-content:center;">${m.avatar}</span>
-              <span style="flex:1;font-weight:500;">${m.name}</span>
-              ${isAssigned ? '<span style="font-size:10px;color:#10B981;">✓ Assigned</span>' : ''}
+          <div style="margin-bottom:10px;padding:10px;background:#1E293B;border-radius:8px;border-left:4px solid ${m.color};">
+            <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px;">
+              <span style="background:${m.color};width:28px;height:28px;border-radius:50%;display:inline-flex;align-items:center;justify-content:center;font-size:12px;">${m.avatar}</span>
+              <span style="flex:1;font-weight:600;font-size:14px;">${m.name}</span>
+              ${isAssigned ? `<span style="font-size:10px;color:#10B981;background:#10B98133;padding:2px 8px;border-radius:4px;">✓ Assigned${currentRole ? ` as ${currentRole}` : ''}</span>` : '<span style="font-size:10px;color:#64748B;">Not assigned</span>'}
             </div>
-            <div style="display:flex;gap:4px;flex-wrap:wrap;">
-              ${roles.map(role => `<button class="btn btn-secondary btn-sm" style="padding:3px 8px;font-size:10px;" onclick="assignProjectToMember('${projectId}','${m.id}','${role}');closeModal('quickassign');">${role}</button>`).join('')}
-              <button class="btn btn-primary btn-sm" style="padding:3px 8px;font-size:10px;" onclick="assignProjectToMember('${projectId}','${m.id}',null);closeModal('quickassign');">No Role</button>
+            <div style="display:flex;gap:6px;flex-wrap:wrap;">
+              ${roles.map(role => {
+                const isSelected = currentRole === role;
+                const btnStyle = isSelected
+                  ? `background:${roleColors[role]};color:white;border:2px solid ${roleColors[role]};`
+                  : `background:transparent;color:${roleColors[role]};border:2px solid ${roleColors[role]};`;
+                return `<button class="btn btn-sm" style="padding:4px 10px;font-size:11px;font-weight:600;${btnStyle}"
+                        onclick="toggleRoleSelection('${projectId}','${m.id}','${role}')">${role}</button>`;
+              }).join('')}
+              <button class="btn btn-sm" style="padding:4px 10px;font-size:11px;${currentRole === null && isAssigned ? 'background:#3B82F6;color:white;border:2px solid #3B82F6;' : 'background:transparent;color:#3B82F6;border:2px solid #3B82F6;'}"
+                      onclick="toggleRoleSelection('${projectId}','${m.id}','none')">No Role</button>
+              ${isAssigned ? `<button class="btn btn-sm" style="padding:4px 10px;font-size:11px;background:transparent;color:#EF4444;border:2px solid #EF4444;"
+                      onclick="toggleRoleSelection('${projectId}','${m.id}','remove')">✕ Remove</button>` : ''}
             </div>
           </div>
         `;
       }).join('');
-      
+
+      // Count changes
+      const assignedCount = Object.keys(pendingRoleChanges).length;
+
       document.getElementById('quickassign-content').innerHTML = `
-        <p style="margin-bottom:12px;color:#94A3B8;font-size:13px;">Assign "<b>${p.name}</b>"</p>
-        ${currentHtml}
-        <div style="max-height:300px;overflow-y:auto;">
+        <p style="margin-bottom:12px;color:#94A3B8;font-size:13px;">Assign roles for "<b>${p.name}</b>"</p>
+        <p style="margin-bottom:12px;font-size:11px;color:#64748B;">Click on a role to assign/change. Changes are saved when you click Save.</p>
+        <div style="max-height:350px;overflow-y:auto;margin-bottom:12px;">
           ${memberOptions}
         </div>
-        <button class="btn btn-secondary" style="width:100%;margin-top:12px;" 
-                onclick="returnToPool('${projectId}');closeModal('quickassign');">
+        <div style="display:flex;gap:8px;">
+          <button class="btn btn-primary" style="flex:1;" onclick="saveQuickAssignChanges('${projectId}')">
+            💾 Save Changes ${assignedCount > 0 ? `(${assignedCount} assigned)` : ''}
+          </button>
+          <button class="btn btn-secondary" onclick="closeModal('quickassign')">Cancel</button>
+        </div>
+        <button class="btn btn-secondary" style="width:100%;margin-top:8px;color:#EF4444;border-color:#EF4444;"
+                onclick="if(confirm('Remove all assignments?')){returnToPool('${projectId}');closeModal('quickassign');}">
           📦 Return to Pool (Remove All)
         </button>
       `;
-      document.getElementById('modal-quickassign').classList.remove('hidden');
+    }
+
+    function toggleRoleSelection(projectId, memberId, role) {
+      const p = getProjectById(projectId);
+      if (!p) return;
+
+      if (role === 'remove') {
+        // Remove assignment
+        delete pendingRoleChanges[memberId];
+      } else if (role === 'none') {
+        // Assign with no specific role
+        pendingRoleChanges[memberId] = null;
+      } else {
+        // Check if clicking same role (toggle off to unassigned)
+        if (pendingRoleChanges[memberId] === role) {
+          delete pendingRoleChanges[memberId];
+        } else {
+          // Assign with specific role
+          pendingRoleChanges[memberId] = role;
+        }
+      }
+
+      // Re-render the content
+      renderQuickAssignContent(projectId, p);
+    }
+
+    function saveQuickAssignChanges(projectId) {
+      // First, remove all existing assignments for this project
+      Object.keys(data.memberProjects).forEach(mid => {
+        if (!data.memberProjects[mid]) data.memberProjects[mid] = [];
+        data.memberProjects[mid] = data.memberProjects[mid].filter(a => {
+          const aId = typeof a === 'string' ? a : a.id;
+          return aId !== projectId;
+        });
+      });
+
+      // Add new assignments based on pendingRoleChanges
+      Object.keys(pendingRoleChanges).forEach(memberId => {
+        if (!data.memberProjects[memberId]) data.memberProjects[memberId] = [];
+        const role = pendingRoleChanges[memberId];
+        data.memberProjects[memberId].push({ id: projectId, role: role });
+      });
+
+      // Handle pool status
+      const hasAssignments = Object.keys(pendingRoleChanges).length > 0;
+      if (hasAssignments) {
+        // Remove from pool if assigned
+        data.projectPool = data.projectPool.filter(pid => pid !== projectId);
+      } else {
+        // Add to pool if not assigned to anyone
+        if (!data.projectPool.includes(projectId)) {
+          data.projectPool.push(projectId);
+        }
+      }
+
+      // Save and refresh
+      saveData();
+      closeModal('quickassign');
+      renderDashboard();
+      if (currentProjectId === projectId) {
+        renderProjectDetail();
+      }
+      showToast('Assignments saved!');
     }
     
     function removeAssignment(projectId, memberId) {
@@ -2906,9 +2984,8 @@ Current: ${p.status}`, currentIdx + 1);
                 ondrop="handleTaskDrop(event, '${t.id}')">
             <span class="gantt-task-drag-handle" title="Drag to reorder">⋮⋮</span>
             ${hasSubtasks ? `<span class="subtask-expand" onclick="toggleSubtaskExpand('${t.id}')" title="Show subtasks">▶</span>` : ''}
-            <span class="gantt-task-text" title="${t.name} (${formatDateShort(t.start)} - ${formatDateShort(t.end)})">${t.name}${isLocked ? ' 🔒' : ''}${hasSubtasks ? ` <span style="color:#64748B;font-size:10px;">(${completedCount}/${subtaskCount})</span>` : ''}</span>
+            <span class="gantt-task-text" data-full-text="${t.name}">${t.name}${hasSubtasks ? ` <span style="color:#64748B;font-size:10px;">(${completedCount}/${subtaskCount})</span>` : ''}</span>
             <div class="gantt-task-actions">
-              ${isAdmin() ? `<button class="btn ${isLocked ? 'lock-btn' : 'btn-secondary'} btn-icon btn-sm" onclick="toggleTaskLock('${t.id}')" style="width:20px;height:20px;font-size:9px;">${isLocked ? '🔓' : '🔒'}</button>` : ''}
               ${canEditThisTask ? `<button class="btn btn-secondary btn-icon btn-sm" onclick="editTask('${t.id}')" style="width:20px;height:20px;font-size:9px;">✏️</button>` : ''}
               ${isAdmin() ? `<button class="btn btn-danger btn-icon btn-sm" onclick="deleteTask('${t.id}')" style="width:20px;height:20px;font-size:9px;">🗑️</button>` : ''}
             </div>
@@ -2924,7 +3001,27 @@ Current: ${p.status}`, currentIdx + 1);
           </div>`;
         });
       }
-      html += '</div>'; // end task-column
+      html += '</div>';
+
+      // PIC column
+      html += `<div class="gantt-pic-column">
+        <div class="gantt-task-col-spacer"></div>
+        <div class="gantt-task-col" style="min-width:80px;">PIC</div>`;
+      if (!tasks.length) {
+        html += '<div class="gantt-pic-cell" style="min-height:60px;"></div>';
+      } else {
+        tasks.forEach(t => {
+          const picMember = t.pic ? getMemberById(t.pic) : null;
+          const hasSubtasks = t.subtasks && t.subtasks.length > 0;
+          html += `<div class="gantt-task-row-wrapper">
+            <div class="gantt-pic-cell">
+              ${picMember ? `<span style="background:${picMember.color};width:24px;height:24px;border-radius:50%;display:inline-flex;align-items:center;justify-content:center;font-size:10px;" title="${picMember.name}">${picMember.avatar}</span>` : '<span style="color:#64748B;font-size:11px;">-</span>'}
+            </div>
+            ${hasSubtasks ? `<div class="subtask-pic-spacer" id="subtask-pic-${t.id}" style="display:none;"></div>` : ''}
+          </div>`;
+        });
+      }
+      html += '</div>'; // end pic-column
 
       // Timeline column
       html += '<div class="gantt-timeline-column">';
@@ -2991,7 +3088,7 @@ Current: ${p.status}`, currentIdx + 1);
               </div>`;
           } else {
             html += `<div class="gantt-bar" id="bar-${t.id}" style="left:${leftDays*dayWidth}px;width:${widthDays*dayWidth}px;background:${getProgressColor(t.progress)};cursor:not-allowed;opacity:0.8" ondblclick="updateTaskProgress('${t.id}')">
-                <span class="gantt-bar-label">${t.progress}% 🔒</span>
+                <span class="gantt-bar-label">${t.progress}%</span>
               </div>`;
           }
           html += '</div></div>';
@@ -3049,7 +3146,7 @@ Current: ${p.status}`, currentIdx + 1);
           const completedCount = hasSubtasks ? t.subtasks.filter(st => st.done).length : 0;
           html += `<div class="gantt-task-name">
             ${hasSubtasks ? `<span class="subtask-expand" onclick="toggleSubtaskExpand('${t.id}')" title="Show subtasks">▶</span>` : ''}
-            <span class="gantt-task-text">${t.name}${isLocked ? ' 🔒' : ''}${hasSubtasks ? ` <span style="color:#64748B;font-size:10px;">(${completedCount}/${subtaskCount})</span>` : ''}</span>
+            <span class="gantt-task-text" data-full-text="${t.name}">${t.name}${hasSubtasks ? ` <span style="color:#64748B;font-size:10px;">(${completedCount}/${subtaskCount})</span>` : ''}</span>
             <div class="gantt-task-actions">
               ${canEditThisTask ? `<button class="btn btn-secondary btn-icon btn-sm" onclick="editTask('${t.id}')" style="width:22px;height:22px;font-size:10px;">✏️</button>` : ''}
             </div>
@@ -3068,13 +3165,33 @@ Current: ${p.status}`, currentIdx + 1);
       }
       html += '</div>';
 
+      // PIC column for Weekly view
+      html += `<div class="gantt-pic-column">
+        <div class="gantt-task-col-spacer"></div>
+        <div class="gantt-task-col" style="min-width:80px;">PIC</div>`;
+      if (!tasks.length) {
+        html += '<div class="gantt-pic-cell" style="min-height:60px;"></div>';
+      } else {
+        tasks.forEach(t => {
+          const picMember = t.pic ? getMemberById(t.pic) : null;
+          const hasSubtasks = t.subtasks && t.subtasks.length > 0;
+          html += `<div class="gantt-task-row-wrapper">
+            <div class="gantt-pic-cell">
+              ${picMember ? `<span style="background:${picMember.color};width:24px;height:24px;border-radius:50%;display:inline-flex;align-items:center;justify-content:center;font-size:10px;" title="${picMember.name}">${picMember.avatar}</span>` : '<span style="color:#64748B;font-size:11px;">-</span>'}
+            </div>
+            ${hasSubtasks ? `<div class="subtask-pic-spacer" id="subtask-pic-${t.id}" style="display:none;"></div>` : ''}
+          </div>`;
+        });
+      }
+      html += '</div>';
+
       html += '<div class="gantt-timeline-column">';
       html += '<div class="gantt-header-months">';
       months.forEach(m => {
         html += `<div class="gantt-month-label" style="min-width:${m.weeks * weekWidth}px;">${m.name}</div>`;
       });
       html += '</div>';
-      
+
       html += '<div class="gantt-timeline">';
       weeks.forEach(w => {
         const weekEnd = new Date(w);
@@ -3086,7 +3203,7 @@ Current: ${p.status}`, currentIdx + 1);
         </div>`;
       });
       html += '</div>';
-      
+
       html += '<div class="gantt-body-rows">';
       if (!tasks.length) {
         html += `<div class="gantt-row"><div class="gantt-bar-container" style="min-width:${totalWeeks * weekWidth}px;">`;
@@ -3110,16 +3227,16 @@ Current: ${p.status}`, currentIdx + 1);
           }
           
           html += `<div class="gantt-bar" style="left:${leftWeeks*weekWidth}px;width:${widthWeeks*weekWidth}px;background:${getProgressColor(t.progress)};${canEditThisTask?'':'opacity:0.8;'}" ondblclick="${canEditThisTask?`editTask('${t.id}')`:`updateTaskProgress('${t.id}')`}">
-              <span class="gantt-bar-label">${t.progress}%${isLocked?' 🔒':''}</span>
+              <span class="gantt-bar-label">${t.progress}%</span>
             </div>`;
           html += '</div></div>';
         });
       }
       html += '</div></div></div>';
-      
+
       return html;
     }
-    
+
     function renderGanttMonthly(start, end, tasks, p, today, canAddTask) {
       const monthWidth = 120;
       let months = [];
@@ -3145,7 +3262,7 @@ Current: ${p.status}`, currentIdx + 1);
           const completedCount = hasSubtasks ? t.subtasks.filter(st => st.done).length : 0;
           html += `<div class="gantt-task-name">
             ${hasSubtasks ? `<span class="subtask-expand" onclick="toggleSubtaskExpand('${t.id}')" title="Show subtasks">▶</span>` : ''}
-            <span class="gantt-task-text">${t.name}${isLocked ? ' 🔒' : ''}${hasSubtasks ? ` <span style="color:#64748B;font-size:10px;">(${completedCount}/${subtaskCount})</span>` : ''}</span>
+            <span class="gantt-task-text" data-full-text="${t.name}">${t.name}${hasSubtasks ? ` <span style="color:#64748B;font-size:10px;">(${completedCount}/${subtaskCount})</span>` : ''}</span>
             <div class="gantt-task-actions">
               ${canEditThisTask ? `<button class="btn btn-secondary btn-icon btn-sm" onclick="editTask('${t.id}')" style="width:22px;height:22px;font-size:10px;">✏️</button>` : ''}
             </div>
@@ -3164,6 +3281,25 @@ Current: ${p.status}`, currentIdx + 1);
       }
       html += '</div>';
 
+      // PIC column for Monthly view
+      html += `<div class="gantt-pic-column">
+        <div class="gantt-task-col" style="height:52px;min-width:80px;">PIC</div>`;
+      if (!tasks.length) {
+        html += '<div class="gantt-pic-cell" style="min-height:60px;"></div>';
+      } else {
+        tasks.forEach(t => {
+          const picMember = t.pic ? getMemberById(t.pic) : null;
+          const hasSubtasks = t.subtasks && t.subtasks.length > 0;
+          html += `<div class="gantt-task-row-wrapper">
+            <div class="gantt-pic-cell">
+              ${picMember ? `<span style="background:${picMember.color};width:24px;height:24px;border-radius:50%;display:inline-flex;align-items:center;justify-content:center;font-size:10px;" title="${picMember.name}">${picMember.avatar}</span>` : '<span style="color:#64748B;font-size:11px;">-</span>'}
+            </div>
+            ${hasSubtasks ? `<div class="subtask-pic-spacer" id="subtask-pic-${t.id}" style="display:none;"></div>` : ''}
+          </div>`;
+        });
+      }
+      html += '</div>';
+
       html += '<div class="gantt-timeline-column">';
       html += '<div class="gantt-timeline">';
       months.forEach(m => {
@@ -3174,7 +3310,7 @@ Current: ${p.status}`, currentIdx + 1);
         </div>`;
       });
       html += '</div>';
-      
+
       html += '<div class="gantt-body-rows">';
       if (!tasks.length) {
         html += `<div class="gantt-row"><div class="gantt-bar-container" style="min-width:${months.length * monthWidth}px;">`;
@@ -3191,25 +3327,25 @@ Current: ${p.status}`, currentIdx + 1);
           const isLocked = t.locked || false;
           // When timeline is locked, NO ONE can edit dates (not even admin)
           const canEditThisTask = !p.lockedTimeline && (isAdmin() || !isLocked);
-          
+
           html += `<div class="gantt-row"><div class="gantt-bar-container" style="min-width:${months.length * monthWidth}px;">`;
           months.forEach(() => html += `<div class="gantt-bar-cell" style="min-width:${monthWidth}px;"></div>`);
-          
+
           // Today line
           const todayMonthIdx = (today.getFullYear() - start.getFullYear()) * 12 + today.getMonth() - start.getMonth();
           if (todayMonthIdx >= 0 && todayMonthIdx < months.length) {
             const todayPos = todayMonthIdx * monthWidth + (today.getDate() / 30) * monthWidth;
             html += `<div class="gantt-today-line" style="left:${todayPos}px;"></div>`;
           }
-          
+
           html += `<div class="gantt-bar" style="left:${leftMonths*monthWidth}px;width:${widthMonths*monthWidth}px;background:${getProgressColor(t.progress)};${canEditThisTask?'':'opacity:0.8;'}" ondblclick="${canEditThisTask?`editTask('${t.id}')`:`updateTaskProgress('${t.id}')`}">
-              <span class="gantt-bar-label">${t.progress}%${isLocked?' 🔒':''}</span>
+              <span class="gantt-bar-label">${t.progress}%</span>
             </div>`;
           html += '</div></div>';
         });
       }
       html += '</div></div></div>';
-      
+
       return html;
     }
     
@@ -3699,12 +3835,18 @@ Current: ${p.status}`, currentIdx + 1);
       const p = getProjectById(currentProjectId);
       const isTimelineLocked = p.lockedTimeline;
 
+      // Populate PIC dropdown with members
+      const picSelect = document.getElementById('task-pic');
+      picSelect.innerHTML = '<option value="">-- Select PIC --</option>' +
+        data.members.map(m => `<option value="${m.id}">${m.avatar} ${m.name}</option>`).join('');
+
       if (taskId) {
         const t = p.tasks.find(x => x.id === taskId);
         document.getElementById('edit-task-id').value = t.id;
         document.getElementById('task-name').value = t.name;
         document.getElementById('task-start').value = t.start;
         document.getElementById('task-end').value = t.end;
+        document.getElementById('task-pic').value = t.pic || '';
         document.getElementById('task-progress').value = t.progress;
         document.getElementById('progress-display').textContent = t.progress;
         document.getElementById('task-modal-title').textContent = 'Edit Task';
@@ -3715,6 +3857,7 @@ Current: ${p.status}`, currentIdx + 1);
         document.getElementById('task-name').value = '';
         document.getElementById('task-start').value = p.startDate || '';
         document.getElementById('task-end').value = p.startDate || '';
+        document.getElementById('task-pic').value = '';
         document.getElementById('task-progress').value = 0;
         document.getElementById('progress-display').textContent = '0';
         document.getElementById('task-modal-title').textContent = 'Add Task';
@@ -3742,18 +3885,44 @@ Current: ${p.status}`, currentIdx + 1);
       document.getElementById('modal-task').classList.remove('hidden');
     }
 
+    let draggedSubtaskIdx = null;
+    let editingSubtaskIdx = null;
+
     function renderSubtasksInModal() {
       const container = document.getElementById('subtasks-container');
       if (!modalSubtasks.length) {
         container.innerHTML = '<div style="color:#64748B;font-size:12px;padding:8px;">No subtasks yet</div>';
       } else {
-        container.innerHTML = modalSubtasks.map((st, idx) => `
-          <div class="subtask-item">
+        container.innerHTML = modalSubtasks.map((st, idx) => {
+          const isEditing = editingSubtaskIdx === idx;
+          return `
+          <div class="subtask-item" data-subtask-idx="${idx}" draggable="true"
+               ondragstart="handleSubtaskDragStart(event, ${idx})"
+               ondragend="handleSubtaskDragEnd(event)"
+               ondragover="handleSubtaskDragOver(event, ${idx})"
+               ondragleave="handleSubtaskDragLeave(event)"
+               ondrop="handleSubtaskDrop(event, ${idx})">
+            <span class="subtask-drag-handle" title="Drag to reorder">⋮⋮</span>
             <input type="checkbox" ${st.done ? 'checked' : ''} onchange="toggleModalSubtask(${idx})">
-            <span class="subtask-name ${st.done ? 'completed' : ''}">${st.name}</span>
-            <button class="subtask-delete" onclick="deleteModalSubtask(${idx})">×</button>
+            ${isEditing ? `
+              <input type="text" class="subtask-name-input" id="subtask-edit-input" value="${st.name.replace(/"/g, '&quot;')}"
+                     onkeydown="handleSubtaskEditKeydown(event, ${idx})" onblur="saveSubtaskEdit(${idx})">
+            ` : `
+              <span class="subtask-name ${st.done ? 'completed' : ''}" ondblclick="startEditSubtask(${idx})">${st.name}</span>
+              <button class="subtask-edit" onclick="startEditSubtask(${idx})" title="Edit">✏️</button>
+            `}
+            <button class="subtask-delete" onclick="deleteModalSubtask(${idx})" title="Delete">×</button>
           </div>
-        `).join('');
+        `}).join('');
+
+        // Focus the edit input if editing
+        if (editingSubtaskIdx !== null) {
+          const input = document.getElementById('subtask-edit-input');
+          if (input) {
+            input.focus();
+            input.select();
+          }
+        }
       }
       updateProgressFromSubtasks();
     }
@@ -3764,17 +3933,92 @@ Current: ${p.status}`, currentIdx + 1);
       if (!name) return;
       modalSubtasks.push({ id: generateId(), name, done: false });
       input.value = '';
+      editingSubtaskIdx = null;
       renderSubtasksInModal();
     }
 
     function toggleModalSubtask(idx) {
       modalSubtasks[idx].done = !modalSubtasks[idx].done;
+      editingSubtaskIdx = null;
       renderSubtasksInModal();
     }
 
     function deleteModalSubtask(idx) {
       modalSubtasks.splice(idx, 1);
+      editingSubtaskIdx = null;
       renderSubtasksInModal();
+    }
+
+    // Subtask drag and drop handlers
+    function handleSubtaskDragStart(e, idx) {
+      draggedSubtaskIdx = idx;
+      e.target.classList.add('dragging');
+      e.dataTransfer.effectAllowed = 'move';
+      e.dataTransfer.setData('text/plain', idx);
+    }
+
+    function handleSubtaskDragEnd(e) {
+      e.target.classList.remove('dragging');
+      draggedSubtaskIdx = null;
+      document.querySelectorAll('.subtask-item.drag-over').forEach(el => el.classList.remove('drag-over'));
+    }
+
+    function handleSubtaskDragOver(e, idx) {
+      e.preventDefault();
+      e.dataTransfer.dropEffect = 'move';
+      if (draggedSubtaskIdx !== null && draggedSubtaskIdx !== idx) {
+        e.currentTarget.classList.add('drag-over');
+      }
+    }
+
+    function handleSubtaskDragLeave(e) {
+      if (!e.currentTarget.contains(e.relatedTarget)) {
+        e.currentTarget.classList.remove('drag-over');
+      }
+    }
+
+    function handleSubtaskDrop(e, targetIdx) {
+      e.preventDefault();
+      e.currentTarget.classList.remove('drag-over');
+
+      const sourceIdx = draggedSubtaskIdx !== null ? draggedSubtaskIdx : parseInt(e.dataTransfer.getData('text/plain'));
+      if (sourceIdx === targetIdx || isNaN(sourceIdx)) return;
+
+      // Reorder the subtasks array
+      const [movedSubtask] = modalSubtasks.splice(sourceIdx, 1);
+      modalSubtasks.splice(targetIdx, 0, movedSubtask);
+
+      editingSubtaskIdx = null;
+      renderSubtasksInModal();
+    }
+
+    // Subtask edit handlers
+    function startEditSubtask(idx) {
+      editingSubtaskIdx = idx;
+      renderSubtasksInModal();
+    }
+
+    function saveSubtaskEdit(idx) {
+      const input = document.getElementById('subtask-edit-input');
+      if (input) {
+        const newName = input.value.trim();
+        if (newName && modalSubtasks[idx]) {
+          modalSubtasks[idx].name = newName;
+        }
+      }
+      editingSubtaskIdx = null;
+      renderSubtasksInModal();
+    }
+
+    function handleSubtaskEditKeydown(e, idx) {
+      if (e.key === 'Enter') {
+        e.preventDefault();
+        saveSubtaskEdit(idx);
+      } else if (e.key === 'Escape') {
+        e.preventDefault();
+        editingSubtaskIdx = null;
+        renderSubtasksInModal();
+      }
     }
 
     function updateProgressFromSubtasks() {
@@ -3848,11 +4092,13 @@ Current: ${p.status}`, currentIdx + 1);
         }
       }
 
+      const pic = document.getElementById('task-pic').value || null;
       const taskData = {
         name,
         start: startDate,
         end: endDate,
         progress,
+        pic,
         subtasks: modalSubtasks
       };
       if (id) {
