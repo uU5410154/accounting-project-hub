@@ -141,19 +141,19 @@
     .portfolio-timeline-column { flex: 1; overflow-x: visible; }
     .portfolio-header-cell { padding: 12px; font-weight: 600; font-size: 12px; color: #94A3B8; border-bottom: 1px solid #334155; border-right: 1px solid #334155; background: #1E293B; }
     .portfolio-body-rows { }
-    .portfolio-row { display: flex; align-items: center; border-bottom: 1px solid #334155; min-height: 36px; }
+    .portfolio-row { display: flex; align-items: center; border-bottom: 1px solid #334155; height: 32px; min-height: 32px; }
     .portfolio-row:last-child { border-bottom: none; }
-    .portfolio-row.portfolio-role-row { min-height: 26px; background: #1a2235; }
+    .portfolio-row.portfolio-role-row { height: 32px; min-height: 32px; background: #1a2235; }
     .portfolio-project-group { border-bottom: 1px solid #334155; }
     .portfolio-project-group:last-child { border-bottom: none; }
-    .portfolio-project-name { min-width: 200px; max-width: 200px; padding: 8px 12px; font-size: 12px; font-weight: 500; cursor: pointer; display: flex; align-items: center; border-right: 1px solid #334155; background: #1E293B; position: sticky; left: 0; z-index: 10; }
+    .portfolio-project-name { min-width: 200px; max-width: 200px; padding: 8px 12px; font-size: 12px; font-weight: 500; cursor: pointer; display: flex; align-items: center; border-right: 1px solid #334155; background: #1E293B; position: sticky; left: 0; z-index: 10; height: 32px; box-sizing: border-box; }
     .portfolio-project-name:hover { color: #38BDF8; background: #334155; }
-    .portfolio-role-name { min-width: 200px; max-width: 200px; padding: 4px 12px 4px 20px; font-size: 11px; display: flex; align-items: center; border-right: 1px solid #334155; background: #1a2235; position: sticky; left: 0; z-index: 10; }
-    .portfolio-bar-container { flex: 1; position: relative; height: 32px; display: flex; }
-    .portfolio-bar { position: absolute; height: 26px; top: 3px; border-radius: 6px; display: flex; align-items: center; justify-content: center; font-size: 10px; color: white; font-weight: 500; cursor: pointer; transition: all 0.2s; min-width: 40px; }
-    .portfolio-bar:hover { transform: scaleY(1.15); filter: brightness(1.1); z-index: 5; }
-    .portfolio-bar.portfolio-role-bar { height: 18px; top: 4px; font-size: 9px; border-radius: 4px; }
-    .portfolio-bar.portfolio-role-bar:hover { transform: scaleY(1.2); }
+    .portfolio-role-name { min-width: 200px; max-width: 200px; padding: 4px 12px 4px 20px; font-size: 11px; display: flex; align-items: center; border-right: 1px solid #334155; background: #1a2235; position: sticky; left: 0; z-index: 10; height: 32px; box-sizing: border-box; }
+    .portfolio-bar-container { flex: 1; position: relative; height: 32px; display: flex; align-items: center; }
+    .portfolio-bar { position: absolute; height: 22px; border-radius: 6px; display: flex; align-items: center; justify-content: center; font-size: 10px; color: white; font-weight: 500; cursor: pointer; transition: all 0.2s; min-width: 40px; top: 50%; transform: translateY(-50%); }
+    .portfolio-bar:hover { filter: brightness(1.1); z-index: 5; }
+    .portfolio-bar.portfolio-role-bar { height: 18px; font-size: 9px; border-radius: 4px; }
+    .portfolio-bar.portfolio-role-bar:hover { filter: brightness(1.1); }
     .board-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 10px; }
     .board-member { display: flex; align-items: center; gap: 10px; flex: 1; }
     .board-avatar { width: 40px; height: 40px; border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 18px; }
@@ -165,12 +165,13 @@
     
     /* Project List in Board */
     .board-projects { display: flex; flex-direction: column; gap: 8px; }
-    .board-project-item { padding: 12px; background: #0F172A; border-radius: 8px; cursor: grab; transition: all 0.2s; border-left: 3px solid transparent; }
+    .board-project-item { padding: 12px; background: #0F172A; border-radius: 8px; cursor: pointer; transition: all 0.2s; border-left: 3px solid transparent; }
     .board-project-item:hover { background: #334155; transform: translateX(2px); }
     .board-project-item:active { transform: scale(0.98); cursor: grabbing; }
     .board-project-item.dragging { opacity: 0.5; }
     .board-project-header { display: flex; justify-content: space-between; align-items: flex-start; gap: 8px; margin-bottom: 6px; }
-    .board-project-name { font-weight: 500; font-size: 13px; flex: 1; }
+    .board-project-name { font-weight: 500; font-size: 13px; flex: 1; cursor: pointer; }
+    .board-project-name:hover { color: #38BDF8; text-decoration: underline; }
     .board-project-meta { display: flex; gap: 6px; flex-wrap: wrap; align-items: center; }
     .board-project-status { font-size: 10px; color: #64748B; background: #1E293B; padding: 2px 6px; border-radius: 4px; }
     .board-project-role { font-size: 9px; font-weight: 600; color: white; background: #6366F1; padding: 2px 6px; border-radius: 4px; text-transform: uppercase; }
@@ -449,8 +450,8 @@
   </style>
 </head>
 <body>
-  <!-- Login Page -->
-  <div class="login-page" id="login-page">
+  <!-- Login Page (hidden initially to prevent flash) -->
+  <div class="login-page hidden" id="login-page">
     <div class="login-container">
       <div class="login-logo">
         <img src="logo.png" alt="CP AXTRA" class="login-logo-img" style="height:60px;margin-bottom:16px;">
@@ -551,11 +552,41 @@
       <div class="section">
         <h1 style="font-size: 22px; font-weight: 700; margin: 16px 0;">📊 Portfolio Overview</h1>
         <p style="color:#64748B;margin-bottom:16px;">Aggregated timeline of all projects with role assignments</p>
+
+        <!-- Portfolio BUG-2: Project Status Summary Cards -->
+        <div id="portfolio-status-cards" style="display:flex;gap:12px;margin-bottom:16px;flex-wrap:wrap;">
+          <!-- Cards will be rendered here by JavaScript -->
+        </div>
+
+        <!-- Portfolio SUG-1 & SUG-2: Enhanced Filters (Multi-select Member, Project Name, Status) -->
         <div id="portfolio-filters" style="display:flex;gap:12px;flex-wrap:wrap;align-items:center;margin-bottom:16px;padding:12px;background:#334155;border-radius:8px;">
-          <span style="color:#94A3B8;font-size:12px;">👤 Filter by Member:</span>
-          <select id="portfolio-member-filter" onchange="renderPortfolio()" style="background:#1E293B;border:1px solid #475569;color:#E2E8F0;padding:6px 12px;border-radius:6px;font-size:12px;">
-            <option value="all">All Members</option>
-          </select>
+          <div style="display:flex;flex-direction:column;gap:4px;">
+            <span style="color:#94A3B8;font-size:11px;">👤 Members:</span>
+            <select id="portfolio-member-filter" multiple onchange="renderPortfolio()" style="background:#1E293B;border:1px solid #475569;color:#E2E8F0;padding:6px 12px;border-radius:6px;font-size:12px;min-width:150px;max-height:100px;">
+              <!-- Options will be populated by JavaScript -->
+            </select>
+            <span style="font-size:9px;color:#64748B;">Hold Ctrl/Cmd for multi-select</span>
+          </div>
+
+          <div style="display:flex;flex-direction:column;gap:4px;">
+            <span style="color:#94A3B8;font-size:11px;">📋 Status:</span>
+            <select id="portfolio-status-filter" onchange="renderPortfolio()" style="background:#1E293B;border:1px solid #475569;color:#E2E8F0;padding:6px 12px;border-radius:6px;font-size:12px;">
+              <option value="all">All Statuses</option>
+              <option value="Not Started">Not Started</option>
+              <option value="Planning">Planning</option>
+              <option value="In Progress">In Progress</option>
+              <option value="On Hold">On Hold</option>
+              <option value="Completed">Completed</option>
+            </select>
+          </div>
+
+          <div style="display:flex;flex-direction:column;gap:4px;">
+            <span style="color:#94A3B8;font-size:11px;">🔍 Project Name:</span>
+            <input type="text" id="portfolio-name-filter" onkeyup="renderPortfolio()" placeholder="Search..." style="background:#1E293B;border:1px solid #475569;color:#E2E8F0;padding:6px 12px;border-radius:6px;font-size:12px;min-width:150px;">
+          </div>
+
+          <button onclick="clearPortfolioFilters()" style="background:#475569;border:none;color:#E2E8F0;padding:6px 12px;border-radius:6px;font-size:11px;cursor:pointer;margin-top:16px;">Clear Filters</button>
+
           <div style="flex:1;"></div>
           <div style="display:flex;gap:8px;align-items:center;">
             <span style="font-size:10px;background:#8B5CF6;color:white;padding:2px 8px;border-radius:4px;">PM</span>
@@ -571,15 +602,25 @@
     <div id="view-calendar" class="hidden">
       <div class="section">
         <button class="back-btn" onclick="showView('dashboard')">← Back</button>
-        <h1 style="font-size: 22px; font-weight: 700; margin: 16px 0;">⏰ Time Management</h1>
-        <div class="member-selector" id="member-selector"></div>
-        <div class="project-legend" id="project-legend"></div>
-        <div class="week-nav">
-          <button class="btn btn-secondary btn-sm" onclick="changeWeek(-1)">← Prev</button>
-          <span class="week-label" id="week-label"></span>
-          <button class="btn btn-secondary btn-sm" onclick="changeWeek(1)">Next →</button>
+        <h1 style="font-size: 22px; font-weight: 700; margin: 16px 0;">⏰ Schedule & Time Management</h1>
+        <p style="color:#64748B;margin-bottom:16px;font-size:13px;">Track project progress and weekly time allocation</p>
+
+        <!-- SCHEDULE IMPROVEMENT: Project Summary Tracking with Status (R=Risk, O=On Track) -->
+        <div id="schedule-project-summary" style="background:#334155;padding:16px;border-radius:12px;margin-bottom:20px;">
+          <!-- Summary will be rendered here -->
         </div>
-        <div class="calendar-grid" id="calendar-grid"></div>
+
+        <div style="border-top:1px solid #475569;padding-top:20px;">
+          <h2 style="font-size:16px;font-weight:600;margin-bottom:16px;color:#F1F5F9;">👥 Member Time Allocation</h2>
+          <div class="member-selector" id="member-selector"></div>
+          <div class="project-legend" id="project-legend"></div>
+          <div class="week-nav">
+            <button class="btn btn-secondary btn-sm" onclick="changeWeek(-1)">← Prev</button>
+            <span class="week-label" id="week-label"></span>
+            <button class="btn btn-secondary btn-sm" onclick="changeWeek(1)">Next →</button>
+          </div>
+          <div class="calendar-grid" id="calendar-grid"></div>
+        </div>
       </div>
     </div>
   </main>
@@ -963,11 +1004,12 @@
       const username = document.getElementById('login-username').value.trim().toLowerCase();
       const password = document.getElementById('login-password').value;
       const errorEl = document.getElementById('login-error');
-      
+
       const allUsers = getAllUsers();
       if (allUsers[username] && allUsers[username].password === password) {
         currentUser = { username, ...allUsers[username] };
-        sessionStorage.setItem('currentUser', JSON.stringify(currentUser));
+        // Use localStorage for persistent login (survives page refresh and new tabs)
+        localStorage.setItem('currentUser', JSON.stringify(currentUser));
         errorEl.classList.remove('show');
         showApp();
       } else {
@@ -978,7 +1020,8 @@
     
     function handleLogout() {
       currentUser = null;
-      sessionStorage.removeItem('currentUser');
+      // Clear persistent login from localStorage
+      localStorage.removeItem('currentUser');
       document.getElementById('login-page').classList.remove('hidden');
       document.getElementById('app-container').classList.add('hidden');
       document.getElementById('login-username').value = '';
@@ -1040,18 +1083,30 @@
     function canEditMember() { return isAdmin(); }
     function canDeleteMember() { return isAdmin(); }
     
-    // Check for existing session
+    // Check for existing session - rehydrate auth state from localStorage
     function checkSession() {
-      const saved = sessionStorage.getItem('currentUser');
+      const saved = localStorage.getItem('currentUser');
       if (saved) {
         try {
           currentUser = JSON.parse(saved);
-          if (USERS[currentUser.username]) {
+          // Validate that user still exists in the system
+          const allUsers = getAllUsers();
+          if (currentUser.username && allUsers[currentUser.username]) {
+            // User exists, rehydrate session
             showApp();
             return;
+          } else {
+            // User no longer exists, clear invalid session
+            localStorage.removeItem('currentUser');
+            currentUser = null;
           }
-        } catch (e) {}
+        } catch (e) {
+          // Invalid session data, clear it
+          localStorage.removeItem('currentUser');
+          currentUser = null;
+        }
       }
+      // No valid session, show login page
       document.getElementById('login-page').classList.remove('hidden');
     }
     
@@ -1312,6 +1367,40 @@
     function calcDuration(s, e) { return s && e ? Math.ceil((new Date(e) - new Date(s)) / 864e5) + 1 : 0; }
     function calcProgress(tasks) { return tasks?.length ? Math.round(tasks.reduce((sum, t) => sum + (t.progress || 0), 0) / tasks.length) : 0; }
     function getPriorityClass(p) { return 'priority priority-' + (p || 'medium').toLowerCase(); }
+
+    // SUG-7: Risk calculation logic
+    // A task/project is at risk if:
+    // 1. End date is in the past and progress < 100%
+    // 2. Task is overdue based on expected progress vs actual progress
+    function calculateRiskStatus(item) {
+      if (!item.endDate || !item.startDate) return { isRisk: false, reason: '' };
+
+      const today = new Date();
+      today.setHours(0, 0, 0, 0);
+      const start = new Date(item.startDate);
+      const end = new Date(item.endDate);
+      const progress = item.progress || (item.tasks ? calcProgress(item.tasks) : 0);
+
+      // Risk 1: Past end date and not complete
+      if (end < today && progress < 100) {
+        const daysOverdue = Math.ceil((today - end) / 864e5);
+        return { isRisk: true, reason: `Overdue by ${daysOverdue} day${daysOverdue !== 1 ? 's' : ''}` };
+      }
+
+      // Risk 2: Expected progress vs actual progress (if within project timeline)
+      if (start <= today && today <= end) {
+        const totalDuration = calcDuration(item.startDate, item.endDate);
+        const elapsedDuration = Math.ceil((today - start) / 864e5);
+        const expectedProgress = Math.min(100, Math.round((elapsedDuration / totalDuration) * 100));
+
+        // If actual progress is more than 20% behind expected progress, flag as risk
+        if (progress < expectedProgress - 20) {
+          return { isRisk: true, reason: `Behind schedule (${progress}% vs ${expectedProgress}% expected)` };
+        }
+      }
+
+      return { isRisk: false, reason: '' };
+    }
     function getProgressColor(p) { return p === 100 ? '#10B981' : p > 0 ? '#3B82F6' : '#6B7280'; }
     const projectColors = ['#3B82F6', '#10B981', '#F59E0B', '#EC4899', '#8B5CF6', '#EF4444', '#14B8A6'];
     function getProjectColor(id, list) { return projectColors[list.findIndex(p => p.id === id) % projectColors.length]; }
@@ -1362,29 +1451,88 @@
       return assignments;
     }
     
+    // Portfolio helper: Clear all filters
+    function clearPortfolioFilters() {
+      document.getElementById('portfolio-member-filter').selectedIndex = -1;
+      document.getElementById('portfolio-status-filter').value = 'all';
+      document.getElementById('portfolio-name-filter').value = '';
+      renderPortfolio();
+    }
+
     function renderPortfolio() {
       const container = document.getElementById('portfolio-gantt');
       const filterSelect = document.getElementById('portfolio-member-filter');
-      
-      // Populate member filter dropdown
-      const currentFilter = filterSelect.value || 'all';
-      filterSelect.innerHTML = '<option value="all">All Members</option>' + 
-        data.members.map(m => `<option value="${m.id}" ${currentFilter === m.id ? 'selected' : ''}>${m.avatar} ${m.name}</option>`).join('');
-      
+      const statusFilter = document.getElementById('portfolio-status-filter');
+      const nameFilter = document.getElementById('portfolio-name-filter');
+
+      // Portfolio SUG-1: Populate multi-select member filter
+      const selectedMembers = Array.from(filterSelect.selectedOptions).map(opt => opt.value);
+      filterSelect.innerHTML = data.members.map(m =>
+        `<option value="${m.id}" ${selectedMembers.includes(m.id) ? 'selected' : ''}>${m.avatar} ${m.name}</option>`
+      ).join('');
+
+      // Start with all projects that have dates
       let allProjects = data.projects.filter(p => p.startDate && p.endDate);
-      
-      // Apply member filter
-      const selectedMember = filterSelect.value;
-      if (selectedMember && selectedMember !== 'all') {
-        // Filter to projects where selected member is assigned
+
+      // Portfolio BUG-2: Calculate status summary BEFORE filtering
+      const statusSummary = {
+        total: allProjects.length,
+        'Not Started': allProjects.filter(p => p.status === 'Not Started').length,
+        'Planning': allProjects.filter(p => p.status === 'Planning').length,
+        'In Progress': allProjects.filter(p => p.status === 'In Progress').length,
+        'On Hold': allProjects.filter(p => p.status === 'On Hold').length,
+        'Completed': allProjects.filter(p => p.status === 'Completed').length,
+        atRisk: allProjects.filter(p => calculateRiskStatus(p).isRisk).length
+      };
+
+      // Render Portfolio BUG-2: Status Summary Cards
+      document.getElementById('portfolio-status-cards').innerHTML = `
+        <div style="flex:1;min-width:140px;background:linear-gradient(135deg,#3B82F6,#2563EB);padding:20px;border-radius:12px;text-align:center;">
+          <div style="font-size:36px;font-weight:700;color:white;">${statusSummary.total}</div>
+          <div style="font-size:12px;color:rgba(255,255,255,0.9);margin-top:4px;">Total Projects</div>
+        </div>
+        <div style="flex:1;min-width:120px;background:#1E293B;padding:16px;border-radius:12px;text-align:center;border:2px solid #10B981;">
+          <div style="font-size:28px;font-weight:700;color:#10B981;">${statusSummary.Completed}</div>
+          <div style="font-size:11px;color:#94A3B8;margin-top:2px;">Completed</div>
+        </div>
+        <div style="flex:1;min-width:120px;background:#1E293B;padding:16px;border-radius:12px;text-align:center;border:2px solid #F59E0B;">
+          <div style="font-size:28px;font-weight:700;color:#F59E0B;">${statusSummary['In Progress']}</div>
+          <div style="font-size:11px;color:#94A3B8;margin-top:2px;">In Progress</div>
+        </div>
+        <div style="flex:1;min-width:120px;background:#1E293B;padding:16px;border-radius:12px;text-align:center;border:2px solid #64748B;">
+          <div style="font-size:28px;font-weight:700;color:#64748B;">${statusSummary['Not Started']}</div>
+          <div style="font-size:11px;color:#94A3B8;margin-top:2px;">Not Started</div>
+        </div>
+        <div style="flex:1;min-width:120px;background:#1E293B;padding:16px;border-radius:12px;text-align:center;border:2px solid #EF4444;">
+          <div style="font-size:28px;font-weight:700;color:#EF4444;">${statusSummary.atRisk}</div>
+          <div style="font-size:11px;color:#94A3B8;margin-top:2px;">⚠️ At Risk</div>
+        </div>
+      `;
+
+      // Portfolio SUG-1 & BUG-1 FIX: Apply multi-select member filter
+      const selectedMemberIds = Array.from(filterSelect.selectedOptions).map(opt => opt.value);
+      if (selectedMemberIds.length > 0) {
         allProjects = allProjects.filter(p => {
           const assignments = getProjectRoleAssignments(p.id);
-          return assignments.some(a => a.memberId === selectedMember);
+          // Check if ANY of the selected members is assigned to this project
+          return assignments.some(a => selectedMemberIds.includes(a.memberId));
         });
+      }
+
+      // Portfolio SUG-2: Apply status filter
+      const selectedStatus = statusFilter.value;
+      if (selectedStatus && selectedStatus !== 'all') {
+        allProjects = allProjects.filter(p => p.status === selectedStatus);
+      }
+
+      // Portfolio SUG-2: Apply project name filter
+      const searchName = nameFilter.value.trim().toLowerCase();
+      if (searchName) {
+        allProjects = allProjects.filter(p => p.name.toLowerCase().includes(searchName));
       }
       
       if (!allProjects.length) {
-        container.innerHTML = '<div class="gantt-empty">No projects with dates set' + (selectedMember !== 'all' ? ' for selected member' : '') + '.</div>';
+        container.innerHTML = '<div class="gantt-empty">No projects match the current filters.</div>';
         return;
       }
       
@@ -1500,19 +1648,19 @@
       let html = `<div class="gantt-wrapper">
         <div class="portfolio-project-column">
           <div class="portfolio-header-cell">Project / Role</div>`;
-      
+
       // Project names with role sub-rows
       projects.forEach((p, idx) => {
         const hasPM = p.pmMembers && p.pmMembers.length > 0;
         const hasDev = p.devMembers && p.devMembers.length > 0;
         const rowCount = 1 + (hasPM ? 1 : 0) + (hasDev ? 1 : 0);
-        
+
         html += `<div class="portfolio-project-group">
           <div class="portfolio-project-name" onclick="openProject('${p.id}')" title="${p.name}" style="font-weight:600;">
             <span style="display:inline-block;width:8px;height:8px;border-radius:50%;background:${p.color};margin-right:8px;flex-shrink:0;"></span>
             <span style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${p.name}</span>
           </div>`;
-        
+
         if (hasPM) {
           const pmNames = p.pmMembers.map(a => a.member.name).join(', ');
           html += `<div class="portfolio-role-name" title="${pmNames}">
@@ -1520,7 +1668,7 @@
             <span style="color:#94A3B8;font-size:10px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${pmNames}</span>
           </div>`;
         }
-        
+
         if (hasDev) {
           const devNames = p.devMembers.map(a => a.member.name).join(', ');
           html += `<div class="portfolio-role-name" title="${devNames}">
@@ -1528,11 +1676,61 @@
             <span style="color:#94A3B8;font-size:10px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${devNames}</span>
           </div>`;
         }
-        
+
         html += '</div>';
       });
       html += '</div>';
-      
+
+      // FIX: Add Start Date column - 32px rows to match Gantt bars
+      html += `<div style="min-width:70px;max-width:70px;flex-shrink:0;background:#1E293B;">
+        <div class="portfolio-header-cell" style="min-width:70px;max-width:70px;font-size:9px;padding:6px;text-align:center;">Start</div>`;
+
+      projects.forEach((p, idx) => {
+        const hasPM = p.pmMembers && p.pmMembers.length > 0;
+        const hasDev = p.devMembers && p.devMembers.length > 0;
+
+        // Main project row - 32px height to match Gantt
+        html += `<div class="portfolio-row" style="height:32px;display:flex;align-items:center;justify-content:center;border-right:1px solid #334155;background:#1E293B;font-size:9px;color:#94A3B8;">
+          ${formatDateShort(p.startDate)}
+        </div>`;
+
+        // PM role row - empty, 32px height to match Gantt
+        if (hasPM) {
+          html += `<div class="portfolio-row portfolio-role-row" style="height:32px;border-right:1px solid #334155;background:#1a2235;"></div>`;
+        }
+
+        // Dev role row - empty, 32px height to match Gantt
+        if (hasDev) {
+          html += `<div class="portfolio-row portfolio-role-row" style="height:32px;border-right:1px solid #334155;background:#1a2235;"></div>`;
+        }
+      });
+      html += '</div>';
+
+      // FIX: Add End Date column - 32px rows to match Gantt bars
+      html += `<div style="min-width:70px;max-width:70px;flex-shrink:0;background:#1E293B;">
+        <div class="portfolio-header-cell" style="min-width:70px;max-width:70px;font-size:9px;padding:6px;text-align:center;">End</div>`;
+
+      projects.forEach((p, idx) => {
+        const hasPM = p.pmMembers && p.pmMembers.length > 0;
+        const hasDev = p.devMembers && p.devMembers.length > 0;
+
+        // Main project row - 32px height to match Gantt
+        html += `<div class="portfolio-row" style="height:32px;display:flex;align-items:center;justify-content:center;border-right:1px solid #334155;background:#1E293B;font-size:9px;color:#94A3B8;">
+          ${formatDateShort(p.endDate)}
+        </div>`;
+
+        // PM role row - empty, 32px height to match Gantt
+        if (hasPM) {
+          html += `<div class="portfolio-row portfolio-role-row" style="height:32px;border-right:1px solid #334155;background:#1a2235;"></div>`;
+        }
+
+        // Dev role row - empty, 32px height to match Gantt
+        if (hasDev) {
+          html += `<div class="portfolio-row portfolio-role-row" style="height:32px;border-right:1px solid #334155;background:#1a2235;"></div>`;
+        }
+      });
+      html += '</div>';
+
       html += '<div class="portfolio-timeline-column">';
       
       // Month headers
@@ -1644,18 +1842,18 @@
       let html = `<div class="gantt-wrapper">
         <div class="portfolio-project-column">
           <div class="portfolio-header-cell">Project / Role</div>`;
-      
+
       // Project names with role sub-rows
       projects.forEach((p, idx) => {
         const hasPM = p.pmMembers && p.pmMembers.length > 0;
         const hasDev = p.devMembers && p.devMembers.length > 0;
-        
+
         html += `<div class="portfolio-project-group">
           <div class="portfolio-project-name" onclick="openProject('${p.id}')" title="${p.name}" style="font-weight:600;">
             <span style="display:inline-block;width:8px;height:8px;border-radius:50%;background:${p.color};margin-right:8px;flex-shrink:0;"></span>
             <span style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${p.name}</span>
           </div>`;
-        
+
         if (hasPM) {
           const pmNames = p.pmMembers.map(a => a.member.name).join(', ');
           html += `<div class="portfolio-role-name" title="${pmNames}">
@@ -1663,7 +1861,7 @@
             <span style="color:#94A3B8;font-size:10px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${pmNames}</span>
           </div>`;
         }
-        
+
         if (hasDev) {
           const devNames = p.devMembers.map(a => a.member.name).join(', ');
           html += `<div class="portfolio-role-name" title="${devNames}">
@@ -1671,11 +1869,61 @@
             <span style="color:#94A3B8;font-size:10px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${devNames}</span>
           </div>`;
         }
-        
+
         html += '</div>';
       });
       html += '</div>';
-      
+
+      // FIX: Add Start Date column - 32px rows to match Gantt bars
+      html += `<div style="min-width:70px;max-width:70px;flex-shrink:0;background:#1E293B;">
+        <div class="portfolio-header-cell" style="min-width:70px;max-width:70px;font-size:9px;padding:6px;text-align:center;">Start</div>`;
+
+      projects.forEach((p, idx) => {
+        const hasPM = p.pmMembers && p.pmMembers.length > 0;
+        const hasDev = p.devMembers && p.devMembers.length > 0;
+
+        // Main project row - 32px height to match Gantt
+        html += `<div class="portfolio-row" style="height:32px;display:flex;align-items:center;justify-content:center;border-right:1px solid #334155;background:#1E293B;font-size:9px;color:#94A3B8;">
+          ${formatDateShort(p.startDate)}
+        </div>`;
+
+        // PM role row - empty, 32px height to match Gantt
+        if (hasPM) {
+          html += `<div class="portfolio-row portfolio-role-row" style="height:32px;border-right:1px solid #334155;background:#1a2235;"></div>`;
+        }
+
+        // Dev role row - empty, 32px height to match Gantt
+        if (hasDev) {
+          html += `<div class="portfolio-row portfolio-role-row" style="height:32px;border-right:1px solid #334155;background:#1a2235;"></div>`;
+        }
+      });
+      html += '</div>';
+
+      // FIX: Add End Date column - 32px rows to match Gantt bars
+      html += `<div style="min-width:70px;max-width:70px;flex-shrink:0;background:#1E293B;">
+        <div class="portfolio-header-cell" style="min-width:70px;max-width:70px;font-size:9px;padding:6px;text-align:center;">End</div>`;
+
+      projects.forEach((p, idx) => {
+        const hasPM = p.pmMembers && p.pmMembers.length > 0;
+        const hasDev = p.devMembers && p.devMembers.length > 0;
+
+        // Main project row - 32px height to match Gantt
+        html += `<div class="portfolio-row" style="height:32px;display:flex;align-items:center;justify-content:center;border-right:1px solid #334155;background:#1E293B;font-size:9px;color:#94A3B8;">
+          ${formatDateShort(p.endDate)}
+        </div>`;
+
+        // PM role row - empty, 32px height to match Gantt
+        if (hasPM) {
+          html += `<div class="portfolio-row portfolio-role-row" style="height:32px;border-right:1px solid #334155;background:#1a2235;"></div>`;
+        }
+
+        // Dev role row - empty, 32px height to match Gantt
+        if (hasDev) {
+          html += `<div class="portfolio-row portfolio-role-row" style="height:32px;border-right:1px solid #334155;background:#1a2235;"></div>`;
+        }
+      });
+      html += '</div>';
+
       html += '<div class="portfolio-timeline-column">';
       
       // Month headers
@@ -1771,18 +2019,18 @@
       let html = `<div class="gantt-wrapper">
         <div class="portfolio-project-column">
           <div class="portfolio-header-cell" style="height:52px;">Project / Role</div>`;
-      
+
       // Project names with role sub-rows
       projects.forEach((p, idx) => {
         const hasPM = p.pmMembers && p.pmMembers.length > 0;
         const hasDev = p.devMembers && p.devMembers.length > 0;
-        
+
         html += `<div class="portfolio-project-group">
           <div class="portfolio-project-name" onclick="openProject('${p.id}')" title="${p.name}" style="font-weight:600;">
             <span style="display:inline-block;width:8px;height:8px;border-radius:50%;background:${p.color};margin-right:8px;flex-shrink:0;"></span>
             <span style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${p.name}</span>
           </div>`;
-        
+
         if (hasPM) {
           const pmNames = p.pmMembers.map(a => a.member.name).join(', ');
           html += `<div class="portfolio-role-name" title="${pmNames}">
@@ -1790,7 +2038,7 @@
             <span style="color:#94A3B8;font-size:10px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${pmNames}</span>
           </div>`;
         }
-        
+
         if (hasDev) {
           const devNames = p.devMembers.map(a => a.member.name).join(', ');
           html += `<div class="portfolio-role-name" title="${devNames}">
@@ -1798,11 +2046,61 @@
             <span style="color:#94A3B8;font-size:10px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${devNames}</span>
           </div>`;
         }
-        
+
         html += '</div>';
       });
       html += '</div>';
-      
+
+      // FIX: Add Start Date column - 32px rows to match Gantt bars
+      html += `<div style="min-width:70px;max-width:70px;flex-shrink:0;background:#1E293B;">
+        <div class="portfolio-header-cell" style="min-width:70px;max-width:70px;height:52px;font-size:9px;padding:6px;text-align:center;display:flex;align-items:center;justify-content:center;">Start</div>`;
+
+      projects.forEach((p, idx) => {
+        const hasPM = p.pmMembers && p.pmMembers.length > 0;
+        const hasDev = p.devMembers && p.devMembers.length > 0;
+
+        // Main project row - 32px height to match Gantt
+        html += `<div class="portfolio-row" style="height:32px;display:flex;align-items:center;justify-content:center;border-right:1px solid #334155;background:#1E293B;font-size:9px;color:#94A3B8;">
+          ${formatDateShort(p.startDate)}
+        </div>`;
+
+        // PM role row - empty, 32px height to match Gantt
+        if (hasPM) {
+          html += `<div class="portfolio-row portfolio-role-row" style="height:32px;border-right:1px solid #334155;background:#1a2235;"></div>`;
+        }
+
+        // Dev role row - empty, 32px height to match Gantt
+        if (hasDev) {
+          html += `<div class="portfolio-row portfolio-role-row" style="height:32px;border-right:1px solid #334155;background:#1a2235;"></div>`;
+        }
+      });
+      html += '</div>';
+
+      // FIX: Add End Date column - 32px rows to match Gantt bars
+      html += `<div style="min-width:70px;max-width:70px;flex-shrink:0;background:#1E293B;">
+        <div class="portfolio-header-cell" style="min-width:70px;max-width:70px;height:52px;font-size:9px;padding:6px;text-align:center;display:flex;align-items:center;justify-content:center;">End</div>`;
+
+      projects.forEach((p, idx) => {
+        const hasPM = p.pmMembers && p.pmMembers.length > 0;
+        const hasDev = p.devMembers && p.devMembers.length > 0;
+
+        // Main project row - 32px height to match Gantt
+        html += `<div class="portfolio-row" style="height:32px;display:flex;align-items:center;justify-content:center;border-right:1px solid #334155;background:#1E293B;font-size:9px;color:#94A3B8;">
+          ${formatDateShort(p.endDate)}
+        </div>`;
+
+        // PM role row - empty, 32px height to match Gantt
+        if (hasPM) {
+          html += `<div class="portfolio-row portfolio-role-row" style="height:32px;border-right:1px solid #334155;background:#1a2235;"></div>`;
+        }
+
+        // Dev role row - empty, 32px height to match Gantt
+        if (hasDev) {
+          html += `<div class="portfolio-row portfolio-role-row" style="height:32px;border-right:1px solid #334155;background:#1a2235;"></div>`;
+        }
+      });
+      html += '</div>';
+
       html += '<div class="portfolio-timeline-column">';
       
       // Month headers
@@ -1879,12 +2177,35 @@
       return html;
     }
     
-    function getWeeklyHoursSummary() { const s = {}; Object.values(data.timeSlots).forEach(ms => Object.values(ms).forEach(ds => Object.values(ds).forEach(pid => { if(pid) s[pid] = (s[pid]||0)+1; }))); return s; }
-    
+    // BUG-1 FIX: Calculate hours from assigned projects across all members (matching Portfolio data)
+    // This ensures consistency between Weekly Hours and Portfolio view
+    function getWeeklyHoursSummary() {
+      const s = {};
+      Object.values(data.timeSlots).forEach(ms =>
+        Object.values(ms).forEach(ds =>
+          Object.values(ds).forEach(pid => {
+            if(pid) s[pid] = (s[pid]||0)+1;
+          })
+        )
+      );
+      return s;
+    }
+
+    // SUG-1 FIX: Move "Total" to far left for better visibility
     function renderSummary() {
-      const s = getWeeklyHoursSummary(); let total = 0, html = '';
-      data.projects.slice(0, 4).forEach(p => { const h = s[p.id]||0; total += h; html += `<div class="summary-card"><div class="summary-hours">${h}h</div><div class="summary-name">${p.name}</div></div>`; });
-      html += `<div class="summary-card total"><div class="summary-hours">${total}h</div><div class="summary-name">Total</div></div>`;
+      const s = getWeeklyHoursSummary();
+      let total = 0;
+      let projectCards = '';
+
+      // Calculate total first
+      data.projects.slice(0, 4).forEach(p => {
+        const h = s[p.id]||0;
+        total += h;
+        projectCards += `<div class="summary-card"><div class="summary-hours">${h}h</div><div class="summary-name">${p.name}</div></div>`;
+      });
+
+      // SUG-1: Place Total card first (far left)
+      const html = `<div class="summary-card total"><div class="summary-hours">${total}h</div><div class="summary-name">Total</div></div>` + projectCards;
       document.getElementById('summary-cards').innerHTML = html;
     }
 
@@ -1892,24 +2213,31 @@
       const c = document.getElementById('project-pool');
       const projects = data.projectPool.map(id => getProjectById(id)).filter(Boolean);
       if (!projects.length) { c.innerHTML = '<div class="pool-empty">No projects in pool. Click + to create one.</div>'; return; }
-      c.innerHTML = projects.map(p => `
+      c.innerHTML = projects.map(p => {
+        // SUG-3: Add background color for "In Progress" status (yellow/orange)
+        const statusStyle = p.status === 'In Progress' ? 'background:#F59E0B;color:#0F172A;font-weight:600;' : '';
+        // SUG-7: Calculate risk status for project
+        const riskStatus = calculateRiskStatus(p);
+        return `
         <div class="pool-project" draggable="true" data-project-id="${p.id}"
              ondragstart="handleDragStart(event, '${p.id}')"
-             ondragend="handleDragEnd(event)">
+             ondragend="handleDragEnd(event)" style="${riskStatus.isRisk ? 'border:2px solid #EF4444;' : ''}">
           <div class="pool-project-header">
             <span class="pool-project-name" onclick="openProject('${p.id}')">${p.name}</span>
             <span class="${getPriorityClass(p.priority)}">${p.priority}</span>
           </div>
           <p class="pool-project-desc" onclick="openProject('${p.id}')">${p.description || 'No description'}</p>
-          <div class="pool-project-meta">
+          ${riskStatus.isRisk ? `<div style="background:#FEE2E2;color:#DC2626;padding:6px 8px;border-radius:6px;font-size:10px;margin-bottom:8px;font-weight:600;">⚠️ RISK: ${riskStatus.reason}</div>` : ''}
+          <div class="pool-project-meta" style="display:flex;align-items:center;flex-wrap:wrap;">
             <span class="pool-project-date">📅 ${formatDateShort(p.startDate)} - ${formatDateShort(p.endDate)}</span>
-            <span class="pool-project-date">${p.status}</span>
+            <span class="pool-project-date" style="${statusStyle}">${p.status}</span>
             ${p.team ? `<span class="pool-project-date">👥 ${p.team}</span>` : ''}
             ${p.savingHours ? `<span class="pool-project-date" style="background:#10B981;color:white;">⏱️ ${p.savingHours}h/mo</span>` : ''}
             <button class="btn btn-primary btn-sm" onclick="openQuickAssign('${p.id}', event)" style="margin-left:auto;padding:4px 8px;font-size:10px;">👥 Assign</button>
           </div>
         </div>
-      `).join('');
+      `;
+      }).join('');
     }
 
     function renderTeamBoards() {
@@ -1957,17 +2285,21 @@
           ${projectsWithRoles.length ? `<div class="board-projects">${projectsWithRoles.map(pr => {
             const p = pr.project;
             const role = pr.role;
+            // SUG-7: Calculate risk status
+            const riskStatus = calculateRiskStatus(p);
             return `
             <div class="board-project-item" draggable="true" data-project-id="${p.id}"
-                 style="border-left-color:${m.color};background:linear-gradient(135deg, ${m.color}15 0%, #0F172A 100%);"
-                 ondragstart="handleDragStart(event, '${p.id}')" ondragend="handleDragEnd(event)">
+                 style="border-left-color:${m.color};background:linear-gradient(135deg, ${m.color}15 0%, #0F172A 100%);${riskStatus.isRisk ? 'border:2px solid #EF4444;' : ''}cursor:pointer;"
+                 ondragstart="handleDragStart(event, '${p.id}')" ondragend="handleDragEnd(event)"
+                 onclick="handleProjectCardClick(event, '${p.id}')">
               <div class="board-project-header">
-                <span class="board-project-name" onclick="openProject('${p.id}')">${p.name}</span>
+                <span class="board-project-name">${p.name}${riskStatus.isRisk ? ' ⚠️' : ''}</span>
                 <span class="${getPriorityClass(p.priority)}" style="font-size:10px;padding:2px 6px;">${p.priority}</span>
               </div>
+              ${riskStatus.isRisk ? `<div style="background:#FEE2E2;color:#DC2626;padding:4px 6px;border-radius:4px;font-size:9px;margin-bottom:4px;font-weight:600;">${riskStatus.reason}</div>` : ''}
               <div class="board-project-meta">
                 ${role ? `<span class="board-project-role">${role}</span>` : ''}
-                <span class="board-project-status">${p.status}</span>
+                <span class="board-project-status" style="${p.status === 'In Progress' ? 'background:#F59E0B;color:#0F172A;font-weight:600;' : ''}">${p.status}</span>
                 ${p.savingHours ? `<span class="board-project-status" style="background:#10B981;color:white;">⏱️ ${p.savingHours}h/mo</span>` : ''}
                 <button class="btn btn-secondary btn-sm" onclick="openQuickAssign('${p.id}', event)" style="margin-left:auto;padding:2px 6px;font-size:9px;">↔️</button>
               </div>
@@ -2009,7 +2341,17 @@
         board.classList.remove('drag-over');
       }
     }
-    
+
+    // FIX: Handle clicking on member project cards to open project detail
+    function handleProjectCardClick(e, projectId) {
+      // Don't open project if clicking on the assign button or other interactive elements
+      if (e.target.tagName === 'BUTTON' || e.target.closest('button')) {
+        return; // Let the button handle its own click
+      }
+      // Open the project detail page
+      openProject(projectId);
+    }
+
     function handleDrop(e, memberId) {
       e.preventDefault();
       const board = e.target.closest('.board');
@@ -2070,19 +2412,18 @@
       pendingAssignment = { projectId: null, memberId: null };
     }
     
+    // SUG-2 FIX: Allow assigning ONE project to MULTIPLE people
+    // Projects stay in pool until explicitly removed
     function assignProjectToMember(projectId, memberId, role) {
-      // Remove from pool (project is now assigned)
-      data.projectPool = data.projectPool.filter(id => id !== projectId);
-      
       // Initialize member's project array if needed
       if (!data.memberProjects[memberId]) data.memberProjects[memberId] = [];
-      
+
       // Check if already assigned to this member
       const existingIdx = data.memberProjects[memberId].findIndex(a => {
         if (typeof a === 'string') return a === projectId;
         return a.id === projectId;
       });
-      
+
       if (existingIdx >= 0) {
         // Update role if already assigned
         data.memberProjects[memberId][existingIdx] = { id: projectId, role: role };
@@ -2091,10 +2432,19 @@
         // Add new assignment
         data.memberProjects[memberId].push({ id: projectId, role: role });
         showToast('Project assigned!');
+
+        // FIX: Remove from pool when first assigned (drag from pool to member)
+        // This ensures the card disappears from pool after drop
+        if (data.projectPool.includes(projectId)) {
+          data.projectPool = data.projectPool.filter(pid => pid !== projectId);
+        }
       }
-      
+
       saveData();
+      // BUG-3 FIX: Refresh dashboard immediately to show updated assignee names
       renderDashboard();
+      // Re-open modal to show updated assignments
+      openQuickAssign(projectId);
     }
     
     // Mobile-friendly quick assign modal
@@ -2281,7 +2631,7 @@
               ${pa.role ? `<span class="board-project-role" style="margin-left:2px;">${pa.role}</span>` : ''}
             </span>
           `).join('')}
-          <button class="btn btn-secondary btn-sm" onclick="openQuickAssign('${p.id}')" style="padding:4px 8px;font-size:10px;">+ Add</button>
+          <button class="btn btn-secondary btn-sm" onclick="openQuickAssign('${p.id}')" style="padding:4px 8px;font-size:10px;">✏️ Edit</button>
         </div>`;
       } else {
         assignmentsHtml = `<button class="btn btn-secondary btn-sm" onclick="openQuickAssign('${p.id}')">👤 Assign Team</button>`;
@@ -2416,7 +2766,8 @@ Current: ${p.status}`, currentIdx + 1);
       // Check if user can add tasks
       const canAddTask = isAdmin() || !p.lockedTimeline;
       
-      let html = `<div class="gantt" id="gantt-container" data-project-start="${p.startDate}" data-project-end="${p.endDate}">
+      const containerDayWidth = ganttTimeScale === 'daily' ? 36 : (ganttTimeScale === 'weekly' ? 80 : 100);
+      let html = `<div class="gantt" id="gantt-container" data-timeline-start="${fixedStart.toISOString().split('T')[0]}" data-project-start="${p.startDate}" data-project-end="${p.endDate}" data-day-width="${containerDayWidth}">
         <div class="gantt-controls">
           <span style="color:#64748B;font-size:12px;margin-right:8px;">📅 Scale:</span>
           <button class="gantt-scale-btn ${ganttTimeScale==='daily'?'active':''}" onclick="setGanttScale('daily')">Daily</button>
@@ -2457,14 +2808,14 @@ Current: ${p.status}`, currentIdx + 1);
     function renderGanttDaily(start, end, tasks, p, today, canAddTask) {
       const totalDays = Math.ceil((end - start) / 864e5) + 1;
       const dayWidth = 36;
-      
+
       let dates = [];
       for (let i = 0; i < totalDays; i++) {
         const d = new Date(start);
         d.setDate(d.getDate() + i);
         dates.push(d);
       }
-      
+
       // Group dates by month for header
       let months = [];
       let currentMonth = '';
@@ -2480,21 +2831,31 @@ Current: ${p.status}`, currentIdx + 1);
         }
       });
       months.push({ name: currentMonth, days: monthDays });
-      
+
       let html = `<div class="gantt-wrapper">
         <div class="gantt-task-column">
           <div class="gantt-task-col-spacer"></div>
           <div class="gantt-task-col">Tasks</div>`;
-      
+
+      // SUG-6: Separate tasks into "In Progress/Completed" and "Not Started" sections
+      const startedTasks = tasks.filter(t => t.progress > 0);
+      const notStartedTasks = tasks.filter(t => t.progress === 0);
+
       // Task names
       if (!tasks.length) {
         html += '<div class="gantt-task-name" style="min-height:60px;color:#64748B;">No tasks yet</div>';
       } else {
-        tasks.forEach(t => {
+        // Render started tasks first
+        startedTasks.forEach(t => {
           const isLocked = t.locked || false;
           const canEditThisTask = isAdmin() || (!isLocked && !p.lockedTimeline);
+          // SUG-5: Calculate and show duration
+          const duration = t.start && t.end ? calcDuration(t.start, t.end) : 0;
           html += `<div class="gantt-task-name">
-            <span class="gantt-task-text">${t.name}${isLocked ? ' 🔒' : ''}</span>
+            <div style="flex:1;min-width:0;">
+              <div class="gantt-task-text">${t.name}${isLocked ? ' 🔒' : ''}</div>
+              <div style="font-size:9px;color:#64748B;margin-top:2px;">${formatDateShort(t.start)} - ${formatDateShort(t.end)} (${duration}d)</div>
+            </div>
             <div class="gantt-task-actions">
               ${isAdmin() ? `<button class="btn ${isLocked ? 'lock-btn' : 'btn-secondary'} btn-icon btn-sm" onclick="toggleTaskLock('${t.id}')" style="width:22px;height:22px;font-size:10px;">${isLocked ? '🔓' : '🔒'}</button>` : ''}
               ${canEditThisTask ? `<button class="btn btn-secondary btn-icon btn-sm" onclick="editTask('${t.id}')" style="width:22px;height:22px;font-size:10px;">✏️</button>` : ''}
@@ -2502,9 +2863,31 @@ Current: ${p.status}`, currentIdx + 1);
             </div>
           </div>`;
         });
+
+        // SUG-6: Add "Not Started" section header if there are not started tasks
+        if (notStartedTasks.length > 0) {
+          html += '<div class="gantt-task-name" style="background:#1E293B;color:#94A3B8;font-weight:600;font-size:11px;padding:6px 12px;">📋 Not Started</div>';
+          notStartedTasks.forEach(t => {
+            const isLocked = t.locked || false;
+            const canEditThisTask = isAdmin() || (!isLocked && !p.lockedTimeline);
+            // SUG-5: Calculate and show duration
+            const duration = t.start && t.end ? calcDuration(t.start, t.end) : 0;
+            html += `<div class="gantt-task-name" style="opacity:0.7;">
+              <div style="flex:1;min-width:0;">
+                <div class="gantt-task-text">${t.name}${isLocked ? ' 🔒' : ''}</div>
+                <div style="font-size:9px;color:#64748B;margin-top:2px;">${formatDateShort(t.start)} - ${formatDateShort(t.end)} (${duration}d)</div>
+              </div>
+              <div class="gantt-task-actions">
+                ${isAdmin() ? `<button class="btn ${isLocked ? 'lock-btn' : 'btn-secondary'} btn-icon btn-sm" onclick="toggleTaskLock('${t.id}')" style="width:22px;height:22px;font-size:10px;">${isLocked ? '🔓' : '🔒'}</button>` : ''}
+                ${canEditThisTask ? `<button class="btn btn-secondary btn-icon btn-sm" onclick="editTask('${t.id}')" style="width:22px;height:22px;font-size:10px;">✏️</button>` : ''}
+                ${isAdmin() ? `<button class="btn btn-danger btn-icon btn-sm" onclick="deleteTask('${t.id}')" style="width:22px;height:22px;font-size:10px;">🗑️</button>` : ''}
+              </div>
+            </div>`;
+          });
+        }
       }
       html += '</div>'; // end task-column
-      
+
       // Timeline column
       html += '<div class="gantt-timeline-column">';
       
@@ -2527,7 +2910,7 @@ Current: ${p.status}`, currentIdx + 1);
       });
       html += '</div>';
       
-      // Task bars
+      // Task bars - SUG-6: Render in same order as task names (started first, then not started)
       html += '<div class="gantt-body-rows">';
       if (!tasks.length) {
         html += `<div class="gantt-row"><div class="gantt-bar-container" style="min-width:${totalDays * dayWidth}px;">`;
@@ -2537,7 +2920,26 @@ Current: ${p.status}`, currentIdx + 1);
         });
         html += '</div></div>';
       } else {
-        tasks.forEach(t => {
+        // Render bars for started tasks first
+        const orderedTasks = [...startedTasks];
+        // Add section spacer row if there are not started tasks
+        if (notStartedTasks.length > 0) {
+          // Add a spacer row for the "Not Started" header
+          orderedTasks.push({ isHeader: true });
+          orderedTasks.push(...notStartedTasks);
+        }
+
+        orderedTasks.forEach(t => {
+          // SUG-6: Render spacer row for "Not Started" section header
+          if (t.isHeader) {
+            html += `<div class="gantt-row" style="min-height:26px;"><div class="gantt-bar-container" style="min-width:${totalDays * dayWidth}px;background:#1E293B;">`;
+            dates.forEach(d => {
+              const isWeekend = d.getDay() === 0 || d.getDay() === 6;
+              html += `<div class="gantt-bar-cell ${isWeekend ? 'weekend' : ''}" style="min-width:${dayWidth}px;"></div>`;
+            });
+            html += '</div></div>';
+            return;
+          }
           const ts = new Date(t.start), te = new Date(t.end);
           const leftDays = Math.max(0, Math.ceil((ts - start) / 864e5));
           const widthDays = Math.max(1, Math.ceil((te - ts) / 864e5) + 1);
@@ -2613,7 +3015,7 @@ Current: ${p.status}`, currentIdx + 1);
         <div class="gantt-task-column">
           <div class="gantt-task-col-spacer"></div>
           <div class="gantt-task-col">Tasks</div>`;
-      
+
       if (!tasks.length) {
         html += '<div class="gantt-task-name" style="min-height:60px;color:#64748B;">No tasks yet</div>';
       } else {
@@ -2629,7 +3031,35 @@ Current: ${p.status}`, currentIdx + 1);
         });
       }
       html += '</div>';
-      
+
+      // FIX: Add Start Date column (compact width)
+      html += `<div class="gantt-task-column" style="min-width:80px;max-width:80px;">
+        <div class="gantt-task-col-spacer"></div>
+        <div class="gantt-task-col" style="font-size:10px;padding:8px;">Start</div>`;
+
+      if (!tasks.length) {
+        html += '<div class="gantt-task-name" style="min-height:60px;"></div>';
+      } else {
+        tasks.forEach(t => {
+          html += `<div class="gantt-task-name" style="justify-content:center;font-size:10px;color:#94A3B8;padding:8px;">${formatDateShort(t.start)}</div>`;
+        });
+      }
+      html += '</div>';
+
+      // FIX: Add End Date column (compact width)
+      html += `<div class="gantt-task-column" style="min-width:80px;max-width:80px;">
+        <div class="gantt-task-col-spacer"></div>
+        <div class="gantt-task-col" style="font-size:10px;padding:8px;">End</div>`;
+
+      if (!tasks.length) {
+        html += '<div class="gantt-task-name" style="min-height:60px;"></div>';
+      } else {
+        tasks.forEach(t => {
+          html += `<div class="gantt-task-name" style="justify-content:center;font-size:10px;color:#94A3B8;padding:8px;">${formatDateShort(t.end)}</div>`;
+        });
+      }
+      html += '</div>';
+
       html += '<div class="gantt-timeline-column">';
       html += '<div class="gantt-header-months">';
       months.forEach(m => {
@@ -2694,7 +3124,7 @@ Current: ${p.status}`, currentIdx + 1);
       let html = `<div class="gantt-wrapper">
         <div class="gantt-task-column">
           <div class="gantt-task-col" style="height:52px;">Tasks</div>`;
-      
+
       if (!tasks.length) {
         html += '<div class="gantt-task-name" style="min-height:60px;color:#64748B;">No tasks yet</div>';
       } else {
@@ -2710,7 +3140,33 @@ Current: ${p.status}`, currentIdx + 1);
         });
       }
       html += '</div>';
-      
+
+      // FIX: Add Start Date column (compact width)
+      html += `<div class="gantt-task-column" style="min-width:80px;max-width:80px;">
+        <div class="gantt-task-col" style="height:52px;font-size:10px;padding:8px;">Start</div>`;
+
+      if (!tasks.length) {
+        html += '<div class="gantt-task-name" style="min-height:60px;"></div>';
+      } else {
+        tasks.forEach(t => {
+          html += `<div class="gantt-task-name" style="justify-content:center;font-size:10px;color:#94A3B8;padding:8px;">${formatDateShort(t.start)}</div>`;
+        });
+      }
+      html += '</div>';
+
+      // FIX: Add End Date column (compact width)
+      html += `<div class="gantt-task-column" style="min-width:80px;max-width:80px;">
+        <div class="gantt-task-col" style="height:52px;font-size:10px;padding:8px;">End</div>`;
+
+      if (!tasks.length) {
+        html += '<div class="gantt-task-name" style="min-height:60px;"></div>';
+      } else {
+        tasks.forEach(t => {
+          html += `<div class="gantt-task-name" style="justify-content:center;font-size:10px;color:#94A3B8;padding:8px;">${formatDateShort(t.end)}</div>`;
+        });
+      }
+      html += '</div>';
+
       html += '<div class="gantt-timeline-column">';
       html += '<div class="gantt-timeline">';
       months.forEach(m => {
@@ -2802,7 +3258,19 @@ Current: ${p.status}`, currentIdx + 1);
       
       const container = document.getElementById('gantt-container');
       const clientX = e.touches ? e.touches[0].clientX : e.clientX;
-      ganttDrag = { active: true, taskId, mode, startX: clientX, originalStart: t.start, originalEnd: t.end, dayWidth: parseInt(container.dataset.dayWidth), projectStart: container.dataset.projectStart, projectEnd: container.dataset.projectEnd };
+      // Use timelineStart (fixed Jan 1) for position calculations, but projectStart/End for date constraints
+      ganttDrag = {
+        active: true,
+        taskId,
+        mode,
+        startX: clientX,
+        originalStart: t.start,
+        originalEnd: t.end,
+        dayWidth: parseInt(container.dataset.dayWidth),
+        timelineStart: container.dataset.timelineStart || '2026-01-01',
+        projectStart: container.dataset.projectStart,
+        projectEnd: container.dataset.projectEnd
+      };
       document.addEventListener('mousemove', onGanttDrag);
       document.addEventListener('mouseup', stopGanttDrag);
       document.addEventListener('touchmove', onGanttDrag, { passive: false });
@@ -2818,19 +3286,24 @@ Current: ${p.status}`, currentIdx + 1);
       const p = getProjectById(currentProjectId);
       const t = p.tasks.find(x => x.id === ganttDrag.taskId);
       if (!t) return;
-      
+
+      // timelineStart is the fixed start of the Gantt (Jan 1, 2026) - used for bar positioning
+      // projectStart/End are the project's date range - used for constraining task dates
+      const timelineStart = new Date(ganttDrag.timelineStart);
       const projectStart = new Date(ganttDrag.projectStart), projectEnd = new Date(ganttDrag.projectEnd);
       let newStart = new Date(ganttDrag.originalStart), newEnd = new Date(ganttDrag.originalEnd);
-      
+
       if (ganttDrag.mode === 'move') { newStart.setDate(newStart.getDate() + deltaDays); newEnd.setDate(newEnd.getDate() + deltaDays); }
       else if (ganttDrag.mode === 'resize-left') { newStart.setDate(newStart.getDate() + deltaDays); if (newStart >= newEnd) newStart = new Date(newEnd.getTime() - 864e5); }
       else if (ganttDrag.mode === 'resize-right') { newEnd.setDate(newEnd.getDate() + deltaDays); if (newEnd <= newStart) newEnd = new Date(newStart.getTime() + 864e5); }
-      
+
+      // Constrain to project boundaries
       if (newStart < projectStart) { const diff = Math.ceil((projectStart - newStart) / 864e5); newStart = new Date(projectStart); if (ganttDrag.mode === 'move') newEnd.setDate(newEnd.getDate() + diff); }
       if (newEnd > projectEnd) { const diff = Math.ceil((newEnd - projectEnd) / 864e5); newEnd = new Date(projectEnd); if (ganttDrag.mode === 'move') newStart.setDate(newStart.getDate() - diff); }
-      
+
       const bar = document.getElementById('bar-' + ganttDrag.taskId);
-      const leftDays = Math.ceil((newStart - projectStart) / 864e5);
+      // Calculate position relative to timelineStart (not projectStart!)
+      const leftDays = Math.ceil((newStart - timelineStart) / 864e5);
       const widthDays = Math.ceil((newEnd - newStart) / 864e5) + 1;
       bar.style.left = (leftDays * ganttDrag.dayWidth) + 'px';
       bar.style.width = (widthDays * ganttDrag.dayWidth) + 'px';
@@ -2851,11 +3324,15 @@ Current: ${p.status}`, currentIdx + 1);
         const p = getProjectById(currentProjectId);
         const t = p.tasks.find(x => x.id === ganttDrag.taskId);
         if (t && (t.start !== bar.dataset.tempStart || t.end !== bar.dataset.tempEnd)) {
-          t.start = bar.dataset.tempStart; t.end = bar.dataset.tempEnd;
-          saveData(); showToast('Timeline updated');
+          t.start = bar.dataset.tempStart;
+          t.end = bar.dataset.tempEnd;
+          saveData();
+          showToast('Timeline updated: ' + formatDateShort(t.start) + ' → ' + formatDateShort(t.end));
+          // Re-render the Gantt chart to reflect the updated dates
+          renderGantt(document.getElementById('tab-content'));
         }
       }
-      document.getElementById('gantt-tooltip').classList.add('hidden');
+      document.getElementById('gantt-tooltip')?.classList.add('hidden');
       ganttDrag.active = false;
       document.removeEventListener('mousemove', onGanttDrag);
       document.removeEventListener('mouseup', stopGanttDrag);
@@ -2906,7 +3383,78 @@ Current: ${p.status}`, currentIdx + 1);
     function deleteUpdate(idx) { if (confirm('Delete?')) { getProjectById(currentProjectId).updates.splice(idx, 1); saveData(); renderUpdates(document.getElementById('tab-content')); showToast('Deleted'); } }
 
     // ==================== TIME MANAGEMENT ====================
-    function renderTimeManagement() { if (!selectedMember && data.members.length) selectedMember = data.members[0].id; renderMemberSelector(); renderProjectLegend(); renderWeekLabel(); renderCalendar(); }
+    function renderTimeManagement() {
+      if (!selectedMember && data.members.length) selectedMember = data.members[0].id;
+      renderProjectSummary();  // SCHEDULE IMPROVEMENT: Add project summary with R/O tracking
+      renderMemberSelector();
+      renderProjectLegend();
+      renderWeekLabel();
+      renderCalendar();
+    }
+
+    // SCHEDULE IMPROVEMENT: Render Project Summary with Status (R=Risk, O=On Track)
+    function renderProjectSummary() {
+      const allProjects = data.projects.filter(p => p.startDate && p.endDate);
+
+      if (!allProjects.length) {
+        document.getElementById('schedule-project-summary').innerHTML = '<p style="color:#64748B;text-align:center;">No projects with scheduled dates.</p>';
+        return;
+      }
+
+      // Calculate status for each project
+      const projectStatus = allProjects.map(p => {
+        const riskStatus = calculateRiskStatus(p);
+        const progress = calcProgress(p.tasks);
+        return { project: p, risk: riskStatus, progress };
+      });
+
+      // Count risk vs on-track
+      const atRisk = projectStatus.filter(ps => ps.risk.isRisk).length;
+      const onTrack = projectStatus.length - atRisk;
+
+      let html = `
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;flex-wrap:wrap;gap:12px;">
+          <h3 style="font-size:14px;font-weight:600;color:#F1F5F9;">📈 Project Summary Tracking</h3>
+          <div style="display:flex;gap:12px;">
+            <div style="display:flex;align-items:center;gap:6px;background:#064E3B;padding:6px 12px;border-radius:8px;">
+              <span style="font-weight:700;color:#6EE7B7;font-size:18px;">${onTrack}</span>
+              <span style="color:#94A3B8;font-size:11px;">O = On Track</span>
+            </div>
+            <div style="display:flex;align-items:center;gap:6px;background:#7F1D1D;padding:6px 12px;border-radius:8px;">
+              <span style="font-weight:700;color:#FCA5A5;font-size:18px;">${atRisk}</span>
+              <span style="color:#94A3B8;font-size:11px;">R = Risk</span>
+            </div>
+          </div>
+        </div>
+        <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:10px;max-height:300px;overflow-y:auto;padding:4px;">
+      `;
+
+      projectStatus.forEach(ps => {
+        const statusBadge = ps.risk.isRisk ?
+          '<span style="background:#EF4444;color:white;padding:2px 8px;border-radius:6px;font-size:10px;font-weight:600;">R</span>' :
+          '<span style="background:#10B981;color:white;padding:2px 8px;border-radius:6px;font-size:10px;font-weight:600;">O</span>';
+
+        html += `
+          <div onclick="openProject('${ps.project.id}')" style="background:#1E293B;padding:12px;border-radius:8px;cursor:pointer;border:2px solid ${ps.risk.isRisk ? '#EF4444' : '#10B981'};transition:all 0.2s;" onmouseover="this.style.transform='translateY(-2px)'" onmouseout="this.style.transform='translateY(0)'">
+            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">
+              <span style="font-weight:600;font-size:13px;flex:1;">${ps.project.name}</span>
+              ${statusBadge}
+            </div>
+            <div style="font-size:10px;color:#64748B;margin-bottom:6px;">${formatDateShort(ps.project.startDate)} - ${formatDateShort(ps.project.endDate)}</div>
+            <div style="display:flex;align-items:center;gap:8px;">
+              <div style="flex:1;background:#0F172A;height:6px;border-radius:3px;overflow:hidden;">
+                <div style="width:${ps.progress}%;height:100%;background:${ps.progress === 100 ? '#10B981' : '#38BDF8'};"></div>
+              </div>
+              <span style="font-size:10px;color:#94A3B8;">${ps.progress}%</span>
+            </div>
+            ${ps.risk.isRisk ? `<div style="margin-top:6px;font-size:9px;color:#EF4444;background:#FEE2E2;padding:4px 6px;border-radius:4px;">⚠️ ${ps.risk.reason}</div>` : ''}
+          </div>
+        `;
+      });
+
+      html += '</div>';
+      document.getElementById('schedule-project-summary').innerHTML = html;
+    }
     function renderMemberSelector() { document.getElementById('member-selector').innerHTML = data.members.map(m => `<button class="member-tab ${m.id===selectedMember?'active':''}" style="${m.id===selectedMember?'background:'+m.color:''}" onclick="selectMember('${m.id}')">${m.avatar} ${m.name}</button>`).join(''); }
     function selectMember(mid) { selectedMember = mid; renderTimeManagement(); }
     function renderProjectLegend() { 
@@ -3409,8 +3957,12 @@ Current: ${p.status}`, currentIdx + 1);
         localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
         showToast('Loaded from cloud');
       } else {
-        // No cloud data yet, sync local data to cloud
-        await syncToCloud(data, false);
+        // No cloud data or cloud unavailable, try to sync local data
+        const syncSuccess = await syncToCloud(data, false);
+        if (!syncSuccess) {
+          // Cloud sync failed, fall back to local-only mode
+          updateSyncStatus('synced', 'Local');
+        }
       }
       
       showView('dashboard');
