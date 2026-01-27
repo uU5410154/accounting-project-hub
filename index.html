@@ -377,7 +377,7 @@
     .update-item { padding: 14px; background: #0F172A; border-radius: 8px; border: 1px solid #334155; position: relative; }
     .update-item:hover .update-actions { opacity: 1; }
     .update-date { font-size: 11px; color: #64748B; margin-bottom: 4px; }
-    .update-text { font-size: 13px; line-height: 1.5; }
+    .update-text { font-size: 13px; line-height: 1.6; white-space: pre-wrap; word-wrap: break-word; }
     .update-actions { position: absolute; top: 10px; right: 10px; display: flex; gap: 4px; opacity: 0; transition: opacity 0.2s; }
     .no-updates { text-align: center; padding: 30px; color: #64748B; font-size: 13px; }
     
@@ -922,7 +922,8 @@
         </div>
         <div class="form-group">
           <label class="form-label">Update Text *</label>
-          <textarea class="form-textarea" id="update-text" placeholder="Enter update..."></textarea>
+          <textarea class="form-textarea" id="update-text" placeholder="Enter update..." rows="5" style="min-height:120px;resize:vertical;"></textarea>
+          <div style="font-size:11px;color:#64748B;margin-top:4px;">💡 Press Enter for new line</div>
         </div>
       </div>
       <div class="modal-footer">
@@ -1568,6 +1569,26 @@
       return { isRisk: false, reason: '' };
     }
     function getProgressColor(p) { return p === 100 ? '#10B981' : p > 0 ? '#3B82F6' : '#6B7280'; }
+    // Bright, distinct project colors for easy identification
+    const PROJECT_CARD_COLORS = [
+      { bg: '#3B82F6', light: '#DBEAFE', text: '#1E40AF' },  // Blue
+      { bg: '#10B981', light: '#D1FAE5', text: '#065F46' },  // Green
+      { bg: '#F59E0B', light: '#FEF3C7', text: '#92400E' },  // Amber
+      { bg: '#EC4899', light: '#FCE7F3', text: '#9D174D' },  // Pink
+      { bg: '#8B5CF6', light: '#EDE9FE', text: '#5B21B6' },  // Purple
+      { bg: '#EF4444', light: '#FEE2E2', text: '#991B1B' },  // Red
+      { bg: '#14B8A6', light: '#CCFBF1', text: '#115E59' },  // Teal
+      { bg: '#F97316', light: '#FFEDD5', text: '#9A3412' },  // Orange
+      { bg: '#06B6D4', light: '#CFFAFE', text: '#155E75' },  // Cyan
+      { bg: '#84CC16', light: '#ECFCCB', text: '#3F6212' },  // Lime
+      { bg: '#A855F7', light: '#F3E8FF', text: '#6B21A8' },  // Violet
+      { bg: '#FB7185', light: '#FFE4E6', text: '#9F1239' },  // Rose
+    ];
+    // Get consistent color for a project based on its position in the projects array
+    function getProjectCardColor(projectId) {
+      const index = data.projects.findIndex(p => p.id === projectId);
+      return PROJECT_CARD_COLORS[index % PROJECT_CARD_COLORS.length];
+    }
     const projectColors = ['#3B82F6', '#10B981', '#F59E0B', '#EC4899', '#8B5CF6', '#EF4444', '#14B8A6'];
     function getProjectColor(id, list) { return projectColors[list.findIndex(p => p.id === id) % projectColors.length]; }
     function getProjectById(id) { return data.projects.find(p => p.id === id); }
@@ -2346,12 +2367,14 @@
         const statusStyle = p.status === 'In Progress' ? 'background:#F59E0B;color:#0F172A;font-weight:600;' : '';
         // SUG-7: Calculate risk status for project
         const riskStatus = calculateRiskStatus(p);
+        // Get distinct project color
+        const pColor = getProjectCardColor(p.id);
         return `
         <div class="pool-project" draggable="true" data-project-id="${p.id}"
              ondragstart="handleDragStart(event, '${p.id}')"
-             ondragend="handleDragEnd(event)" style="${riskStatus.isRisk ? 'border:2px solid #EF4444;' : ''}">
+             ondragend="handleDragEnd(event)" style="border-left:4px solid ${pColor.bg};background:linear-gradient(135deg, ${pColor.bg}20 0%, #334155 100%);${riskStatus.isRisk ? 'box-shadow:0 0 0 2px #EF4444;' : ''}">
           <div class="pool-project-header">
-            <span class="pool-project-name" onclick="openProject('${p.id}')">${p.name}</span>
+            <span class="pool-project-name" onclick="openProject('${p.id}')" style="color:${pColor.bg};">${p.name}</span>
             <span class="${getPriorityClass(p.priority)}">${p.priority}</span>
           </div>
           <p class="pool-project-desc" onclick="openProject('${p.id}')">${p.description || 'No description'}</p>
@@ -2426,13 +2449,15 @@
             const role = pr.role;
             // SUG-7: Calculate risk status
             const riskStatus = calculateRiskStatus(p);
+            // Get distinct project color
+            const pColor = getProjectCardColor(p.id);
             return `
             <div class="board-project-item" draggable="true" data-project-id="${p.id}"
-                 style="border-left-color:${m.color};background:linear-gradient(135deg, ${m.color}15 0%, #0F172A 100%);${riskStatus.isRisk ? 'border:2px solid #EF4444;' : ''}cursor:pointer;"
+                 style="border-left: 4px solid ${pColor.bg};background:linear-gradient(135deg, ${pColor.bg}25 0%, ${pColor.bg}10 100%);${riskStatus.isRisk ? 'box-shadow:0 0 0 2px #EF4444;' : ''}cursor:pointer;"
                  ondragstart="handleDragStart(event, '${p.id}')" ondragend="handleDragEnd(event)"
                  onclick="handleProjectCardClick(event, '${p.id}')">
               <div class="board-project-header">
-                <span class="board-project-name">${p.name}${riskStatus.isRisk ? ' ⚠️' : ''}</span>
+                <span class="board-project-name" style="color:${pColor.bg};font-weight:600;">${p.name}${riskStatus.isRisk ? ' ⚠️' : ''}</span>
                 <span class="${getPriorityClass(p.priority)}" style="font-size:10px;padding:2px 6px;">${p.priority}</span>
               </div>
               ${riskStatus.isRisk ? `<div style="background:#FEE2E2;color:#DC2626;padding:4px 6px;border-radius:4px;font-size:9px;margin-bottom:4px;font-weight:600;">${riskStatus.reason}</div>` : ''}
@@ -3685,10 +3710,51 @@ Current: ${p.status}`, currentIdx + 1);
     function renderUpdates(c) {
       const p = getProjectById(currentProjectId);
       const u = p.updates || [];
+      // Convert newlines to <br> for display
+      const formatUpdateText = (text) => text.replace(/\n/g, '<br>');
       c.innerHTML = `<div class="updates-section">
-        <div class="add-update"><input class="form-input" id="new-update" placeholder="Add update..." onkeypress="if(event.key==='Enter')addNewUpdate()"><button class="btn btn-primary" onclick="addNewUpdate()">Post</button></div>
-        <div class="updates-list">${!u.length?'<div class="no-updates">No updates yet.</div>':u.map((x,i)=>`<div class="update-item"><div class="update-actions"><button class="btn btn-secondary btn-icon btn-sm" onclick="editUpdate(${i})">✏️</button><button class="btn btn-danger btn-icon btn-sm" onclick="deleteUpdate(${i})">🗑️</button></div><div class="update-date">${formatDate(x.date)}</div><div class="update-text">${x.text}</div></div>`).join('')}</div>
+        <div class="add-update" style="flex-direction:column;align-items:stretch;">
+          <textarea class="form-textarea" id="new-update" placeholder="Add update..." rows="2" style="min-height:60px;resize:vertical;" onkeydown="handleUpdateKeydown(event)"></textarea>
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-top:8px;">
+            <span style="font-size:11px;color:#64748B;">💡 Enter to post | Shift+Enter, Option+Enter, or Cmd+Enter for new line</span>
+            <button class="btn btn-primary" onclick="addNewUpdate()">Post</button>
+          </div>
+        </div>
+        <div class="updates-list">${!u.length?'<div class="no-updates">No updates yet.</div>':u.map((x,i)=>`<div class="update-item"><div class="update-actions"><button class="btn btn-secondary btn-icon btn-sm" onclick="editUpdate(${i})">✏️</button><button class="btn btn-danger btn-icon btn-sm" onclick="deleteUpdate(${i})">🗑️</button></div><div class="update-date">${formatDate(x.date)}</div><div class="update-text" style="white-space:pre-wrap;">${formatUpdateText(x.text)}</div></div>`).join('')}</div>
       </div>`;
+    }
+
+    // Handle keyboard shortcuts for update textarea
+    function handleUpdateKeydown(event) {
+      if (event.key === 'Enter') {
+        if (event.altKey || event.metaKey) {
+          // Alt+Enter (Windows) or Option+Enter / Cmd+Enter (Mac) - insert new line
+          event.preventDefault();
+          const textarea = event.target;
+          const start = textarea.selectionStart;
+          const end = textarea.selectionEnd;
+          const value = textarea.value;
+          // Insert newline at cursor position
+          textarea.value = value.substring(0, start) + '\n' + value.substring(end);
+          // Move cursor after the newline
+          textarea.selectionStart = textarea.selectionEnd = start + 1;
+          return;
+        } else if (!event.shiftKey) {
+          // Enter without modifier - post the update
+          event.preventDefault();
+          addNewUpdate();
+        }
+        // Shift+Enter also inserts new line (default behavior)
+      }
+    }
+
+    // Handle keyboard shortcuts for update modal textarea
+    function handleUpdateModalKeydown(event) {
+      if (event.key === 'Enter' && !event.altKey && !event.metaKey) {
+        // Enter without Alt - don't submit, let user press save button
+        // Only Alt+Enter adds new line, regular Enter also adds new line in modal
+        return;
+      }
     }
 
     function addNewUpdate() { const i = document.getElementById('new-update'), t = i.value.trim(); if (!t) return; const p = getProjectById(currentProjectId); if (!p.updates) p.updates = []; p.updates.unshift({ date: new Date().toISOString().split('T')[0], text: t }); i.value = ''; saveData(); renderUpdates(document.getElementById('tab-content')); showToast('Update added'); }
