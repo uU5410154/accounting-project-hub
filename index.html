@@ -260,6 +260,15 @@
     .gantt-pic-select { width: 100%; padding: 4px 6px; background: #0F172A; border: 1px solid #334155; border-radius: 4px; color: #E2E8F0; font-size: 11px; cursor: pointer; outline: none; }
     .gantt-pic-select:hover { border-color: #38BDF8; }
     .gantt-pic-select:focus { border-color: #38BDF8; }
+    .gantt-status-column { min-width: 100px; max-width: 100px; flex-shrink: 0; position: sticky; left: 370px; z-index: 18; background: #1E293B; }
+    .gantt-status-cell { min-width: 100px; max-width: 100px; padding: 4px 6px; font-size: 12px; background: #1E293B; border-right: 1px solid #334155; border-bottom: 1px solid #334155; display: flex; align-items: center; justify-content: center; height: 44px; box-sizing: border-box; position: sticky; left: 370px; z-index: 18; }
+    .gantt-status-select { width: 100%; padding: 4px 6px; background: #0F172A; border: 1px solid #334155; border-radius: 4px; color: #E2E8F0; font-size: 10px; cursor: pointer; outline: none; }
+    .gantt-status-select:hover { border-color: #38BDF8; }
+    .gantt-status-select:focus { border-color: #38BDF8; }
+    .gantt-status-select option[value="Not Started"] { background: #4B5563; }
+    .gantt-status-select option[value="In-Progress"] { background: #1D4ED8; }
+    .gantt-status-select option[value="Stuck"] { background: #B91C1C; }
+    .gantt-status-select option[value="Finished"] { background: #059669; }
     .gantt-timeline-column { flex: 1; }
     .gantt-header { display: flex; border-bottom: 1px solid #334155; }
     .gantt-header-months { display: flex; border-bottom: 1px solid #334155; background: #0F172A; }
@@ -427,6 +436,7 @@
       .detail-name { font-size: 28px; }
       .gantt-task-col, .gantt-task-name, .gantt-task-column { min-width: 280px; max-width: 280px; }
       .gantt-pic-column, .gantt-pic-cell { left: 280px; min-width: 130px; max-width: 130px; }
+      .gantt-status-column, .gantt-status-cell { left: 410px; }
       .gantt-date, .gantt-bar-cell { min-width: 40px; }
     }
     
@@ -468,6 +478,7 @@
       .modal-body { padding: 16px; max-height: 60vh; overflow-y: auto; }
       .gantt-task-col, .gantt-task-name, .gantt-task-column { min-width: 120px; max-width: 120px; padding: 6px; font-size: 10px; }
       .gantt-pic-column, .gantt-pic-cell { min-width: 90px; max-width: 90px; left: 120px; }
+      .gantt-status-column, .gantt-status-cell { min-width: 80px; max-width: 80px; left: 210px; }
       .gantt-controls { flex-direction: column; align-items: stretch; }
       .gantt-scale-btn { padding: 8px 12px; }
       .gantt-date, .gantt-bar-cell { min-width: 28px; }
@@ -531,6 +542,7 @@
       </div>
       <div class="nav-links">
         <button class="nav-link active" id="nav-dashboard" onclick="showView('dashboard')">📋 Projects</button>
+        <button class="nav-link" id="nav-mytasks" onclick="showView('mytasks')">✅ My Tasks</button>
         <button class="nav-link" id="nav-portfolio" onclick="showView('portfolio')">📊 Portfolio</button>
         <button class="nav-link" id="nav-calendar" onclick="showView('calendar')">📅 Schedule</button>
         <a href="https://itservicedesk.lotuss.com/th/admin/dashboard" target="_blank" class="nav-link tickets-btn">🎫 Tickets</a>
@@ -692,6 +704,31 @@
           <button onclick="clearPortfolioFilters()" style="background:#475569;border:none;color:#E2E8F0;padding:6px 12px;border-radius:6px;font-size:11px;cursor:pointer;margin-top:16px;">Clear Filters</button>
         </div>
         <div id="portfolio-gantt"></div>
+      </div>
+    </div>
+
+    <!-- My Tasks View -->
+    <div id="view-mytasks" class="hidden">
+      <div class="section">
+        <button class="back-btn" onclick="showView('dashboard')">← Back</button>
+        <h1 style="font-size: 22px; font-weight: 700; margin: 16px 0;">✅ My Tasks</h1>
+        <p style="color:#64748B;margin-bottom:16px;" id="mytasks-subtitle">Your tasks for today</p>
+
+        <!-- Admin User Tabs -->
+        <div id="mytasks-user-tabs" style="display:none;margin-bottom:20px;">
+          <div style="display:flex;gap:8px;flex-wrap:wrap;"></div>
+        </div>
+
+        <!-- Urgency Filter Tabs -->
+        <div id="mytasks-urgency-tabs" style="margin-bottom:20px;">
+          <div style="display:flex;gap:8px;flex-wrap:wrap;"></div>
+        </div>
+
+        <!-- Task Summary Cards -->
+        <div id="mytasks-summary" style="display:flex;gap:12px;margin-bottom:20px;flex-wrap:wrap;"></div>
+
+        <!-- Tasks List -->
+        <div id="mytasks-list"></div>
       </div>
     </div>
 
@@ -1615,18 +1652,346 @@
       document.getElementById('view-dashboard').classList.add('hidden');
       document.getElementById('view-project').classList.add('hidden');
       document.getElementById('view-portfolio').classList.add('hidden');
+      document.getElementById('view-mytasks').classList.add('hidden');
       document.getElementById('view-calendar').classList.add('hidden');
       document.querySelectorAll('.nav-link').forEach(l => l.classList.remove('active'));
-      
+
       if (view === 'dashboard') { document.getElementById('view-dashboard').classList.remove('hidden'); document.getElementById('nav-dashboard').classList.add('active'); currentProjectId = null; renderDashboard(); }
       else if (view === 'project') { document.getElementById('view-project').classList.remove('hidden'); renderProjectDetail(); }
       else if (view === 'portfolio') { document.getElementById('view-portfolio').classList.remove('hidden'); document.getElementById('nav-portfolio').classList.add('active'); renderPortfolio(); }
+      else if (view === 'mytasks') { document.getElementById('view-mytasks').classList.remove('hidden'); document.getElementById('nav-mytasks').classList.add('active'); renderMyTasks(); }
       else if (view === 'calendar') { document.getElementById('view-calendar').classList.remove('hidden'); document.getElementById('nav-calendar').classList.add('active'); renderTimeManagement(); }
     }
 
     // ==================== DASHBOARD ====================
     function renderDashboard() { renderSummary(); renderProjectPool(); renderTeamBoards(); }
-    
+
+    // ==================== MY TASKS VIEW ====================
+    function getBangkokToday() {
+      // Get today's date in Bangkok timezone
+      const now = new Date();
+      const bangkokTime = new Date(now.toLocaleString('en-US', { timeZone: 'Asia/Bangkok' }));
+      return bangkokTime.toISOString().split('T')[0];
+    }
+
+    // Calculate urgency label for a task
+    function getTaskUrgency(task) {
+      const today = getBangkokToday();
+      const todayDate = new Date(today);
+      const taskEnd = new Date(task.end);
+
+      // Calculate days until due (negative means overdue)
+      const diffTime = taskEnd.getTime() - todayDate.getTime();
+      const daysUntilDue = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+
+      if (daysUntilDue < 0) {
+        return { label: 'Delayed', color: '#DC2626', bg: '#7F1D1D', priority: 1 };
+      } else if (daysUntilDue <= 2) {
+        return { label: 'Due Soon', color: '#F59E0B', bg: '#78350F', priority: 2 };
+      } else if (daysUntilDue <= 4) {
+        return { label: 'Coming Up', color: '#3B82F6', bg: '#1E3A8A', priority: 3 };
+      } else {
+        return { label: 'On Track', color: '#10B981', bg: '#064E3B', priority: 4 };
+      }
+    }
+
+    function getMyTasks(filterMemberId = null, filterUrgency = null) {
+      const today = getBangkokToday();
+      const todayDate = new Date(today);
+      const myTasks = [];
+
+      data.projects.forEach(project => {
+        if (!project.tasks) return;
+
+        project.tasks.forEach(task => {
+          const taskStart = new Date(task.start);
+          const taskEnd = new Date(task.end);
+
+          // Check if task is not finished
+          if (task.status === 'Finished' || task.progress === 100) return;
+
+          // Include tasks that: touch today OR are delayed (end date before today but not finished)
+          const touchesToday = todayDate >= taskStart && todayDate <= taskEnd;
+          const isDelayed = taskEnd < todayDate;
+
+          if (!touchesToday && !isDelayed) return;
+
+          // Filter by PIC member
+          let includeTask = false;
+
+          if (filterMemberId === 'all' || filterMemberId === null) {
+            includeTask = true;
+          } else {
+            if (task.pic === filterMemberId) {
+              includeTask = true;
+            }
+          }
+
+          if (includeTask) {
+            const urgency = getTaskUrgency(task);
+
+            // Filter by urgency if specified
+            if (filterUrgency && filterUrgency !== 'all' && urgency.label !== filterUrgency) {
+              return;
+            }
+
+            myTasks.push({
+              task,
+              project,
+              picMember: task.pic ? getMemberById(task.pic) : null,
+              picCustom: task.picCustom,
+              urgency
+            });
+          }
+        });
+      });
+
+      // Sort by urgency priority (Delayed first, then Due Soon, etc.)
+      myTasks.sort((a, b) => a.urgency.priority - b.urgency.priority);
+
+      return myTasks;
+    }
+
+    // Get all members who are PIC on active tasks (touching today or delayed)
+    function getMembersWithTodayTasks() {
+      const today = getBangkokToday();
+      const todayDate = new Date(today);
+      const memberIds = new Set();
+
+      data.projects.forEach(project => {
+        if (!project.tasks) return;
+
+        project.tasks.forEach(task => {
+          const taskStart = new Date(task.start);
+          const taskEnd = new Date(task.end);
+
+          // Check if task is not finished
+          if (task.status === 'Finished' || task.progress === 100) return;
+
+          // Include tasks that touch today OR are delayed
+          const touchesToday = todayDate >= taskStart && todayDate <= taskEnd;
+          const isDelayed = taskEnd < todayDate;
+
+          if (touchesToday || isDelayed) {
+            if (task.pic) {
+              memberIds.add(task.pic);
+            }
+          }
+        });
+      });
+
+      // Return member objects
+      return Array.from(memberIds)
+        .map(id => getMemberById(id))
+        .filter(m => m !== null)
+        .sort((a, b) => a.name.localeCompare(b.name));
+    }
+
+    let mytasksSelectedMember = 'all';
+    let mytasksSelectedUrgency = 'all';
+
+    function selectMyTasksMember(memberId) {
+      mytasksSelectedMember = memberId;
+      renderMyTasks();
+    }
+
+    function selectMyTasksUrgency(urgency) {
+      mytasksSelectedUrgency = urgency;
+      renderMyTasks();
+    }
+
+    function renderMyTasks() {
+      const today = getBangkokToday();
+      const isAdminUser = isAdmin();
+      const userTabsContainer = document.getElementById('mytasks-user-tabs');
+      const urgencyTabsContainer = document.getElementById('mytasks-urgency-tabs');
+
+      // Get members who have tasks today (for tabs)
+      const membersWithTasks = getMembersWithTodayTasks();
+
+      // Show/hide admin user tabs and populate them
+      if (isAdminUser) {
+        userTabsContainer.style.display = 'block';
+
+        // Build member tabs based on PICs with tasks today
+        let tabsHtml = `
+          <div onclick="selectMyTasksMember('all')" style="padding:10px 20px;border-radius:8px;cursor:pointer;font-size:13px;font-weight:500;transition:all 0.2s;
+            ${mytasksSelectedMember === 'all' ? 'background:#3B82F6;color:white;' : 'background:#1E293B;color:#94A3B8;border:1px solid #475569;'}">
+            All Members
+          </div>
+        `;
+
+        membersWithTasks.forEach(member => {
+          const isActive = mytasksSelectedMember === member.id;
+          const taskCount = getMyTasks(member.id, null).length;
+          tabsHtml += `
+            <div onclick="selectMyTasksMember('${member.id}')" style="padding:10px 20px;border-radius:8px;cursor:pointer;font-size:13px;font-weight:500;transition:all 0.2s;
+              ${isActive ? 'background:#3B82F6;color:white;' : 'background:#1E293B;color:#94A3B8;border:1px solid #475569;'}">
+              ${member.name} <span style="font-size:11px;opacity:0.7;">(${taskCount})</span>
+            </div>
+          `;
+        });
+
+        userTabsContainer.querySelector('div').innerHTML = tabsHtml;
+      } else {
+        userTabsContainer.style.display = 'none';
+      }
+
+      // Get all tasks for urgency counting (before urgency filter)
+      const selectedMember = isAdminUser ? mytasksSelectedMember : 'all';
+      const allTasks = getMyTasks(selectedMember, null);
+
+      // Count tasks by urgency
+      const urgencyCounts = {
+        'all': allTasks.length,
+        'Delayed': allTasks.filter(t => t.urgency.label === 'Delayed').length,
+        'Due Soon': allTasks.filter(t => t.urgency.label === 'Due Soon').length,
+        'Coming Up': allTasks.filter(t => t.urgency.label === 'Coming Up').length,
+        'On Track': allTasks.filter(t => t.urgency.label === 'On Track').length
+      };
+
+      // Build urgency tabs
+      const urgencyOptions = [
+        { key: 'all', label: 'All', color: '#64748B', bg: '#334155' },
+        { key: 'Delayed', label: 'Delayed', color: '#DC2626', bg: '#7F1D1D' },
+        { key: 'Due Soon', label: 'Due Soon', color: '#F59E0B', bg: '#78350F' },
+        { key: 'Coming Up', label: 'Coming Up', color: '#3B82F6', bg: '#1E3A8A' },
+        { key: 'On Track', label: 'On Track', color: '#10B981', bg: '#064E3B' }
+      ];
+
+      let urgencyTabsHtml = '';
+      urgencyOptions.forEach(opt => {
+        const isActive = mytasksSelectedUrgency === opt.key;
+        const count = urgencyCounts[opt.key];
+        if (opt.key === 'all' || count > 0) {
+          urgencyTabsHtml += `
+            <div onclick="selectMyTasksUrgency('${opt.key}')" style="padding:10px 20px;border-radius:8px;cursor:pointer;font-size:13px;font-weight:500;transition:all 0.2s;
+              ${isActive ? `background:${opt.bg};color:white;border:2px solid ${opt.color};` : 'background:#1E293B;color:#94A3B8;border:1px solid #475569;'}">
+              ${opt.label} <span style="font-size:11px;opacity:0.8;">(${count})</span>
+            </div>
+          `;
+        }
+      });
+      urgencyTabsContainer.querySelector('div').innerHTML = urgencyTabsHtml;
+
+      // Get filtered tasks
+      const myTasks = getMyTasks(selectedMember, mytasksSelectedUrgency === 'all' ? null : mytasksSelectedUrgency);
+
+      // Update subtitle based on selected filter
+      let subtitleText = '';
+      if (isAdminUser) {
+        if (selectedMember === 'all') {
+          subtitleText = `All team tasks for today <span style="color:#38BDF8;">(${today})</span> - Bangkok Time`;
+        } else {
+          const memberName = getMemberById(selectedMember)?.name || selectedMember;
+          subtitleText = `Tasks for <span style="color:#38BDF8;">${memberName}</span> today <span style="color:#94A3B8;">(${today})</span> - Bangkok Time`;
+        }
+      } else {
+        subtitleText = `Your tasks for today <span style="color:#38BDF8;">(${today})</span> - Bangkok Time`;
+      }
+      document.getElementById('mytasks-subtitle').innerHTML = subtitleText;
+
+      // Count by status
+      const statusCounts = {
+        'Not Started': myTasks.filter(t => t.task.status === 'Not Started' || !t.task.status).length,
+        'In-Progress': myTasks.filter(t => t.task.status === 'In-Progress').length,
+        'Stuck': myTasks.filter(t => t.task.status === 'Stuck').length
+      };
+
+      // Summary cards
+      document.getElementById('mytasks-summary').innerHTML = `
+        <div style="background:linear-gradient(135deg,#64748B,#475569);padding:16px 24px;border-radius:12px;min-width:120px;text-align:center;">
+          <div style="font-size:28px;font-weight:700;">${myTasks.length}</div>
+          <div style="font-size:12px;color:#E2E8F0;">Total Tasks</div>
+        </div>
+        <div style="background:linear-gradient(135deg,#6B7280,#4B5563);padding:16px 24px;border-radius:12px;min-width:120px;text-align:center;">
+          <div style="font-size:28px;font-weight:700;">${statusCounts['Not Started']}</div>
+          <div style="font-size:12px;color:#E2E8F0;">Not Started</div>
+        </div>
+        <div style="background:linear-gradient(135deg,#3B82F6,#1D4ED8);padding:16px 24px;border-radius:12px;min-width:120px;text-align:center;">
+          <div style="font-size:28px;font-weight:700;">${statusCounts['In-Progress']}</div>
+          <div style="font-size:12px;color:#E2E8F0;">In Progress</div>
+        </div>
+        <div style="background:linear-gradient(135deg,#EF4444,#B91C1C);padding:16px 24px;border-radius:12px;min-width:120px;text-align:center;">
+          <div style="font-size:28px;font-weight:700;">${statusCounts['Stuck']}</div>
+          <div style="font-size:12px;color:#E2E8F0;">Stuck</div>
+        </div>
+      `;
+
+      // Tasks list
+      if (myTasks.length === 0) {
+        document.getElementById('mytasks-list').innerHTML = `
+          <div style="background:#334155;padding:40px;border-radius:12px;text-align:center;">
+            <div style="font-size:48px;margin-bottom:16px;">🎉</div>
+            <div style="font-size:18px;font-weight:600;color:#10B981;">No tasks for today!</div>
+            <div style="font-size:13px;color:#64748B;margin-top:8px;">You're all caught up. Enjoy your day!</div>
+          </div>
+        `;
+        return;
+      }
+
+      // Group tasks by project
+      const tasksByProject = {};
+      myTasks.forEach(item => {
+        if (!tasksByProject[item.project.id]) {
+          tasksByProject[item.project.id] = { project: item.project, tasks: [] };
+        }
+        tasksByProject[item.project.id].tasks.push(item);
+      });
+
+      let html = '';
+      Object.values(tasksByProject).forEach(group => {
+        const pColor = getProjectCardColor(group.project.id);
+        html += `
+          <div style="background:#334155;border-radius:12px;margin-bottom:16px;overflow:hidden;border-left:4px solid ${pColor.bg};">
+            <div style="padding:16px;background:#1E293B;cursor:pointer;" onclick="openProject('${group.project.id}')">
+              <div style="display:flex;align-items:center;gap:12px;">
+                <span style="font-size:18px;font-weight:600;">${group.project.name}</span>
+                <span style="background:#475569;padding:4px 10px;border-radius:12px;font-size:11px;">${group.tasks.length} task${group.tasks.length > 1 ? 's' : ''}</span>
+                <span style="background:${group.project.status === 'In Progress' ? '#F59E0B' : '#64748B'};padding:4px 10px;border-radius:12px;font-size:11px;">${group.project.status}</span>
+              </div>
+            </div>
+            <div style="padding:12px;">
+        `;
+
+        group.tasks.forEach(item => {
+          const statusColor = {
+            'Not Started': '#6B7280',
+            'In-Progress': '#3B82F6',
+            'Stuck': '#EF4444',
+            'Finished': '#10B981'
+          }[item.task.status || 'Not Started'] || '#6B7280';
+
+          const picName = item.picMember ? item.picMember.name : (item.picCustom || 'Unassigned');
+          const urgency = item.urgency;
+
+          html += `
+            <div style="background:#1E293B;padding:12px;border-radius:8px;margin-bottom:8px;display:flex;align-items:center;gap:12px;border-left:3px solid ${urgency.color};">
+              <div style="width:8px;height:8px;border-radius:50%;background:${statusColor};flex-shrink:0;"></div>
+              <div style="flex:1;min-width:0;">
+                <div style="display:flex;align-items:center;gap:8px;">
+                  <span style="font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${item.task.name}</span>
+                  <span style="background:${urgency.bg};color:${urgency.color};padding:2px 8px;border-radius:4px;font-size:10px;font-weight:600;flex-shrink:0;">${urgency.label}</span>
+                </div>
+                <div style="font-size:11px;color:#64748B;margin-top:4px;">
+                  ${formatDate(item.task.start)} - ${formatDate(item.task.end)} • PIC: ${picName}
+                </div>
+              </div>
+              <div style="display:flex;align-items:center;gap:8px;flex-shrink:0;">
+                <span style="background:${statusColor};padding:4px 10px;border-radius:6px;font-size:11px;color:white;">${item.task.status || 'Not Started'}</span>
+                <span style="background:#0F172A;padding:4px 10px;border-radius:6px;font-size:11px;">${item.task.progress || 0}%</span>
+                <button class="btn btn-secondary btn-sm" onclick="openProject('${item.project.id}');setTimeout(()=>switchTab('timeline'),100);" title="View in Timeline">📊</button>
+              </div>
+            </div>
+          `;
+        });
+
+        html += `</div></div>`;
+      });
+
+      document.getElementById('mytasks-list').innerHTML = html;
+    }
+
     // ==================== PORTFOLIO VIEW (All Projects Gantt) ====================
     let portfolioMemberFilter = 'all';
     
@@ -1682,6 +2047,14 @@
       let allProjects = data.projects.filter(p => p.startDate && p.endDate);
 
       // Portfolio BUG-2: Calculate status summary BEFORE filtering
+      // Count stuck tasks across all projects
+      let stuckTasksCount = 0;
+      allProjects.forEach(p => {
+        if (p.tasks) {
+          stuckTasksCount += p.tasks.filter(t => t.status === 'Stuck').length;
+        }
+      });
+
       const statusSummary = {
         total: allProjects.length,
         'Not Started': allProjects.filter(p => p.status === 'Not Started').length,
@@ -1689,7 +2062,8 @@
         'In Progress': allProjects.filter(p => p.status === 'In Progress').length,
         'On Hold': allProjects.filter(p => p.status === 'On Hold').length,
         'Completed': allProjects.filter(p => p.status === 'Completed').length,
-        atRisk: allProjects.filter(p => calculateRiskStatus(p).isRisk).length
+        atRisk: allProjects.filter(p => calculateRiskStatus(p).isRisk).length,
+        stuckTasks: stuckTasksCount
       };
 
       // Render Portfolio BUG-2: Status Summary Cards
@@ -1713,6 +2087,10 @@
         <div style="flex:1;min-width:120px;background:#1E293B;padding:16px;border-radius:12px;text-align:center;border:2px solid #EF4444;">
           <div style="font-size:28px;font-weight:700;color:#EF4444;">${statusSummary.atRisk}</div>
           <div style="font-size:11px;color:#94A3B8;margin-top:2px;">⚠️ At Risk</div>
+        </div>
+        <div style="flex:1;min-width:120px;background:linear-gradient(135deg,#DC2626,#991B1B);padding:16px;border-radius:12px;text-align:center;">
+          <div style="font-size:28px;font-weight:700;color:white;">${statusSummary.stuckTasks}</div>
+          <div style="font-size:11px;color:rgba(255,255,255,0.9);margin-top:2px;">🚫 Stuck Tasks</div>
         </div>
       `;
 
@@ -3219,16 +3597,48 @@ Current: ${p.status}`, currentIdx + 1);
       }
       html += '</div>'; // end pic-column
 
+      // Status column
+      html += `<div class="gantt-status-column">
+        <div class="gantt-task-col-spacer"></div>
+        <div class="gantt-task-col" style="min-width:100px;">Status</div>`;
+      if (!tasks.length) {
+        html += '<div class="gantt-status-cell" style="min-height:60px;"></div>';
+      } else {
+        tasks.forEach(t => {
+          const statusColors = {
+            'Not Started': '#6B7280',
+            'In-Progress': '#3B82F6',
+            'Stuck': '#EF4444',
+            'Finished': '#10B981'
+          };
+          const currentStatus = t.status || 'Not Started';
+          const statusColor = statusColors[currentStatus] || '#6B7280';
+          const hasSubtasks = t.subtasks && t.subtasks.length > 0;
+          html += `<div class="gantt-task-row-wrapper">
+            <div class="gantt-status-cell">
+              <select class="gantt-status-select" onchange="updateTaskStatus('${t.id}', this.value)" style="background:${statusColor};color:white;font-weight:500;">
+                <option value="Not Started" ${currentStatus === 'Not Started' ? 'selected' : ''}>Not Started</option>
+                <option value="In-Progress" ${currentStatus === 'In-Progress' ? 'selected' : ''}>In-Progress</option>
+                <option value="Stuck" ${currentStatus === 'Stuck' ? 'selected' : ''}>Stuck</option>
+                <option value="Finished" ${currentStatus === 'Finished' ? 'selected' : ''}>Finished</option>
+              </select>
+            </div>
+            ${hasSubtasks ? `<div class="subtask-status-spacer" id="subtask-status-${t.id}" style="display:none;"></div>` : ''}
+          </div>`;
+        });
+      }
+      html += '</div>'; // end status-column
+
       // Timeline column
       html += '<div class="gantt-timeline-column">';
-      
+
       // Month headers
       html += '<div class="gantt-header-months">';
       months.forEach(m => {
         html += `<div class="gantt-month-label" style="min-width:${m.days * dayWidth}px;">${m.name}</div>`;
       });
       html += '</div>';
-      
+
       // Day headers
       html += '<div class="gantt-timeline">';
       dates.forEach(d => {
@@ -3386,6 +3796,38 @@ Current: ${p.status}`, currentIdx + 1);
       }
       html += '</div>';
 
+      // Status column for Weekly view
+      html += `<div class="gantt-status-column">
+        <div class="gantt-task-col-spacer"></div>
+        <div class="gantt-task-col" style="min-width:100px;">Status</div>`;
+      if (!tasks.length) {
+        html += '<div class="gantt-status-cell" style="min-height:60px;"></div>';
+      } else {
+        tasks.forEach(t => {
+          const statusColors = {
+            'Not Started': '#6B7280',
+            'In-Progress': '#3B82F6',
+            'Stuck': '#EF4444',
+            'Finished': '#10B981'
+          };
+          const currentStatus = t.status || 'Not Started';
+          const statusColor = statusColors[currentStatus] || '#6B7280';
+          const hasSubtasks = t.subtasks && t.subtasks.length > 0;
+          html += `<div class="gantt-task-row-wrapper">
+            <div class="gantt-status-cell">
+              <select class="gantt-status-select" onchange="updateTaskStatus('${t.id}', this.value)" style="background:${statusColor};color:white;font-weight:500;">
+                <option value="Not Started" ${currentStatus === 'Not Started' ? 'selected' : ''}>Not Started</option>
+                <option value="In-Progress" ${currentStatus === 'In-Progress' ? 'selected' : ''}>In-Progress</option>
+                <option value="Stuck" ${currentStatus === 'Stuck' ? 'selected' : ''}>Stuck</option>
+                <option value="Finished" ${currentStatus === 'Finished' ? 'selected' : ''}>Finished</option>
+              </select>
+            </div>
+            ${hasSubtasks ? `<div class="subtask-status-spacer" id="subtask-status-${t.id}" style="display:none;"></div>` : ''}
+          </div>`;
+        });
+      }
+      html += '</div>';
+
       html += '<div class="gantt-timeline-column">';
       html += '<div class="gantt-header-months">';
       months.forEach(m => {
@@ -3501,6 +3943,37 @@ Current: ${p.status}`, currentIdx + 1);
               </select>
             </div>
             ${hasSubtasks ? `<div class="subtask-pic-spacer" id="subtask-pic-${t.id}" style="display:none;"></div>` : ''}
+          </div>`;
+        });
+      }
+      html += '</div>';
+
+      // Status column for Monthly view
+      html += `<div class="gantt-status-column">
+        <div class="gantt-task-col" style="min-width:100px;height:44px;">Status</div>`;
+      if (!tasks.length) {
+        html += '<div class="gantt-status-cell" style="min-height:60px;"></div>';
+      } else {
+        tasks.forEach(t => {
+          const statusColors = {
+            'Not Started': '#6B7280',
+            'In-Progress': '#3B82F6',
+            'Stuck': '#EF4444',
+            'Finished': '#10B981'
+          };
+          const currentStatus = t.status || 'Not Started';
+          const statusColor = statusColors[currentStatus] || '#6B7280';
+          const hasSubtasks = t.subtasks && t.subtasks.length > 0;
+          html += `<div class="gantt-task-row-wrapper">
+            <div class="gantt-status-cell">
+              <select class="gantt-status-select" onchange="updateTaskStatus('${t.id}', this.value)" style="background:${statusColor};color:white;font-weight:500;">
+                <option value="Not Started" ${currentStatus === 'Not Started' ? 'selected' : ''}>Not Started</option>
+                <option value="In-Progress" ${currentStatus === 'In-Progress' ? 'selected' : ''}>In-Progress</option>
+                <option value="Stuck" ${currentStatus === 'Stuck' ? 'selected' : ''}>Stuck</option>
+                <option value="Finished" ${currentStatus === 'Finished' ? 'selected' : ''}>Finished</option>
+              </select>
+            </div>
+            ${hasSubtasks ? `<div class="subtask-status-spacer" id="subtask-status-${t.id}" style="display:none;"></div>` : ''}
           </div>`;
         });
       }
@@ -4490,6 +4963,24 @@ Current: ${p.status}`, currentIdx + 1);
         saveData();
         showToast('PIC cleared');
       }
+    }
+
+    // Update task status directly from Gantt dropdown
+    function updateTaskStatus(taskId, status) {
+      const p = getProjectById(currentProjectId);
+      const task = p.tasks.find(t => t.id === taskId);
+      if (!task) return;
+
+      task.status = status;
+
+      // If finished, set progress to 100%
+      if (status === 'Finished') {
+        task.progress = 100;
+      }
+
+      saveData();
+      renderGantt(document.getElementById('tab-content'));
+      showToast('Status updated to ' + status);
     }
 
     // Member Modal
