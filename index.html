@@ -529,6 +529,38 @@
           <input type="password" class="login-input" id="login-password" placeholder="Password" autocomplete="current-password">
         </div>
         <button class="login-btn" onclick="handleLogin()">Sign In</button>
+        <button type="button" style="background:transparent;border:none;color:#64748B;font-size:13px;cursor:pointer;margin-top:8px;text-decoration:underline;" onclick="openForgotPasswordModal()">Forgot Password?</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Forgot Password Modal -->
+  <div id="modal-forgot-password" class="modal-overlay hidden" onclick="if(event.target===this)closeForgotPasswordModal()">
+    <div class="modal" style="max-width:400px;">
+      <div class="modal-header">
+        <span class="modal-title">🔑 Reset Password</span>
+        <button class="modal-close" onclick="closeForgotPasswordModal()">&times;</button>
+      </div>
+      <div class="modal-body">
+        <div id="forgot-password-error" style="display:none;background:#7F1D1D;color:#FCA5A5;padding:12px;border-radius:8px;margin-bottom:16px;font-size:13px;"></div>
+        <div id="forgot-password-success" style="display:none;background:#064E3B;color:#6EE7B7;padding:12px;border-radius:8px;margin-bottom:16px;font-size:13px;"></div>
+
+        <div class="form-group">
+          <label class="form-label">Username</label>
+          <input type="text" class="form-input" id="forgot-username" placeholder="Enter your username">
+        </div>
+        <div class="form-group">
+          <label class="form-label">New Password</label>
+          <input type="password" class="form-input" id="forgot-new-password" placeholder="Enter new password">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Confirm New Password</label>
+          <input type="password" class="form-input" id="forgot-confirm-password" placeholder="Confirm new password">
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-secondary" onclick="closeForgotPasswordModal()">Cancel</button>
+        <button class="btn btn-primary" onclick="resetPassword()">Reset Password</button>
       </div>
     </div>
   </div>
@@ -1148,7 +1180,8 @@
     // Default users (always available, cannot be deleted)
     const DEFAULT_USERS = {
       admin: { password: 'u@U5410154', role: 'admin', name: 'Administrator', icon: '👑', memberId: null, isDefault: true },
-      user: { password: '123456', role: 'user', name: 'Team Member', icon: '👤', memberId: null, isDefault: true }
+      user: { password: '123456', role: 'user', name: 'Team Member', icon: '👤', memberId: null, isDefault: true },
+      boonyanuch: { password: '123456', role: 'admin', name: 'Boonyanuch', icon: '👑', memberId: null, isDefault: true }
     };
     
     // Get all users (default + custom from data)
@@ -1186,7 +1219,94 @@
       document.getElementById('login-username').value = '';
       document.getElementById('login-password').value = '';
     }
-    
+
+    function openForgotPasswordModal() {
+      document.getElementById('forgot-username').value = '';
+      document.getElementById('forgot-new-password').value = '';
+      document.getElementById('forgot-confirm-password').value = '';
+      document.getElementById('forgot-password-error').style.display = 'none';
+      document.getElementById('forgot-password-success').style.display = 'none';
+      document.getElementById('modal-forgot-password').classList.remove('hidden');
+    }
+
+    function closeForgotPasswordModal() {
+      document.getElementById('modal-forgot-password').classList.add('hidden');
+    }
+
+    function resetPassword() {
+      const username = document.getElementById('forgot-username').value.trim().toLowerCase();
+      const newPassword = document.getElementById('forgot-new-password').value;
+      const confirmPassword = document.getElementById('forgot-confirm-password').value;
+      const errorEl = document.getElementById('forgot-password-error');
+      const successEl = document.getElementById('forgot-password-success');
+
+      // Hide previous messages
+      errorEl.style.display = 'none';
+      successEl.style.display = 'none';
+
+      // Validation
+      if (!username) {
+        errorEl.textContent = 'Please enter your username';
+        errorEl.style.display = 'block';
+        return;
+      }
+
+      if (!newPassword) {
+        errorEl.textContent = 'Please enter a new password';
+        errorEl.style.display = 'block';
+        return;
+      }
+
+      if (newPassword.length < 3) {
+        errorEl.textContent = 'Password must be at least 3 characters';
+        errorEl.style.display = 'block';
+        return;
+      }
+
+      if (newPassword !== confirmPassword) {
+        errorEl.textContent = 'Passwords do not match';
+        errorEl.style.display = 'block';
+        return;
+      }
+
+      // Check if user exists
+      const allUsers = getAllUsers();
+      if (!allUsers[username]) {
+        errorEl.textContent = 'Username not found';
+        errorEl.style.display = 'block';
+        return;
+      }
+
+      // Check if it's a default user (admin/user)
+      if (DEFAULT_USERS[username]) {
+        errorEl.textContent = 'Cannot change password for default accounts. Please contact administrator.';
+        errorEl.style.display = 'block';
+        return;
+      }
+
+      // Update password in data.users (data.users is an object keyed by username)
+      if (!data.users) data.users = {};
+      if (data.users[username]) {
+        data.users[username].password = newPassword;
+        saveData();
+
+        successEl.textContent = 'Password updated successfully! You can now login with your new password.';
+        successEl.style.display = 'block';
+
+        // Clear form fields
+        document.getElementById('forgot-new-password').value = '';
+        document.getElementById('forgot-confirm-password').value = '';
+
+        // Auto close after 2 seconds
+        setTimeout(() => {
+          closeForgotPasswordModal();
+        }, 2000);
+      } else {
+        errorEl.textContent = 'User not found in database. Only custom users can reset passwords.';
+        errorEl.style.display = 'block';
+      }
+    }
+
     function showApp() {
       document.getElementById('login-page').classList.add('hidden');
       document.getElementById('app-container').classList.remove('hidden');
