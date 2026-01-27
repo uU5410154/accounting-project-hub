@@ -177,6 +177,11 @@
     .board-project-meta { display: flex; gap: 6px; flex-wrap: wrap; align-items: center; }
     .board-project-status { font-size: 10px; color: #64748B; background: #1E293B; padding: 2px 6px; border-radius: 4px; }
     .board-project-role { font-size: 9px; font-weight: 600; color: white; background: #6366F1; padding: 2px 6px; border-radius: 4px; text-transform: uppercase; }
+    .board-project-role.role-pm { background: #8B5CF6; }
+    .board-project-role.role-dev { background: #EF4444; }
+    .board-project-role.role-qa { background: #F59E0B; }
+    .board-project-role.role-support { background: #06B6D4; }
+    .board-project-role.role-lead { background: #3B82F6; }
     
     /* Modal */
     .modal-overlay { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.8); display: flex; align-items: flex-start; justify-content: center; z-index: 1000; padding: 20px; overflow-y: auto; }
@@ -248,8 +253,11 @@
     .gantt-scroll-container { overflow-x: auto; overflow-y: hidden; -webkit-overflow-scrolling: touch; }
     .gantt-wrapper { display: flex; min-width: max-content; }
     .gantt-task-column { min-width: 250px; max-width: 250px; flex-shrink: 0; position: sticky; left: 0; z-index: 20; background: #1E293B; }
-    .gantt-pic-column { min-width: 80px; max-width: 80px; flex-shrink: 0; position: sticky; left: 250px; z-index: 19; background: #1E293B; }
-    .gantt-pic-cell { min-width: 80px; max-width: 80px; padding: 6px 8px; font-size: 12px; background: #1E293B; border-right: 1px solid #334155; border-bottom: 1px solid #334155; display: flex; align-items: center; justify-content: center; height: 44px; box-sizing: border-box; }
+    .gantt-pic-column { min-width: 120px; max-width: 120px; flex-shrink: 0; position: sticky; left: 250px; z-index: 19; background: #1E293B; }
+    .gantt-pic-cell { min-width: 120px; max-width: 120px; padding: 4px 6px; font-size: 12px; background: #1E293B; border-right: 1px solid #334155; border-bottom: 1px solid #334155; display: flex; align-items: center; justify-content: center; height: 44px; box-sizing: border-box; }
+    .gantt-pic-select { width: 100%; padding: 4px 6px; background: #0F172A; border: 1px solid #334155; border-radius: 4px; color: #E2E8F0; font-size: 11px; cursor: pointer; outline: none; }
+    .gantt-pic-select:hover { border-color: #38BDF8; }
+    .gantt-pic-select:focus { border-color: #38BDF8; }
     .gantt-timeline-column { flex: 1; }
     .gantt-header { display: flex; border-bottom: 1px solid #334155; }
     .gantt-header-months { display: flex; border-bottom: 1px solid #334155; background: #0F172A; }
@@ -416,7 +424,7 @@
       .section { padding: 24px; }
       .detail-name { font-size: 28px; }
       .gantt-task-col, .gantt-task-name, .gantt-task-column { min-width: 280px; max-width: 280px; }
-      .gantt-pic-column, .gantt-pic-cell { left: 280px; }
+      .gantt-pic-column, .gantt-pic-cell { left: 280px; min-width: 130px; max-width: 130px; }
       .gantt-date, .gantt-bar-cell { min-width: 40px; }
     }
     
@@ -457,7 +465,7 @@
       .modal { margin: 10px; border-radius: 12px; max-height: 90vh; }
       .modal-body { padding: 16px; max-height: 60vh; overflow-y: auto; }
       .gantt-task-col, .gantt-task-name, .gantt-task-column { min-width: 120px; max-width: 120px; padding: 6px; font-size: 10px; }
-      .gantt-pic-column, .gantt-pic-cell { min-width: 60px; max-width: 60px; left: 120px; }
+      .gantt-pic-column, .gantt-pic-cell { min-width: 90px; max-width: 90px; left: 120px; }
       .gantt-controls { flex-direction: column; align-items: stretch; }
       .gantt-scale-btn { padding: 8px 12px; }
       .gantt-date, .gantt-bar-cell { min-width: 28px; }
@@ -568,6 +576,30 @@
           <h2 class="section-title">👥 Team</h2>
           <button class="btn btn-primary btn-sm" id="btn-add-member" onclick="openMemberModal()">+ Add Member</button>
         </div>
+        <!-- Role Filter for Team Section -->
+        <div id="team-role-filter" style="display:flex;flex-wrap:wrap;gap:8px;margin-bottom:16px;padding:12px;background:#334155;border-radius:8px;align-items:center;">
+          <span style="color:#94A3B8;font-size:12px;font-weight:500;">🏷️ Filter by Role:</span>
+          <label style="display:flex;align-items:center;gap:4px;cursor:pointer;font-size:12px;">
+            <input type="checkbox" value="PM" onchange="renderTeamBoards()" checked style="accent-color:#8B5CF6;">
+            <span style="background:#8B5CF6;color:white;padding:2px 8px;border-radius:4px;font-size:11px;">PM</span>
+          </label>
+          <label style="display:flex;align-items:center;gap:4px;cursor:pointer;font-size:12px;">
+            <input type="checkbox" value="Dev" onchange="renderTeamBoards()" checked style="accent-color:#EF4444;">
+            <span style="background:#EF4444;color:white;padding:2px 8px;border-radius:4px;font-size:11px;">Dev</span>
+          </label>
+          <label style="display:flex;align-items:center;gap:4px;cursor:pointer;font-size:12px;">
+            <input type="checkbox" value="QA" onchange="renderTeamBoards()" checked style="accent-color:#F59E0B;">
+            <span style="background:#F59E0B;color:white;padding:2px 8px;border-radius:4px;font-size:11px;">QA</span>
+          </label>
+          <label style="display:flex;align-items:center;gap:4px;cursor:pointer;font-size:12px;">
+            <input type="checkbox" value="Support" onchange="renderTeamBoards()" checked style="accent-color:#06B6D4;">
+            <span style="background:#06B6D4;color:white;padding:2px 8px;border-radius:4px;font-size:11px;">Support</span>
+          </label>
+          <label style="display:flex;align-items:center;gap:4px;cursor:pointer;font-size:12px;">
+            <input type="checkbox" value="Lead" onchange="renderTeamBoards()" checked style="accent-color:#3B82F6;">
+            <span style="background:#3B82F6;color:white;padding:2px 8px;border-radius:4px;font-size:11px;">Lead</span>
+          </label>
+        </div>
         <div class="boards" id="team-boards"></div>
       </div>
     </div>
@@ -615,16 +647,16 @@
                 <span style="background:#8B5CF6;color:white;padding:1px 6px;border-radius:3px;">PM</span>
               </label>
               <label style="display:flex;align-items:center;gap:4px;cursor:pointer;font-size:11px;">
-                <input type="checkbox" value="Dev" onchange="renderPortfolio()" checked style="accent-color:#10B981;">
-                <span style="background:#10B981;color:white;padding:1px 6px;border-radius:3px;">Dev</span>
+                <input type="checkbox" value="Dev" onchange="renderPortfolio()" checked style="accent-color:#EF4444;">
+                <span style="background:#EF4444;color:white;padding:1px 6px;border-radius:3px;">Dev</span>
               </label>
               <label style="display:flex;align-items:center;gap:4px;cursor:pointer;font-size:11px;">
                 <input type="checkbox" value="QA" onchange="renderPortfolio()" checked style="accent-color:#F59E0B;">
                 <span style="background:#F59E0B;color:white;padding:1px 6px;border-radius:3px;">QA</span>
               </label>
               <label style="display:flex;align-items:center;gap:4px;cursor:pointer;font-size:11px;">
-                <input type="checkbox" value="Support" onchange="renderPortfolio()" checked style="accent-color:#EF4444;">
-                <span style="background:#EF4444;color:white;padding:1px 6px;border-radius:3px;">Support</span>
+                <input type="checkbox" value="Support" onchange="renderPortfolio()" checked style="accent-color:#06B6D4;">
+                <span style="background:#06B6D4;color:white;padding:1px 6px;border-radius:3px;">Support</span>
               </label>
               <label style="display:flex;align-items:center;gap:4px;cursor:pointer;font-size:11px;">
                 <input type="checkbox" value="Lead" onchange="renderPortfolio()" checked style="accent-color:#3B82F6;">
@@ -801,9 +833,14 @@
         </div>
         <div class="form-group">
           <label class="form-label">PIC (Person In Charge)</label>
-          <select class="form-select" id="task-pic">
-            <option value="">-- Select PIC --</option>
-          </select>
+          <div style="display:flex;gap:8px;align-items:center;">
+            <select class="form-select" id="task-pic" style="flex:1;" onchange="handlePicSelectChange()">
+              <option value="">-- Select PIC --</option>
+            </select>
+            <span style="color:#64748B;font-size:12px;">or</span>
+            <input class="form-input" id="task-pic-custom" placeholder="Type custom name..." style="flex:1;">
+          </div>
+          <div style="font-size:11px;color:#64748B;margin-top:4px;">Select a team member or type a custom name</div>
         </div>
         <div class="form-group">
           <label class="form-label">Progress: <span id="progress-display">0</span>%</label>
@@ -1549,7 +1586,7 @@
       document.getElementById('view-calendar').classList.add('hidden');
       document.querySelectorAll('.nav-link').forEach(l => l.classList.remove('active'));
       
-      if (view === 'dashboard') { document.getElementById('view-dashboard').classList.remove('hidden'); document.getElementById('nav-dashboard').classList.add('active'); renderDashboard(); }
+      if (view === 'dashboard') { document.getElementById('view-dashboard').classList.remove('hidden'); document.getElementById('nav-dashboard').classList.add('active'); currentProjectId = null; renderDashboard(); }
       else if (view === 'project') { document.getElementById('view-project').classList.remove('hidden'); renderProjectDetail(); }
       else if (view === 'portfolio') { document.getElementById('view-portfolio').classList.remove('hidden'); document.getElementById('nav-portfolio').classList.add('active'); renderPortfolio(); }
       else if (view === 'calendar') { document.getElementById('view-calendar').classList.remove('hidden'); document.getElementById('nav-calendar').classList.add('active'); renderTimeManagement(); }
@@ -1696,7 +1733,7 @@
       // All available roles with their colors
       const PORTFOLIO_ROLES = [
         { role: 'PM', color: '#8B5CF6' },
-        { role: 'Dev', color: '#10B981' },
+        { role: 'Dev', color: '#EF4444' },
         { role: 'QA', color: '#F59E0B' },
         { role: 'Support', color: '#EF4444' },
         { role: 'Lead', color: '#3B82F6' }
@@ -1808,7 +1845,7 @@
       months.push({ name: currentMonth, days: monthDays });
 
       // Role colors for portfolio
-      const ROLE_COLORS = { PM: '#8B5CF6', Dev: '#10B981', QA: '#F59E0B', Support: '#EF4444', Lead: '#3B82F6' };
+      const ROLE_COLORS = { PM: '#8B5CF6', Dev: '#EF4444', QA: '#F59E0B', Support: '#06B6D4', Lead: '#3B82F6' };
       const ROLE_ORDER = ['PM', 'Dev', 'QA', 'Support', 'Lead'];
       // Get selected roles from first project (they all have the same selection)
       const selectedRoles = projects.length > 0 ? (projects[0].selectedRoles || ROLE_ORDER) : ROLE_ORDER;
@@ -1977,7 +2014,7 @@
       months.push({ name: currentMonth, weeks: monthWeeks });
       
       // Role colors for portfolio
-      const ROLE_COLORS = { PM: '#8B5CF6', Dev: '#10B981', QA: '#F59E0B', Support: '#EF4444', Lead: '#3B82F6' };
+      const ROLE_COLORS = { PM: '#8B5CF6', Dev: '#EF4444', QA: '#F59E0B', Support: '#06B6D4', Lead: '#3B82F6' };
       const ROLE_ORDER = ['PM', 'Dev', 'QA', 'Support', 'Lead'];
       // Get selected roles from first project (they all have the same selection)
       const selectedRoles = projects.length > 0 ? (projects[0].selectedRoles || ROLE_ORDER) : ROLE_ORDER;
@@ -2131,7 +2168,7 @@
       }
       
       // Role colors for portfolio
-      const ROLE_COLORS = { PM: '#8B5CF6', Dev: '#10B981', QA: '#F59E0B', Support: '#EF4444', Lead: '#3B82F6' };
+      const ROLE_COLORS = { PM: '#8B5CF6', Dev: '#EF4444', QA: '#F59E0B', Support: '#06B6D4', Lead: '#3B82F6' };
       const ROLE_ORDER = ['PM', 'Dev', 'QA', 'Support', 'Lead'];
       // Get selected roles from first project (they all have the same selection)
       const selectedRoles = projects.length > 0 ? (projects[0].selectedRoles || ROLE_ORDER) : ROLE_ORDER;
@@ -2334,7 +2371,13 @@
     function renderTeamBoards() {
       // Define available roles
       const PROJECT_ROLES = ['PM', 'Dev', 'QA', 'Support', 'Lead'];
-      
+
+      // Get selected roles from filter checkboxes
+      const filterContainer = document.getElementById('team-role-filter');
+      const selectedRoles = filterContainer
+        ? Array.from(filterContainer.querySelectorAll('input[type="checkbox"]:checked')).map(cb => cb.value)
+        : PROJECT_ROLES;
+
       // Sort members: current user's member first (for mobile), then others
       const currentMemberId = getCurrentUserMemberId();
       const sortedMembers = [...data.members].sort((a, b) => {
@@ -2342,7 +2385,7 @@
         if (b.id === currentMemberId) return 1;
         return 0;
       });
-      
+
       document.getElementById('team-boards').innerHTML = sortedMembers.map(m => {
         const assignments = data.memberProjects[m.id] || [];
         const isCurrentUser = m.id === currentMemberId;
@@ -2355,7 +2398,12 @@
             // New format - object with id and role
             return { project: getProjectById(a.id), role: a.role };
           }
-        }).filter(pr => pr.project);
+        }).filter(pr => pr.project)
+          // Filter by selected roles
+          .filter(pr => {
+            if (!pr.role) return selectedRoles.length === PROJECT_ROLES.length; // Show unassigned roles only if all filters are selected
+            return selectedRoles.includes(pr.role);
+          });
         
         return `<div class="board ${isCurrentUser ? 'current-user-board' : ''}" style="border-color:${m.color}${isCurrentUser ? ';box-shadow:0 0 20px '+m.color+'40;' : ''}" data-member-id="${m.id}"
                      ondragover="handleDragOver(event)" ondragleave="handleDragLeave(event)" ondrop="handleDropWithRole(event, '${m.id}')">
@@ -2389,7 +2437,7 @@
               </div>
               ${riskStatus.isRisk ? `<div style="background:#FEE2E2;color:#DC2626;padding:4px 6px;border-radius:4px;font-size:9px;margin-bottom:4px;font-weight:600;">${riskStatus.reason}</div>` : ''}
               <div class="board-project-meta">
-                ${role ? `<span class="board-project-role">${role}</span>` : ''}
+                ${role ? `<span class="board-project-role role-${role.toLowerCase()}">${role}</span>` : ''}
                 <span class="board-project-status" style="${p.status === 'In Progress' ? 'background:#F59E0B;color:#0F172A;font-weight:600;' : ''}">${p.status}</span>
                 ${p.savingHours ? `<span class="board-project-status" style="background:#10B981;color:white;">⏱️ ${p.savingHours}h/mo</span>` : ''}
                 <button class="btn btn-secondary btn-sm" onclick="openQuickAssign('${p.id}', event)" style="margin-left:auto;padding:2px 6px;font-size:9px;">↔️</button>
@@ -2569,7 +2617,7 @@
 
     function renderQuickAssignContent(projectId, p) {
       const roles = ['PM', 'Dev', 'QA', 'Support', 'Lead'];
-      const roleColors = { PM: '#8B5CF6', Dev: '#10B981', QA: '#F59E0B', Support: '#EF4444', Lead: '#3B82F6' };
+      const roleColors = { PM: '#8B5CF6', Dev: '#EF4444', QA: '#F59E0B', Support: '#06B6D4', Lead: '#3B82F6' };
 
       const memberOptions = data.members.map(m => {
         const currentRole = pendingRoleChanges[m.id];
@@ -2794,7 +2842,7 @@
             <span style="display:inline-flex;align-items:center;gap:4px;background:#334155;padding:4px 8px;border-radius:16px;font-size:11px;">
               <span style="background:${pa.member.color};width:18px;height:18px;border-radius:50%;display:inline-flex;align-items:center;justify-content:center;font-size:9px;">${pa.member.avatar}</span>
               ${pa.member.name}
-              ${pa.role ? `<span class="board-project-role" style="margin-left:2px;">${pa.role}</span>` : ''}
+              ${pa.role ? `<span class="board-project-role role-${pa.role.toLowerCase()}" style="margin-left:2px;">${pa.role}</span>` : ''}
             </span>
           `).join('')}
           <button class="btn btn-secondary btn-sm" onclick="openQuickAssign('${p.id}')" style="padding:4px 8px;font-size:10px;">✏️ Edit</button>
@@ -3055,9 +3103,14 @@ Current: ${p.status}`, currentIdx + 1);
         tasks.forEach(t => {
           const picMember = t.pic ? getMemberById(t.pic) : null;
           const hasSubtasks = t.subtasks && t.subtasks.length > 0;
+          const customOptionText = t.picCustom && !t.pic ? `✏️ ${t.picCustom}` : '✏️ Custom...';
           html += `<div class="gantt-task-row-wrapper">
             <div class="gantt-pic-cell">
-              ${picMember ? `<span style="background:${picMember.color};width:24px;height:24px;border-radius:50%;display:inline-flex;align-items:center;justify-content:center;font-size:10px;" title="${picMember.name}">${picMember.avatar}</span>` : '<span style="color:#64748B;font-size:11px;">-</span>'}
+              <select class="gantt-pic-select" onchange="updateTaskPic('${t.id}', this.value)" title="${picMember ? picMember.name : (t.picCustom || 'Select PIC')}">
+                <option value="">-- Select --</option>
+                ${data.members.map(m => `<option value="${m.id}" ${t.pic === m.id ? 'selected' : ''}>${m.name}</option>`).join('')}
+                <option value="__custom__" ${t.picCustom && !t.pic ? 'selected' : ''}>${customOptionText}</option>
+              </select>
             </div>
             ${hasSubtasks ? `<div class="subtask-pic-spacer" id="subtask-pic-${t.id}" style="display:none;"></div>` : ''}
           </div>`;
@@ -3217,9 +3270,14 @@ Current: ${p.status}`, currentIdx + 1);
         tasks.forEach(t => {
           const picMember = t.pic ? getMemberById(t.pic) : null;
           const hasSubtasks = t.subtasks && t.subtasks.length > 0;
+          const customOptionText = t.picCustom && !t.pic ? `✏️ ${t.picCustom}` : '✏️ Custom...';
           html += `<div class="gantt-task-row-wrapper">
             <div class="gantt-pic-cell">
-              ${picMember ? `<span style="background:${picMember.color};width:24px;height:24px;border-radius:50%;display:inline-flex;align-items:center;justify-content:center;font-size:10px;" title="${picMember.name}">${picMember.avatar}</span>` : '<span style="color:#64748B;font-size:11px;">-</span>'}
+              <select class="gantt-pic-select" onchange="updateTaskPic('${t.id}', this.value)" title="${picMember ? picMember.name : (t.picCustom || 'Select PIC')}">
+                <option value="">-- Select --</option>
+                ${data.members.map(m => `<option value="${m.id}" ${t.pic === m.id ? 'selected' : ''}>${m.name}</option>`).join('')}
+                <option value="__custom__" ${t.picCustom && !t.pic ? 'selected' : ''}>${customOptionText}</option>
+              </select>
             </div>
             ${hasSubtasks ? `<div class="subtask-pic-spacer" id="subtask-pic-${t.id}" style="display:none;"></div>` : ''}
           </div>`;
@@ -3332,9 +3390,14 @@ Current: ${p.status}`, currentIdx + 1);
         tasks.forEach(t => {
           const picMember = t.pic ? getMemberById(t.pic) : null;
           const hasSubtasks = t.subtasks && t.subtasks.length > 0;
+          const customOptionText = t.picCustom && !t.pic ? `✏️ ${t.picCustom}` : '✏️ Custom...';
           html += `<div class="gantt-task-row-wrapper">
             <div class="gantt-pic-cell">
-              ${picMember ? `<span style="background:${picMember.color};width:24px;height:24px;border-radius:50%;display:inline-flex;align-items:center;justify-content:center;font-size:10px;" title="${picMember.name}">${picMember.avatar}</span>` : '<span style="color:#64748B;font-size:11px;">-</span>'}
+              <select class="gantt-pic-select" onchange="updateTaskPic('${t.id}', this.value)" title="${picMember ? picMember.name : (t.picCustom || 'Select PIC')}">
+                <option value="">-- Select --</option>
+                ${data.members.map(m => `<option value="${m.id}" ${t.pic === m.id ? 'selected' : ''}>${m.name}</option>`).join('')}
+                <option value="__custom__" ${t.picCustom && !t.pic ? 'selected' : ''}>${customOptionText}</option>
+              </select>
             </div>
             ${hasSubtasks ? `<div class="subtask-pic-spacer" id="subtask-pic-${t.id}" style="display:none;"></div>` : ''}
           </div>`;
@@ -3747,6 +3810,15 @@ Current: ${p.status}`, currentIdx + 1);
     // ==================== MODALS ====================
     function closeModal(type) { document.getElementById('modal-' + type).classList.add('hidden'); }
 
+    // Clear custom PIC input when a member is selected
+    function handlePicSelectChange() {
+      const picSelect = document.getElementById('task-pic');
+      const picCustom = document.getElementById('task-pic-custom');
+      if (picSelect.value) {
+        picCustom.value = '';
+      }
+    }
+
     function openProjectModal() {
       if (!isAdmin()) {
         showToast('Only admin can create projects');
@@ -3835,7 +3907,8 @@ Current: ${p.status}`, currentIdx + 1);
       if (id) { Object.assign(getProjectById(id), projectData); showToast('Updated'); }
       else { const np = { id: generateId(), ...projectData, tasks: [], updates: [] }; data.projects.push(np); data.projectPool.push(np.id); showToast('Created'); }
       saveData(); closeModal('project');
-      if (currentProjectId) renderProjectDetail(); else renderDashboard();
+      // Use 'id' to determine if editing existing project or creating new one
+      if (id && currentProjectId === id) renderProjectDetail(); else renderDashboard();
     }
 
     function deleteProjectFromModal() {
@@ -3879,6 +3952,7 @@ Current: ${p.status}`, currentIdx + 1);
 
       // Populate PIC dropdown with members
       const picSelect = document.getElementById('task-pic');
+      const picCustom = document.getElementById('task-pic-custom');
       picSelect.innerHTML = '<option value="">-- Select PIC --</option>' +
         data.members.map(m => `<option value="${m.id}">${m.avatar} ${m.name}</option>`).join('');
 
@@ -3888,7 +3962,19 @@ Current: ${p.status}`, currentIdx + 1);
         document.getElementById('task-name').value = t.name;
         document.getElementById('task-start').value = t.start;
         document.getElementById('task-end').value = t.end;
-        document.getElementById('task-pic').value = t.pic || '';
+
+        // Check if PIC is a member ID or custom name
+        if (t.pic && getMemberById(t.pic)) {
+          picSelect.value = t.pic;
+          picCustom.value = '';
+        } else if (t.picCustom) {
+          picSelect.value = '';
+          picCustom.value = t.picCustom;
+        } else {
+          picSelect.value = '';
+          picCustom.value = '';
+        }
+
         document.getElementById('task-progress').value = t.progress;
         document.getElementById('progress-display').textContent = t.progress;
         document.getElementById('task-modal-title').textContent = 'Edit Task';
@@ -3899,7 +3985,8 @@ Current: ${p.status}`, currentIdx + 1);
         document.getElementById('task-name').value = '';
         document.getElementById('task-start').value = p.startDate || '';
         document.getElementById('task-end').value = p.startDate || '';
-        document.getElementById('task-pic').value = '';
+        picSelect.value = '';
+        picCustom.value = '';
         document.getElementById('task-progress').value = 0;
         document.getElementById('progress-display').textContent = '0';
         document.getElementById('task-modal-title').textContent = 'Add Task';
@@ -4134,13 +4221,20 @@ Current: ${p.status}`, currentIdx + 1);
         }
       }
 
-      const pic = document.getElementById('task-pic').value || null;
+      const picMemberId = document.getElementById('task-pic').value || null;
+      const picCustomName = document.getElementById('task-pic-custom').value.trim() || null;
+
+      // Use member ID if selected, otherwise use custom name
+      const pic = picMemberId || null;
+      const picCustom = !picMemberId && picCustomName ? picCustomName : null;
+
       const taskData = {
         name,
         start: startDate,
         end: endDate,
         progress,
         pic,
+        picCustom,
         subtasks: modalSubtasks
       };
       if (id) {
@@ -4158,17 +4252,51 @@ Current: ${p.status}`, currentIdx + 1);
       }
       saveData(); closeModal('task'); renderGantt(document.getElementById('tab-content'));
     }
-    function deleteTask(tid) { 
+    function deleteTask(tid) {
       if (!isAdmin()) {
         showToast('Only admin can delete tasks');
         return;
       }
-      if (confirm('Delete task?')) { 
-        getProjectById(currentProjectId).tasks = getProjectById(currentProjectId).tasks.filter(t => t.id !== tid); 
-        saveData(); 
-        renderGantt(document.getElementById('tab-content')); 
-        showToast('Deleted'); 
-      } 
+      if (confirm('Delete task?')) {
+        getProjectById(currentProjectId).tasks = getProjectById(currentProjectId).tasks.filter(t => t.id !== tid);
+        saveData();
+        renderGantt(document.getElementById('tab-content'));
+        showToast('Deleted');
+      }
+    }
+
+    // Update task PIC directly from Gantt dropdown
+    function updateTaskPic(taskId, value) {
+      const p = getProjectById(currentProjectId);
+      const task = p.tasks.find(t => t.id === taskId);
+      if (!task) return;
+
+      if (value === '__custom__') {
+        // Prompt for custom name
+        const customName = prompt('Enter custom PIC name:');
+        if (customName && customName.trim()) {
+          task.pic = null;
+          task.picCustom = customName.trim();
+          saveData();
+          renderGantt(document.getElementById('tab-content'));
+          showToast('PIC updated');
+        } else {
+          // Revert if cancelled - re-render to reset dropdown
+          renderGantt(document.getElementById('tab-content'));
+        }
+      } else if (value) {
+        // Member selected
+        task.pic = value;
+        task.picCustom = null;
+        saveData();
+        showToast('PIC updated');
+      } else {
+        // Cleared
+        task.pic = null;
+        task.picCustom = null;
+        saveData();
+        showToast('PIC cleared');
+      }
     }
 
     // Member Modal
