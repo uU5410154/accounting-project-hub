@@ -143,17 +143,17 @@
     .portfolio-gantt { background: #1E293B; border-radius: 12px; overflow: hidden; }
     .portfolio-project-column { min-width: 200px; max-width: 200px; flex-shrink: 0; position: sticky; left: 0; z-index: 20; background: #1E293B; }
     .portfolio-timeline-column { flex: 1; overflow-x: visible; }
-    .portfolio-header-cell { padding: 12px; font-weight: 600; font-size: 12px; color: #94A3B8; border-bottom: 1px solid #334155; border-right: 1px solid #334155; background: #1E293B; }
+    .portfolio-header-cell { padding: 12px; font-weight: 600; font-size: 12px; color: #94A3B8; border-bottom: 1px solid #334155; border-right: 1px solid #334155; background: #1E293B; height: 72px; box-sizing: border-box; display: flex; align-items: center; justify-content: center; }
     .portfolio-body-rows { }
-    .portfolio-row { display: flex; align-items: center; border-bottom: 1px solid #334155; height: 32px; min-height: 32px; }
+    .portfolio-row { display: flex; align-items: center; border-bottom: 1px solid #334155; height: 36px; min-height: 36px; box-sizing: border-box; }
     .portfolio-row:last-child { border-bottom: none; }
-    .portfolio-row.portfolio-role-row { height: 32px; min-height: 32px; background: #1a2235; }
-    .portfolio-project-group { border-bottom: 1px solid #334155; }
-    .portfolio-project-group:last-child { border-bottom: none; }
-    .portfolio-project-name { min-width: 200px; max-width: 200px; padding: 8px 12px; font-size: 12px; font-weight: 500; cursor: pointer; display: flex; align-items: center; border-right: 1px solid #334155; background: #1E293B; position: sticky; left: 0; z-index: 10; height: 32px; box-sizing: border-box; }
+    .portfolio-row.portfolio-role-row { height: 36px; min-height: 36px; background: #1a2235; }
+    .portfolio-project-group { }
+    .portfolio-project-group:last-child { }
+    .portfolio-project-name { min-width: 200px; max-width: 200px; padding: 8px 12px; font-size: 12px; font-weight: 500; cursor: pointer; display: flex; align-items: center; border-right: 1px solid #334155; border-bottom: 1px solid #334155; background: #1E293B; position: sticky; left: 0; z-index: 10; height: 36px; box-sizing: border-box; }
     .portfolio-project-name:hover { color: #38BDF8; background: #334155; }
-    .portfolio-role-name { min-width: 200px; max-width: 200px; padding: 4px 12px 4px 20px; font-size: 11px; display: flex; align-items: center; border-right: 1px solid #334155; background: #1a2235; position: sticky; left: 0; z-index: 10; height: 32px; box-sizing: border-box; }
-    .portfolio-bar-container { flex: 1; position: relative; height: 32px; display: flex; align-items: center; }
+    .portfolio-role-name { min-width: 200px; max-width: 200px; padding: 4px 12px 4px 20px; font-size: 11px; display: flex; align-items: center; border-right: 1px solid #334155; border-bottom: 1px solid #334155; background: #1a2235; position: sticky; left: 0; z-index: 10; height: 36px; box-sizing: border-box; }
+    .portfolio-bar-container { flex: 1; position: relative; height: 36px; display: flex; align-items: center; }
     .portfolio-bar { position: absolute; height: 22px; border-radius: 6px; display: flex; align-items: center; justify-content: center; font-size: 10px; color: white; font-weight: 500; cursor: pointer; transition: all 0.2s; min-width: 40px; top: 50%; transform: translateY(-50%); }
     .portfolio-bar:hover { filter: brightness(1.1); z-index: 5; }
     .portfolio-bar.portfolio-role-bar { height: 18px; font-size: 9px; border-radius: 4px; }
@@ -1908,18 +1908,18 @@
 
       // FIX: Add Start Date column - 32px rows to match Gantt bars
       html += `<div style="min-width:70px;max-width:70px;flex-shrink:0;background:#1E293B;">
-        <div class="portfolio-header-cell" style="min-width:70px;max-width:70px;font-size:9px;padding:6px;text-align:center;">Start</div>`;
+        <div class="portfolio-header-cell" style="min-width:70px;max-width:70px;font-size:9px;padding:6px;text-align:center;height:72px;">Start</div>`;
 
       projects.forEach((p, idx) => {
         // Main project row - 32px height to match Gantt
-        html += `<div class="portfolio-row" style="height:32px;display:flex;align-items:center;justify-content:center;border-right:1px solid #334155;background:#1E293B;font-size:9px;color:#94A3B8;">
+        html += `<div class="portfolio-row" style="height:36px;display:flex;align-items:center;justify-content:center;border-right:1px solid #334155;background:#1E293B;font-size:9px;color:#94A3B8;">
           ${formatDateShort(p.startDate)}
         </div>`;
 
         // Role rows - empty, 32px height to match Gantt
         selectedRoles.forEach(role => {
           if (p.roleGroups[role] && p.roleGroups[role].length > 0) {
-            html += `<div class="portfolio-row portfolio-role-row" style="height:32px;border-right:1px solid #334155;background:#1a2235;"></div>`;
+            html += `<div class="portfolio-row portfolio-role-row" style="height:36px;border-right:1px solid #334155;background:#1a2235;"></div>`;
           }
         });
       });
@@ -1927,18 +1927,18 @@
 
       // FIX: Add End Date column - 32px rows to match Gantt bars
       html += `<div style="min-width:70px;max-width:70px;flex-shrink:0;background:#1E293B;">
-        <div class="portfolio-header-cell" style="min-width:70px;max-width:70px;font-size:9px;padding:6px;text-align:center;">End</div>`;
+        <div class="portfolio-header-cell" style="min-width:70px;max-width:70px;font-size:9px;padding:6px;text-align:center;height:72px;">End</div>`;
 
       projects.forEach((p, idx) => {
         // Main project row - 32px height to match Gantt
-        html += `<div class="portfolio-row" style="height:32px;display:flex;align-items:center;justify-content:center;border-right:1px solid #334155;background:#1E293B;font-size:9px;color:#94A3B8;">
+        html += `<div class="portfolio-row" style="height:36px;display:flex;align-items:center;justify-content:center;border-right:1px solid #334155;background:#1E293B;font-size:9px;color:#94A3B8;">
           ${formatDateShort(p.endDate)}
         </div>`;
 
         // Role rows - empty, 32px height to match Gantt
         selectedRoles.forEach(role => {
           if (p.roleGroups[role] && p.roleGroups[role].length > 0) {
-            html += `<div class="portfolio-row portfolio-role-row" style="height:32px;border-right:1px solid #334155;background:#1a2235;"></div>`;
+            html += `<div class="portfolio-row portfolio-role-row" style="height:36px;border-right:1px solid #334155;background:#1a2235;"></div>`;
           }
         });
       });
@@ -1986,7 +1986,7 @@
         html += `<div class="portfolio-row"><div class="portfolio-bar-container" style="min-width:${totalDays * dayWidth}px;">
           ${todayLineHtml}
           <div class="portfolio-bar" onclick="openProject('${p.id}')"
-               style="left:${leftDays * dayWidth}px;width:${widthDays * dayWidth}px;background:linear-gradient(135deg,${p.color},${p.color}dd);"
+               style="left:${leftDays * dayWidth}px;width:${widthDays * dayWidth}px;background:linear-gradient(135deg,#4B5563,#374151);"
                title="${p.name}: ${formatDateShort(p.startDate)} - ${formatDateShort(p.endDate)} (${progress}%)">
             ${widthDays * dayWidth > 50 ? `${progress}%` : ''}
           </div>
@@ -2000,7 +2000,7 @@
             html += `<div class="portfolio-row portfolio-role-row"><div class="portfolio-bar-container" style="min-width:${totalDays * dayWidth}px;">
               ${todayLineHtml}
               <div class="portfolio-bar portfolio-role-bar" onclick="openProject('${p.id}')"
-                   style="left:${leftDays * dayWidth}px;width:${widthDays * dayWidth}px;background:linear-gradient(135deg,${ROLE_COLORS[role]},${ROLE_COLORS[role]}aa);height:18px;top:4px;"
+                   style="left:${leftDays * dayWidth}px;width:${widthDays * dayWidth}px;background:linear-gradient(135deg,${ROLE_COLORS[role]},${ROLE_COLORS[role]}aa);height:18px;top:50%;transform:translateY(-50%);"
                    title="${role}: ${memberNames}">
                 ${widthDays * dayWidth > 60 ? role : ''}
               </div>
@@ -2077,18 +2077,18 @@
 
       // FIX: Add Start Date column - 32px rows to match Gantt bars
       html += `<div style="min-width:70px;max-width:70px;flex-shrink:0;background:#1E293B;">
-        <div class="portfolio-header-cell" style="min-width:70px;max-width:70px;font-size:9px;padding:6px;text-align:center;">Start</div>`;
+        <div class="portfolio-header-cell" style="min-width:70px;max-width:70px;font-size:9px;padding:6px;text-align:center;height:72px;">Start</div>`;
 
       projects.forEach((p, idx) => {
         // Main project row - 32px height to match Gantt
-        html += `<div class="portfolio-row" style="height:32px;display:flex;align-items:center;justify-content:center;border-right:1px solid #334155;background:#1E293B;font-size:9px;color:#94A3B8;">
+        html += `<div class="portfolio-row" style="height:36px;display:flex;align-items:center;justify-content:center;border-right:1px solid #334155;background:#1E293B;font-size:9px;color:#94A3B8;">
           ${formatDateShort(p.startDate)}
         </div>`;
 
         // Role rows - empty, 32px height to match Gantt
         selectedRoles.forEach(role => {
           if (p.roleGroups[role] && p.roleGroups[role].length > 0) {
-            html += `<div class="portfolio-row portfolio-role-row" style="height:32px;border-right:1px solid #334155;background:#1a2235;"></div>`;
+            html += `<div class="portfolio-row portfolio-role-row" style="height:36px;border-right:1px solid #334155;background:#1a2235;"></div>`;
           }
         });
       });
@@ -2096,18 +2096,18 @@
 
       // FIX: Add End Date column - 32px rows to match Gantt bars
       html += `<div style="min-width:70px;max-width:70px;flex-shrink:0;background:#1E293B;">
-        <div class="portfolio-header-cell" style="min-width:70px;max-width:70px;font-size:9px;padding:6px;text-align:center;">End</div>`;
+        <div class="portfolio-header-cell" style="min-width:70px;max-width:70px;font-size:9px;padding:6px;text-align:center;height:72px;">End</div>`;
 
       projects.forEach((p, idx) => {
         // Main project row - 32px height to match Gantt
-        html += `<div class="portfolio-row" style="height:32px;display:flex;align-items:center;justify-content:center;border-right:1px solid #334155;background:#1E293B;font-size:9px;color:#94A3B8;">
+        html += `<div class="portfolio-row" style="height:36px;display:flex;align-items:center;justify-content:center;border-right:1px solid #334155;background:#1E293B;font-size:9px;color:#94A3B8;">
           ${formatDateShort(p.endDate)}
         </div>`;
 
         // Role rows - empty, 32px height to match Gantt
         selectedRoles.forEach(role => {
           if (p.roleGroups[role] && p.roleGroups[role].length > 0) {
-            html += `<div class="portfolio-row portfolio-role-row" style="height:32px;border-right:1px solid #334155;background:#1a2235;"></div>`;
+            html += `<div class="portfolio-row portfolio-role-row" style="height:36px;border-right:1px solid #334155;background:#1a2235;"></div>`;
           }
         });
       });
@@ -2158,7 +2158,7 @@
         html += `<div class="portfolio-row"><div class="portfolio-bar-container" style="min-width:${totalWeeks * weekWidth}px;">
           ${todayLineHtml}
           <div class="portfolio-bar" onclick="openProject('${p.id}')"
-               style="left:${leftWeeks * weekWidth}px;width:${widthWeeks * weekWidth}px;background:linear-gradient(135deg,${p.color},${p.color}dd);"
+               style="left:${leftWeeks * weekWidth}px;width:${widthWeeks * weekWidth}px;background:linear-gradient(135deg,#4B5563,#374151);"
                title="${p.name}: ${formatDateShort(p.startDate)} - ${formatDateShort(p.endDate)}">
             ${progress}% • ${p.status}
           </div>
@@ -2173,7 +2173,7 @@
             html += `<div class="portfolio-row portfolio-role-row"><div class="portfolio-bar-container" style="min-width:${totalWeeks * weekWidth}px;">
               ${todayLineHtml}
               <div class="portfolio-bar portfolio-role-bar" onclick="openProject('${p.id}')"
-                   style="left:${leftWeeks * weekWidth}px;width:${widthWeeks * weekWidth}px;background:linear-gradient(135deg,${ROLE_COLORS[role]},${ROLE_COLORS[role]}aa);height:18px;top:4px;"
+                   style="left:${leftWeeks * weekWidth}px;width:${widthWeeks * weekWidth}px;background:linear-gradient(135deg,${ROLE_COLORS[role]},${ROLE_COLORS[role]}aa);height:18px;top:50%;transform:translateY(-50%);"
                    title="${role}: ${memberNames}">
                 ${role}: ${shortNames}
               </div>
@@ -2203,7 +2203,7 @@
 
       let html = `<div class="gantt-wrapper">
         <div class="portfolio-project-column">
-          <div class="portfolio-header-cell" style="height:52px;">Project / Role</div>`;
+          <div class="portfolio-header-cell" style="height:44px;">Project / Role</div>`;
 
       // Project names with role sub-rows
       projects.forEach((p, idx) => {
@@ -2231,18 +2231,18 @@
 
       // FIX: Add Start Date column - 32px rows to match Gantt bars
       html += `<div style="min-width:70px;max-width:70px;flex-shrink:0;background:#1E293B;">
-        <div class="portfolio-header-cell" style="min-width:70px;max-width:70px;height:52px;font-size:9px;padding:6px;text-align:center;display:flex;align-items:center;justify-content:center;">Start</div>`;
+        <div class="portfolio-header-cell" style="min-width:70px;max-width:70px;height:44px;font-size:9px;padding:6px;text-align:center;display:flex;align-items:center;justify-content:center;">Start</div>`;
 
       projects.forEach((p, idx) => {
         // Main project row - 32px height to match Gantt
-        html += `<div class="portfolio-row" style="height:32px;display:flex;align-items:center;justify-content:center;border-right:1px solid #334155;background:#1E293B;font-size:9px;color:#94A3B8;">
+        html += `<div class="portfolio-row" style="height:36px;display:flex;align-items:center;justify-content:center;border-right:1px solid #334155;background:#1E293B;font-size:9px;color:#94A3B8;">
           ${formatDateShort(p.startDate)}
         </div>`;
 
         // Role rows - empty, 32px height to match Gantt
         selectedRoles.forEach(role => {
           if (p.roleGroups[role] && p.roleGroups[role].length > 0) {
-            html += `<div class="portfolio-row portfolio-role-row" style="height:32px;border-right:1px solid #334155;background:#1a2235;"></div>`;
+            html += `<div class="portfolio-row portfolio-role-row" style="height:36px;border-right:1px solid #334155;background:#1a2235;"></div>`;
           }
         });
       });
@@ -2250,18 +2250,18 @@
 
       // FIX: Add End Date column - 32px rows to match Gantt bars
       html += `<div style="min-width:70px;max-width:70px;flex-shrink:0;background:#1E293B;">
-        <div class="portfolio-header-cell" style="min-width:70px;max-width:70px;height:52px;font-size:9px;padding:6px;text-align:center;display:flex;align-items:center;justify-content:center;">End</div>`;
+        <div class="portfolio-header-cell" style="min-width:70px;max-width:70px;height:44px;font-size:9px;padding:6px;text-align:center;display:flex;align-items:center;justify-content:center;">End</div>`;
 
       projects.forEach((p, idx) => {
         // Main project row - 32px height to match Gantt
-        html += `<div class="portfolio-row" style="height:32px;display:flex;align-items:center;justify-content:center;border-right:1px solid #334155;background:#1E293B;font-size:9px;color:#94A3B8;">
+        html += `<div class="portfolio-row" style="height:36px;display:flex;align-items:center;justify-content:center;border-right:1px solid #334155;background:#1E293B;font-size:9px;color:#94A3B8;">
           ${formatDateShort(p.endDate)}
         </div>`;
 
         // Role rows - empty, 32px height to match Gantt
         selectedRoles.forEach(role => {
           if (p.roleGroups[role] && p.roleGroups[role].length > 0) {
-            html += `<div class="portfolio-row portfolio-role-row" style="height:32px;border-right:1px solid #334155;background:#1a2235;"></div>`;
+            html += `<div class="portfolio-row portfolio-role-row" style="height:36px;border-right:1px solid #334155;background:#1a2235;"></div>`;
           }
         });
       });
@@ -2305,7 +2305,7 @@
         html += `<div class="portfolio-row"><div class="portfolio-bar-container" style="min-width:${months.length * monthWidth}px;">
           ${todayLineHtml}
           <div class="portfolio-bar" onclick="openProject('${p.id}')"
-               style="left:${leftPos}px;width:${widthMonths * monthWidth}px;background:linear-gradient(135deg,${p.color},${p.color}dd);"
+               style="left:${leftPos}px;width:${widthMonths * monthWidth}px;background:linear-gradient(135deg,#4B5563,#374151);"
                title="${p.name}: ${formatDateShort(p.startDate)} - ${formatDateShort(p.endDate)}">
             ${progress}% • ${p.status}
           </div>
@@ -2320,7 +2320,7 @@
             html += `<div class="portfolio-row portfolio-role-row"><div class="portfolio-bar-container" style="min-width:${months.length * monthWidth}px;">
               ${todayLineHtml}
               <div class="portfolio-bar portfolio-role-bar" onclick="openProject('${p.id}')"
-                   style="left:${leftPos}px;width:${widthMonths * monthWidth}px;background:linear-gradient(135deg,${ROLE_COLORS[role]},${ROLE_COLORS[role]}aa);height:18px;top:4px;"
+                   style="left:${leftPos}px;width:${widthMonths * monthWidth}px;background:linear-gradient(135deg,${ROLE_COLORS[role]},${ROLE_COLORS[role]}aa);height:18px;top:50%;transform:translateY(-50%);"
                    title="${role}: ${memberNames}">
                 ${role}: ${shortNames}
               </div>
@@ -3727,6 +3727,25 @@ Current: ${p.status}`, currentIdx + 1);
     }
 
     // ==================== UPDATES TAB ====================
+    function formatBangkokDateTime(isoString) {
+      if (!isoString) return '';
+      const date = new Date(isoString);
+      // Check if it's just a date (old format) or full ISO string
+      if (isoString.length <= 10) {
+        return formatDate(isoString);
+      }
+      // Format as Bangkok time (UTC+7)
+      return date.toLocaleString('en-GB', {
+        timeZone: 'Asia/Bangkok',
+        day: '2-digit',
+        month: 'short',
+        year: 'numeric',
+        hour: '2-digit',
+        minute: '2-digit',
+        hour12: false
+      });
+    }
+
     function renderUpdates(c) {
       const p = getProjectById(currentProjectId);
       const u = p.updates || [];
@@ -3740,7 +3759,7 @@ Current: ${p.status}`, currentIdx + 1);
             <button class="btn btn-primary" onclick="addNewUpdate()">Post</button>
           </div>
         </div>
-        <div class="updates-list">${!u.length?'<div class="no-updates">No updates yet.</div>':u.map((x,i)=>`<div class="update-item"><div class="update-actions"><button class="btn btn-secondary btn-icon btn-sm" onclick="editUpdate(${i})">✏️</button><button class="btn btn-danger btn-icon btn-sm" onclick="deleteUpdate(${i})">🗑️</button></div><div class="update-date">${formatDate(x.date)}</div><div class="update-text" style="white-space:pre-wrap;">${formatUpdateText(x.text)}</div></div>`).join('')}</div>
+        <div class="updates-list">${!u.length?'<div class="no-updates">No updates yet.</div>':u.map((x,i)=>`<div class="update-item"><div class="update-actions"><button class="btn btn-secondary btn-icon btn-sm" onclick="editUpdate(${i})">✏️</button><button class="btn btn-danger btn-icon btn-sm" onclick="deleteUpdate(${i})">🗑️</button></div><div class="update-date">${formatBangkokDateTime(x.date)}${x.author ? ` • <span style="color:#38BDF8;font-weight:500;">@${x.author}</span>` : ''}</div><div class="update-text" style="white-space:pre-wrap;">${formatUpdateText(x.text)}</div></div>`).join('')}</div>
       </div>`;
     }
 
@@ -3777,9 +3796,36 @@ Current: ${p.status}`, currentIdx + 1);
       }
     }
 
-    function addNewUpdate() { const i = document.getElementById('new-update'), t = i.value.trim(); if (!t) return; const p = getProjectById(currentProjectId); if (!p.updates) p.updates = []; p.updates.unshift({ date: new Date().toISOString().split('T')[0], text: t }); i.value = ''; saveData(); renderUpdates(document.getElementById('tab-content')); showToast('Update added'); }
+    function addNewUpdate() {
+      const i = document.getElementById('new-update'), t = i.value.trim();
+      if (!t) return;
+      const p = getProjectById(currentProjectId);
+      if (!p.updates) p.updates = [];
+      p.updates.unshift({
+        date: new Date().toISOString(),
+        text: t,
+        author: currentUser ? currentUser.username : 'Unknown'
+      });
+      i.value = '';
+      saveData();
+      renderUpdates(document.getElementById('tab-content'));
+      showToast('Update added');
+    }
     function editUpdate(idx) { const p = getProjectById(currentProjectId); const u = p.updates[idx]; document.getElementById('edit-update-index').value = idx; document.getElementById('update-date').value = u.date; document.getElementById('update-text').value = u.text; document.getElementById('modal-update').classList.remove('hidden'); }
-    function saveUpdate() { const idx = parseInt(document.getElementById('edit-update-index').value); const p = getProjectById(currentProjectId); p.updates[idx] = { date: document.getElementById('update-date').value, text: document.getElementById('update-text').value.trim() }; saveData(); closeModal('update'); renderUpdates(document.getElementById('tab-content')); showToast('Saved'); }
+    function saveUpdate() {
+      const idx = parseInt(document.getElementById('edit-update-index').value);
+      const p = getProjectById(currentProjectId);
+      const existingAuthor = p.updates[idx].author;
+      p.updates[idx] = {
+        date: document.getElementById('update-date').value,
+        text: document.getElementById('update-text').value.trim(),
+        author: existingAuthor || (currentUser ? currentUser.username : 'Unknown')
+      };
+      saveData();
+      closeModal('update');
+      renderUpdates(document.getElementById('tab-content'));
+      showToast('Saved');
+    }
     function deleteUpdate(idx) { if (confirm('Delete?')) { getProjectById(currentProjectId).updates.splice(idx, 1); saveData(); renderUpdates(document.getElementById('tab-content')); showToast('Deleted'); } }
 
     // ==================== TIME MANAGEMENT ====================
