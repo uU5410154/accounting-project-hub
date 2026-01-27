@@ -98,7 +98,7 @@
     .btn-icon { width: 32px; height: 32px; padding: 0; display: flex; align-items: center; justify-content: center; font-size: 14px; border-radius: 6px; }
     
     /* Summary Cards */
-    .summary-cards { display: flex; gap: 12px; overflow-x: auto; padding-bottom: 8px; -webkit-overflow-scrolling: touch; }
+    .summary-cards { display: flex; gap: 12px; overflow-x: auto; padding-bottom: 8px; -webkit-overflow-scrolling: touch; flex-wrap: wrap; }
     .summary-card { min-width: 100px; padding: 16px; background: #334155; border-radius: 10px; text-align: center; flex-shrink: 0; }
     .summary-card.total { background: #38BDF8; color: #0F172A; }
     .summary-hours { font-size: 24px; font-weight: 700; margin-bottom: 2px; }
@@ -286,7 +286,7 @@
     .gantt-task-drag-handle:hover { color: #38BDF8; }
     .gantt-task-text { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; flex: 1; cursor: default; position: relative; }
     .gantt-task-text:hover { overflow: visible; }
-    .gantt-task-text:hover::after { content: attr(data-full-text); position: absolute; left: 0; top: 100%; background: #0F172A; color: #F1F5F9; padding: 8px 12px; border-radius: 6px; white-space: nowrap; z-index: 1000; box-shadow: 0 4px 12px rgba(0,0,0,0.3); font-size: 12px; border: 1px solid #334155; max-width: 400px; white-space: normal; word-wrap: break-word; }
+    .gantt-task-text:hover::after { content: attr(data-full-text); position: absolute; left: 0; bottom: 100%; margin-bottom: 8px; background: #0F172A; color: #F1F5F9; padding: 8px 12px; border-radius: 6px; white-space: nowrap; z-index: 9999; box-shadow: 0 4px 12px rgba(0,0,0,0.3); font-size: 12px; border: 1px solid #334155; max-width: 400px; white-space: normal; word-wrap: break-word; }
 
     /* Subtask styles */
     .subtask-item { display: flex; align-items: center; gap: 8px; padding: 8px; background: #1E293B; border-radius: 6px; margin-bottom: 6px; transition: background 0.2s, transform 0.2s; }
@@ -561,7 +561,7 @@
       <!-- Dashboard View -->
       <div id="view-dashboard">
         <div class="section">
-          <h2 class="section-title">📊 Weekly Hours</h2>
+          <h2 class="section-title">📊 Hours</h2>
           <div class="summary-cards" id="summary-cards"></div>
         </div>
         <div class="section">
@@ -771,11 +771,15 @@
             </div>
           </div>
           <div class="form-group">
-            <label class="form-label">Saving Hours/Month</label>
+            <label class="form-label">Target Saving Hours/Month</label>
             <input type="number" class="form-input" id="project-saving-hours" placeholder="e.g., 40" min="0">
           </div>
         </div>
         <div class="form-row">
+          <div class="form-group">
+            <label class="form-label">Actual Saving Hours/Month</label>
+            <input type="number" class="form-input" id="project-actual-saving-hours" placeholder="e.g., 35 (for completed projects)" min="0">
+          </div>
           <div class="form-group">
             <label class="form-label">Start Date</label>
             <input type="date" class="form-input" id="project-start">
@@ -2348,21 +2352,72 @@
     }
 
     // SUG-1 FIX: Move "Total" to far left for better visibility
+    let projectHoursExpanded = false;
+
+    function toggleProjectHours() {
+      projectHoursExpanded = !projectHoursExpanded;
+      renderSummary();
+    }
+
     function renderSummary() {
       const s = getWeeklyHoursSummary();
       let total = 0;
-      let projectCards = '';
 
       // Calculate total first
-      data.projects.slice(0, 4).forEach(p => {
+      data.projects.forEach(p => {
         const h = s[p.id]||0;
         total += h;
-        projectCards += `<div class="summary-card"><div class="summary-hours">${h}h</div><div class="summary-name">${p.name}</div></div>`;
       });
 
-      // SUG-1: Place Total card first (far left)
-      const html = `<div class="summary-card total"><div class="summary-hours">${total}h</div><div class="summary-name">Total</div></div>` + projectCards;
-      document.getElementById('summary-cards').innerHTML = html;
+      // Calculate Target Hours (sum of all savingHours)
+      const targetHours = data.projects.reduce((sum, p) => sum + (p.savingHours || 0), 0);
+
+      // Calculate Actual Hours (sum of actualSavingHours for Completed projects only)
+      const actualHours = data.projects
+        .filter(p => p.status === 'Completed' || p.status === 'Done')
+        .reduce((sum, p) => sum + (p.actualSavingHours || 0), 0);
+
+      // Build project saving hours list (for expandable section)
+      const projectsWithSavingHours = data.projects.filter(p => p.savingHours || p.actualSavingHours);
+      const projectCount = projectsWithSavingHours.length;
+
+      let projectListHtml = '';
+      if (projectHoursExpanded && projectCount > 0) {
+        projectListHtml = `
+          <div style="display:flex;flex-wrap:wrap;gap:8px;margin-top:12px;padding-top:12px;border-top:1px solid #475569;">
+            ${projectsWithSavingHours.map(p => {
+              const isCompleted = p.status === 'Completed' || p.status === 'Done';
+              return `
+                <div onclick="openProject('${p.id}')" style="background:#0F172A;padding:8px 12px;border-radius:8px;cursor:pointer;min-width:140px;border-left:3px solid ${isCompleted ? '#3B82F6' : '#10B981'};" title="Click to view project">
+                  <div style="font-size:11px;color:#94A3B8;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:120px;">${p.name}</div>
+                  <div style="display:flex;gap:8px;margin-top:4px;">
+                    ${p.savingHours ? `<span style="font-size:12px;color:#10B981;font-weight:600;">🎯 ${p.savingHours}h</span>` : ''}
+                    ${p.actualSavingHours ? `<span style="font-size:12px;color:#3B82F6;font-weight:600;">✅ ${p.actualSavingHours}h</span>` : ''}
+                  </div>
+                  ${isCompleted ? '<span style="font-size:9px;color:#64748B;">Completed</span>' : ''}
+                </div>
+              `;
+            }).join('')}
+          </div>
+        `;
+      }
+
+      // SUG-1: Place Total card first, then Target and Actual hours cards with expandable toggle
+      const html = `
+        <div class="summary-card total"><div class="summary-hours">${total}h</div><div class="summary-name">Total</div></div>
+        <div class="summary-card" style="background:linear-gradient(135deg,#10B981,#059669);cursor:pointer;" onclick="toggleProjectHours()" title="Click to ${projectHoursExpanded ? 'collapse' : 'expand'} project details">
+          <div class="summary-hours">${targetHours}h</div>
+          <div class="summary-name">Target Saving ${projectCount > 0 ? `<span style="font-size:10px;">(${projectCount})</span>` : ''}</div>
+          <div style="font-size:10px;margin-top:2px;">${projectHoursExpanded ? '▲ Collapse' : '▼ Expand'}</div>
+        </div>
+        <div class="summary-card" style="background:linear-gradient(135deg,#3B82F6,#1D4ED8);cursor:pointer;" onclick="toggleProjectHours()" title="Click to ${projectHoursExpanded ? 'collapse' : 'expand'} project details">
+          <div class="summary-hours">${actualHours}h</div>
+          <div class="summary-name">Actual Saving</div>
+          <div style="font-size:10px;margin-top:2px;">${projectHoursExpanded ? '▲ Collapse' : '▼ Expand'}</div>
+        </div>
+      `;
+
+      document.getElementById('summary-cards').innerHTML = html + projectListHtml;
     }
 
     function renderProjectPool() {
@@ -2978,7 +3033,8 @@ Current: ${p.status}`, currentIdx + 1);
           <h4 style="font-size:14px;font-weight:600;margin-bottom:12px;">📋 Project Info</h4>
           <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px;margin-bottom:16px;">
             ${p.team ? `<div style="background:#0F172A;padding:12px;border-radius:8px;"><span style="color:#64748B;font-size:11px;display:block;">User Team</span><strong style="color:#38BDF8;">👥 ${p.team}</strong></div>` : ''}
-            ${p.savingHours ? `<div style="background:#0F172A;padding:12px;border-radius:8px;"><span style="color:#64748B;font-size:11px;display:block;">Saving Hours/Month</span><strong style="color:#10B981;">⏱️ ${p.savingHours} hours</strong></div>` : ''}
+            ${p.savingHours ? `<div style="background:#0F172A;padding:12px;border-radius:8px;"><span style="color:#64748B;font-size:11px;display:block;">Target Saving Hours/Month</span><strong style="color:#10B981;">🎯 ${p.savingHours} hours</strong></div>` : ''}
+            ${p.actualSavingHours ? `<div style="background:#0F172A;padding:12px;border-radius:8px;"><span style="color:#64748B;font-size:11px;display:block;">Actual Saving Hours/Month</span><strong style="color:#3B82F6;">✅ ${p.actualSavingHours} hours</strong></div>` : ''}
           </div>
           <h4 style="font-size:14px;font-weight:600;margin-bottom:12px;">📅 Expected Timeline</h4>
           <div style="display:flex;gap:20px;flex-wrap:wrap;">
@@ -3706,7 +3762,8 @@ Current: ${p.status}`, currentIdx + 1);
       c.innerHTML = `<div class="details-grid">
         <div class="detail-card"><h3 class="detail-card-title">📋 Project Info</h3>
           <div class="detail-item"><span class="detail-label">User Team</span><span class="detail-value" style="color:#38BDF8;">${p.team || 'Not assigned'}</span></div>
-          <div class="detail-item"><span class="detail-label">Saving Hours/Month</span><span class="detail-value" style="color:#10B981;">${p.savingHours ? p.savingHours + ' hours' : 'Not set'}</span></div>
+          <div class="detail-item"><span class="detail-label">Target Saving Hours/Month</span><span class="detail-value" style="color:#10B981;">${p.savingHours ? '🎯 ' + p.savingHours + ' hours' : 'Not set'}</span></div>
+          <div class="detail-item"><span class="detail-label">Actual Saving Hours/Month</span><span class="detail-value" style="color:#3B82F6;">${p.actualSavingHours ? '✅ ' + p.actualSavingHours + ' hours' : 'Not set'}</span></div>
           <div class="detail-item"><span class="detail-label">Priority</span><span class="${getPriorityClass(p.priority)}">${p.priority}</span></div>
           <div class="detail-item"><span class="detail-label">Status</span><span class="detail-value">${p.status}</span></div>
         </div>
@@ -3964,6 +4021,7 @@ Current: ${p.status}`, currentIdx + 1);
       document.getElementById('project-start').value = new Date().toISOString().split('T')[0];
       document.getElementById('project-end').value = new Date(Date.now() + 30*864e5).toISOString().split('T')[0];
       document.getElementById('project-saving-hours').value = '';
+      document.getElementById('project-actual-saving-hours').value = '';
       document.getElementById('brief-content').innerHTML = '';
       document.getElementById('project-modal-title').textContent = 'New Project';
       document.getElementById('delete-project-btn').classList.add('hidden');
@@ -3986,6 +4044,7 @@ Current: ${p.status}`, currentIdx + 1);
       document.getElementById('project-start').value = p.startDate || '';
       document.getElementById('project-end').value = p.endDate || '';
       document.getElementById('project-saving-hours').value = p.savingHours || '';
+      document.getElementById('project-actual-saving-hours').value = p.actualSavingHours || '';
       document.getElementById('brief-content').innerHTML = p.brief || '';
       document.getElementById('project-modal-title').textContent = 'Edit Project';
       document.getElementById('delete-project-btn').classList.remove('hidden');
@@ -4025,16 +4084,18 @@ Current: ${p.status}`, currentIdx + 1);
       const name = document.getElementById('project-name').value.trim();
       if (!name) { alert('Name required'); return; }
       const savingHoursVal = document.getElementById('project-saving-hours').value;
-      const projectData = { 
-        name, 
-        description: document.getElementById('project-desc-input').value.trim(), 
-        priority: document.getElementById('project-priority').value, 
-        status: document.getElementById('project-status').value, 
+      const actualSavingHoursVal = document.getElementById('project-actual-saving-hours').value;
+      const projectData = {
+        name,
+        description: document.getElementById('project-desc-input').value.trim(),
+        priority: document.getElementById('project-priority').value,
+        status: document.getElementById('project-status').value,
         team: document.getElementById('project-team').value,
         savingHours: savingHoursVal ? parseInt(savingHoursVal) : null,
-        startDate: document.getElementById('project-start').value, 
-        endDate: document.getElementById('project-end').value, 
-        brief: document.getElementById('brief-content').innerHTML 
+        actualSavingHours: actualSavingHoursVal ? parseInt(actualSavingHoursVal) : null,
+        startDate: document.getElementById('project-start').value,
+        endDate: document.getElementById('project-end').value,
+        brief: document.getElementById('brief-content').innerHTML
       };
       if (id) { Object.assign(getProjectById(id), projectData); showToast('Updated'); }
       else { const np = { id: generateId(), ...projectData, tasks: [], updates: [] }; data.projects.push(np); data.projectPool.push(np.id); showToast('Created'); }
