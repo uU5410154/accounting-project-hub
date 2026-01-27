@@ -71,9 +71,11 @@
     .nav-logo { font-size: 24px; color: #38BDF8; }
     .nav-title { font-size: 18px; font-weight: 600; }
     .nav-links { display: flex; gap: 6px; }
-    .nav-link { padding: 8px 14px; background: transparent; border: none; color: #94A3B8; font-size: 13px; font-weight: 500; cursor: pointer; border-radius: 8px; font-family: inherit; }
+    .nav-link { padding: 8px 14px; background: transparent; border: none; color: #94A3B8; font-size: 13px; font-weight: 500; cursor: pointer; border-radius: 8px; font-family: inherit; text-decoration: none; display: inline-flex; align-items: center; }
     .nav-link:hover { background: #334155; }
     .nav-link.active { background: #334155; color: #F1F5F9; }
+    .nav-link.tickets-btn { background: #FACC15; color: #0F172A; font-weight: 600; }
+    .nav-link.tickets-btn:hover { background: #FDE047; transform: scale(1.05); }
     .nav-actions { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
     .nav-date { font-size: 12px; color: #64748B; display: none; }
     
@@ -523,7 +525,7 @@
   <!-- Main App (hidden until login) -->
   <div id="app-container" class="hidden">
     <nav class="nav">
-      <div class="nav-brand">
+      <div class="nav-brand" onclick="showView('dashboard')" style="cursor:pointer;" title="Go to Dashboard">
         <img src="logo.png" alt="Logo" style="height:28px;">
         <span class="nav-title">Project Hub</span>
       </div>
@@ -531,6 +533,7 @@
         <button class="nav-link active" id="nav-dashboard" onclick="showView('dashboard')">📋 Projects</button>
         <button class="nav-link" id="nav-portfolio" onclick="showView('portfolio')">📊 Portfolio</button>
         <button class="nav-link" id="nav-calendar" onclick="showView('calendar')">📅 Schedule</button>
+        <a href="https://itservicedesk.lotuss.com/th/admin/dashboard" target="_blank" class="nav-link tickets-btn">🎫 Tickets</a>
       </div>
       <div class="nav-actions">
         <span class="nav-date" id="current-date"></span>
