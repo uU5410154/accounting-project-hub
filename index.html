@@ -4701,8 +4701,29 @@ Current: ${p.status}`, currentIdx + 1);
       }
     });
     
-    // Start with login check
-    checkSession();
+    // Load cloud data first, then check session
+    async function startApp() {
+      // Show loading while fetching cloud data for login
+      document.getElementById('login-page').classList.add('hidden');
+      showLoading('Starting...', 'Loading user data from cloud');
+
+      try {
+        // Try to load from cloud first to get latest users
+        const cloudData = await loadFromCloud(false, true);
+        if (cloudData) {
+          data = cloudData;
+          localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+        }
+      } catch (e) {
+        console.log('Cloud load failed, using local data:', e);
+      }
+
+      hideLoading();
+      // Now check session with updated data
+      checkSession();
+    }
+
+    startApp();
   </script>
 </body>
 </html>
