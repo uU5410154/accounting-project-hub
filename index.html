@@ -576,8 +576,8 @@
           <h2 class="section-title">👥 Team</h2>
           <button class="btn btn-primary btn-sm" id="btn-add-member" onclick="openMemberModal()">+ Add Member</button>
         </div>
-        <!-- Role Filter for Team Section -->
-        <div id="team-role-filter" style="display:flex;flex-wrap:wrap;gap:8px;margin-bottom:16px;padding:12px;background:#334155;border-radius:8px;align-items:center;">
+        <!-- Role Filter and Search for Team Section -->
+        <div id="team-role-filter" style="display:flex;flex-wrap:wrap;gap:12px;margin-bottom:16px;padding:12px;background:#334155;border-radius:8px;align-items:center;">
           <span style="color:#94A3B8;font-size:12px;font-weight:500;">🏷️ Filter by Role:</span>
           <label style="display:flex;align-items:center;gap:4px;cursor:pointer;font-size:12px;">
             <input type="checkbox" value="PM" onchange="renderTeamBoards()" checked style="accent-color:#8B5CF6;">
@@ -599,6 +599,10 @@
             <input type="checkbox" value="Lead" onchange="renderTeamBoards()" checked style="accent-color:#3B82F6;">
             <span style="background:#3B82F6;color:white;padding:2px 8px;border-radius:4px;font-size:11px;">Lead</span>
           </label>
+          <div style="display:flex;align-items:center;gap:8px;margin-left:auto;">
+            <span style="color:#94A3B8;font-size:12px;font-weight:500;">🔍</span>
+            <input type="text" id="team-project-search" placeholder="Search projects..." oninput="renderTeamBoards()" style="background:#1E293B;border:1px solid #475569;color:#E2E8F0;padding:6px 12px;border-radius:6px;font-size:12px;min-width:150px;">
+          </div>
         </div>
         <div class="boards" id="team-boards"></div>
       </div>
@@ -2401,6 +2405,10 @@
         ? Array.from(filterContainer.querySelectorAll('input[type="checkbox"]:checked')).map(cb => cb.value)
         : PROJECT_ROLES;
 
+      // Get search text
+      const searchInput = document.getElementById('team-project-search');
+      const searchText = searchInput ? searchInput.value.toLowerCase().trim() : '';
+
       // Sort members: current user's member first (for mobile), then others
       const currentMemberId = getCurrentUserMemberId();
       const sortedMembers = [...data.members].sort((a, b) => {
@@ -2426,6 +2434,15 @@
           .filter(pr => {
             if (!pr.role) return selectedRoles.length === PROJECT_ROLES.length; // Show unassigned roles only if all filters are selected
             return selectedRoles.includes(pr.role);
+          })
+          // Filter by search text
+          .filter(pr => {
+            if (!searchText) return true;
+            const p = pr.project;
+            return p.name.toLowerCase().includes(searchText) ||
+                   (p.description && p.description.toLowerCase().includes(searchText)) ||
+                   (p.status && p.status.toLowerCase().includes(searchText)) ||
+                   (p.team && p.team.toLowerCase().includes(searchText));
           });
         
         return `<div class="board ${isCurrentUser ? 'current-user-board' : ''}" style="border-color:${m.color}${isCurrentUser ? ';box-shadow:0 0 20px '+m.color+'40;' : ''}" data-member-id="${m.id}"
