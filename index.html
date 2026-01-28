@@ -3676,7 +3676,7 @@ Current: ${p.status}`, currentIdx + 1);
             <span class="gantt-task-text" data-full-text="${t.name}">${t.name}${hasSubtasks ? ` <span style="color:#64748B;font-size:10px;">(${completedCount}/${subtaskCount})</span>` : ''}</span>
             <div class="gantt-task-actions">
               ${canEditThisTask ? `<button class="btn btn-secondary btn-icon btn-sm" onclick="editTask('${t.id}')" style="width:20px;height:20px;font-size:9px;">✏️</button>` : ''}
-              ${isAdmin() ? `<button class="btn btn-danger btn-icon btn-sm" onclick="deleteTask('${t.id}')" style="width:20px;height:20px;font-size:9px;">🗑️</button>` : ''}
+              <button class="btn btn-danger btn-icon btn-sm" onclick="deleteTask('${t.id}')" style="width:20px;height:20px;font-size:9px;">🗑️</button>
             </div>
           </div>
           ${hasSubtasks ? `<div class="subtask-inline-list" id="subtask-list-${t.id}" style="display:none;">
@@ -3867,6 +3867,7 @@ Current: ${p.status}`, currentIdx + 1);
           const isLocked = t.locked || false;
           // When timeline is locked, NO ONE can edit dates (not even admin)
           const canEditThisTask = !p.lockedTimeline && (isAdmin() || !isLocked);
+          const canDeleteThisTask = isAdmin() || (t.createdBy && currentUser && t.createdBy === currentUser.username);
           const hasSubtasks = t.subtasks && t.subtasks.length > 0;
           const subtaskCount = hasSubtasks ? t.subtasks.length : 0;
           const completedCount = hasSubtasks ? t.subtasks.filter(st => st.done).length : 0;
@@ -3875,6 +3876,7 @@ Current: ${p.status}`, currentIdx + 1);
             <span class="gantt-task-text" data-full-text="${t.name}">${t.name}${hasSubtasks ? ` <span style="color:#64748B;font-size:10px;">(${completedCount}/${subtaskCount})</span>` : ''}</span>
             <div class="gantt-task-actions">
               ${canEditThisTask ? `<button class="btn btn-secondary btn-icon btn-sm" onclick="editTask('${t.id}')" style="width:22px;height:22px;font-size:10px;">✏️</button>` : ''}
+              <button class="btn btn-danger btn-icon btn-sm" onclick="deleteTask('${t.id}')" style="width:22px;height:22px;font-size:10px;">🗑️</button>
             </div>
           </div>`;
           if (hasSubtasks) {
@@ -4020,6 +4022,7 @@ Current: ${p.status}`, currentIdx + 1);
           const isLocked = t.locked || false;
           // When timeline is locked, NO ONE can edit dates (not even admin)
           const canEditThisTask = !p.lockedTimeline && (isAdmin() || !isLocked);
+          const canDeleteThisTask = isAdmin() || (t.createdBy && currentUser && t.createdBy === currentUser.username);
           const hasSubtasks = t.subtasks && t.subtasks.length > 0;
           const subtaskCount = hasSubtasks ? t.subtasks.length : 0;
           const completedCount = hasSubtasks ? t.subtasks.filter(st => st.done).length : 0;
@@ -4028,6 +4031,7 @@ Current: ${p.status}`, currentIdx + 1);
             <span class="gantt-task-text" data-full-text="${t.name}">${t.name}${hasSubtasks ? ` <span style="color:#64748B;font-size:10px;">(${completedCount}/${subtaskCount})</span>` : ''}</span>
             <div class="gantt-task-actions">
               ${canEditThisTask ? `<button class="btn btn-secondary btn-icon btn-sm" onclick="editTask('${t.id}')" style="width:22px;height:22px;font-size:10px;">✏️</button>` : ''}
+              <button class="btn btn-danger btn-icon btn-sm" onclick="deleteTask('${t.id}')" style="width:22px;height:22px;font-size:10px;">🗑️</button>
             </div>
           </div>`;
           if (hasSubtasks) {
@@ -5033,18 +5037,16 @@ Current: ${p.status}`, currentIdx + 1);
       else {
         // New tasks created by user are not locked by default
         taskData.locked = false;
+        taskData.createdBy = currentUser ? currentUser.username : null;
         p.tasks.push({ id: generateId(), ...taskData });
         showToast('Added');
       }
       saveData(); closeModal('task'); renderGantt(document.getElementById('tab-content'));
     }
     function deleteTask(tid) {
-      if (!isAdmin()) {
-        showToast('Only admin can delete tasks');
-        return;
-      }
+      const p = getProjectById(currentProjectId);
       if (confirm('Delete task?')) {
-        getProjectById(currentProjectId).tasks = getProjectById(currentProjectId).tasks.filter(t => t.id !== tid);
+        p.tasks = p.tasks.filter(t => t.id !== tid);
         saveData();
         renderGantt(document.getElementById('tab-content'));
         showToast('Deleted');
