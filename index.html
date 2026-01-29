@@ -2094,7 +2094,7 @@
                   <span style="background:${urgency.bg};color:${urgency.color};padding:2px 8px;border-radius:4px;font-size:10px;font-weight:600;flex-shrink:0;">${urgency.label}</span>
                 </div>
                 <div style="font-size:11px;color:#64748B;margin-top:4px;">
-                  ${formatDate(item.task.start)} - ${formatDate(item.task.end)} • PIC: ${picName}
+                  ${formatDate(item.task.start)} - ${formatDate(item.task.end)}${isAdminUser ? ` • <span style="color:#38BDF8;">PIC: ${picName}</span>` : ''}
                 </div>
               </div>
               <div style="display:flex;align-items:center;gap:8px;flex-shrink:0;">
@@ -4240,9 +4240,11 @@ Current: ${p.status}`, currentIdx + 1);
       else if (ganttDrag.mode === 'resize-left') { newStart.setDate(newStart.getDate() + deltaDays); if (newStart >= newEnd) newStart = new Date(newEnd.getTime() - 864e5); }
       else if (ganttDrag.mode === 'resize-right') { newEnd.setDate(newEnd.getDate() + deltaDays); if (newEnd <= newStart) newEnd = new Date(newStart.getTime() + 864e5); }
 
-      // Constrain to project boundaries
-      if (newStart < projectStart) { const diff = Math.ceil((projectStart - newStart) / 864e5); newStart = new Date(projectStart); if (ganttDrag.mode === 'move') newEnd.setDate(newEnd.getDate() + diff); }
-      if (newEnd > projectEnd) { const diff = Math.ceil((newEnd - projectEnd) / 864e5); newEnd = new Date(projectEnd); if (ganttDrag.mode === 'move') newStart.setDate(newStart.getDate() - diff); }
+      // Constrain to timeline boundaries (fixed timeline, not project boundaries)
+      const timelineEnd = new Date(timelineStart);
+      timelineEnd.setFullYear(timelineEnd.getFullYear() + 2);
+      if (newStart < timelineStart) { const diff = Math.ceil((timelineStart - newStart) / 864e5); newStart = new Date(timelineStart); if (ganttDrag.mode === 'move') newEnd.setDate(newEnd.getDate() + diff); }
+      if (newEnd > timelineEnd) { const diff = Math.ceil((newEnd - timelineEnd) / 864e5); newEnd = new Date(timelineEnd); if (ganttDrag.mode === 'move') newStart.setDate(newStart.getDate() - diff); }
 
       const bar = document.getElementById('bar-' + ganttDrag.taskId);
       // Calculate position relative to timelineStart (not projectStart!)
