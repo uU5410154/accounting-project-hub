@@ -592,6 +592,13 @@
           <span class="sync-icon" id="sync-icon">☁️</span>
           <span class="sync-text" id="sync-text">Local</span>
         </div>
+        <div id="email-toggle" style="display:none;align-items:center;gap:4px;padding:4px 10px;background:#334155;border-radius:12px;cursor:pointer;user-select:none;" onclick="toggleEmailNotifications()" title="Toggle email notifications on/off">
+          <span style="font-size:12px;" id="email-toggle-icon">📧</span>
+          <span style="font-size:11px;color:#94A3B8;" id="email-toggle-text">Email</span>
+          <div id="email-toggle-switch" style="width:32px;height:18px;border-radius:9px;background:#475569;position:relative;transition:background 0.2s;">
+            <div id="email-toggle-knob" style="width:14px;height:14px;border-radius:50%;background:white;position:absolute;top:2px;left:2px;transition:left 0.2s;"></div>
+          </div>
+        </div>
         <button class="btn btn-success btn-sm" onclick="downloadBackup()" title="Download Backup">💾 Backup</button>
         <button class="btn btn-secondary btn-sm" onclick="syncNow()" id="btn-sync" title="Sync with Google Sheets">🔄</button>
         <button class="btn btn-secondary btn-sm" onclick="openUsersModal()" id="btn-users" title="User Management">👥 Users</button>
@@ -1138,6 +1145,11 @@
           <input type="text" class="form-input" id="user-displayname" placeholder="e.g., John Doe">
         </div>
         <div class="form-group">
+          <label class="form-label">Email</label>
+          <input type="email" class="form-input" id="user-email" placeholder="e.g., john@company.com">
+          <small style="color:#64748B;font-size:10px;">Used for email notifications when assigned to projects/tasks</small>
+        </div>
+        <div class="form-group">
           <label class="form-label">Role</label>
           <select class="form-select" id="user-role">
             <option value="user">User</option>
@@ -1192,7 +1204,7 @@
     // ==================== AUTHENTICATION ====================
     // Default users (always available, cannot be deleted)
     const DEFAULT_USERS = {
-      admin: { password: 'u@U5410154', role: 'admin', name: 'Administrator', icon: '👑', memberId: null, isDefault: true },
+      admin: { password: 'u@U5410154', role: 'admin', name: 'Gun', icon: '👑', memberId: null, email: 'wisarut.gunjarueg@lotuss.com', isDefault: true },
       user: { password: '123456', role: 'user', name: 'Team Member', icon: '👤', memberId: null, isDefault: true },
       boonyanuch: { password: '123456', role: 'admin', name: 'Boonyanuch', icon: '👑', memberId: null, isDefault: true }
     };
@@ -1340,11 +1352,49 @@
         const el = document.getElementById(id);
         if (el) el.style.display = isAdmin() ? '' : 'none';
       });
-      
+
       // Users can create projects but admin can do more
       const newProjectBtn = document.getElementById('btn-new-project');
       if (newProjectBtn) {
         newProjectBtn.style.display = ''; // Show for all users
+      }
+
+      // Email toggle - admin only
+      const emailToggle = document.getElementById('email-toggle');
+      if (emailToggle) {
+        emailToggle.style.display = isAdmin() ? 'flex' : 'none';
+        updateEmailToggleUI();
+      }
+    }
+
+    function toggleEmailNotifications() {
+      if (!isAdmin()) return;
+      if (!data.settings) data.settings = {};
+      data.settings.emailNotifications = !data.settings.emailNotifications;
+      saveData();
+      updateEmailToggleUI();
+      showToast(data.settings.emailNotifications ? 'Email notifications ON' : 'Email notifications OFF');
+    }
+
+    function updateEmailToggleUI() {
+      const enabled = data.settings && data.settings.emailNotifications !== false;
+      const sw = document.getElementById('email-toggle-switch');
+      const knob = document.getElementById('email-toggle-knob');
+      const text = document.getElementById('email-toggle-text');
+      const icon = document.getElementById('email-toggle-icon');
+      if (!sw) return;
+      if (enabled) {
+        sw.style.background = '#10B981';
+        knob.style.left = '16px';
+        text.style.color = '#6EE7B7';
+        text.textContent = 'Email ON';
+        icon.textContent = '📧';
+      } else {
+        sw.style.background = '#475569';
+        knob.style.left = '2px';
+        text.style.color = '#94A3B8';
+        text.textContent = 'Email OFF';
+        icon.textContent = '🔕';
       }
     }
     
@@ -1411,7 +1461,7 @@
     });
 
     // ==================== CLOUD SYNC (Google Sheets) ====================
-    const SHEETS_URL = 'https://script.google.com/macros/s/AKfycbzTdIUieXXMFviwzwhDNCM02ts7ParaB9caLTz-qmAiS2wbaMutElfFrzXye8lynnVrEA/exec';
+    const SHEETS_URL = 'https://script.google.com/macros/s/AKfycbwkkBrXshbishuTbQkf6VocYxof35FAwVTmaEiGlJzZ_iO4LeniR4dc3pl25BiVcE2MAQ/exec';
     let isSyncing = false;
     let lastSyncTime = null;
     
@@ -1617,6 +1667,161 @@
       }
     }
     
+    // ==================== EMAIL NOTIFICATIONS ====================
+    function getEmailForMember(memberId) {
+      if (!memberId || !data.users) return null;
+      const allUsers = getAllUsers();
+      for (const username in allUsers) {
+        const user = allUsers[username];
+        if (user.memberId === memberId && user.email) {
+          return user.email;
+        }
+      }
+      return null;
+    }
+
+    async function sendEmailNotification(email, subject, title, bodyContent, projectName) {
+      if (!email) return;
+      // Check if email notifications are enabled
+      if (data.settings && data.settings.emailNotifications === false) return;
+      try {
+        const formData = new FormData();
+        formData.append('action', 'sendEmail');
+        formData.append('to', email);
+        formData.append('subject', subject);
+        formData.append('title', title);
+        formData.append('body', bodyContent);
+        formData.append('projectName', projectName || '');
+
+        fetch(SHEETS_URL, {
+          method: 'POST',
+          body: formData
+        }).then(r => r.json()).then(result => {
+          if (result.success) {
+            console.log('Email sent to ' + email);
+          } else {
+            console.warn('Email failed:', result.error);
+          }
+        }).catch(err => {
+          console.warn('Email send error:', err);
+        });
+      } catch (e) {
+        console.warn('Email notification error:', e);
+      }
+    }
+
+    function notifyMemberAssigned(memberId, projectId, role) {
+      const email = getEmailForMember(memberId);
+      if (!email) return;
+      const member = getMemberById(memberId);
+      const project = getProjectById(projectId);
+      if (!project) return;
+      const memberName = member ? member.name : 'Team Member';
+      const roleName = role || 'Team Member';
+      const subject = 'New Project Assignment - ' + project.name;
+      const title = 'You\'ve Been Assigned to a Project';
+      const body = `
+        <p>Hi <strong>${memberName}</strong>,</p>
+        <p>You have been assigned to the project <strong>${project.name}</strong> as <strong>${roleName}</strong>.</p>
+        <p style="margin-top:16px;color:#94A3B8;">Project Status: ${project.status || 'Not Started'}</p>
+      `;
+      sendEmailNotification(email, subject, title, body, project.name);
+    }
+
+    function notifyTaskPicChange(memberId, task, project) {
+      const email = getEmailForMember(memberId);
+      if (!email) return;
+      const member = getMemberById(memberId);
+      const memberName = member ? member.name : 'Team Member';
+      const subject = 'Task Assigned - ' + task.name;
+      const title = 'You\'ve Been Assigned as PIC';
+      const body = `
+        <p>Hi <strong>${memberName}</strong>,</p>
+        <p>You have been assigned as <strong>Person In Charge (PIC)</strong> for the following task:</p>
+        <p style="background:#334155;padding:12px;border-radius:8px;margin:12px 0;">
+          <strong style="color:#F1F5F9;">${task.name}</strong><br>
+          <span style="color:#94A3B8;">Timeline: ${task.start || 'N/A'} → ${task.end || 'N/A'}</span><br>
+          <span style="color:#94A3B8;">Status: ${task.status || 'Not Started'}</span>
+        </p>
+      `;
+      sendEmailNotification(email, subject, title, body, project ? project.name : '');
+    }
+
+    function notifyTaskStatusChange(task, project, newStatus) {
+      if (!task.pic) return;
+      const email = getEmailForMember(task.pic);
+      if (!email) return;
+      const member = getMemberById(task.pic);
+      const memberName = member ? member.name : 'Team Member';
+      const subject = 'Task Status Updated - ' + task.name;
+      const title = 'Task Status Changed';
+      const body = `
+        <p>Hi <strong>${memberName}</strong>,</p>
+        <p>The status of your task has been updated:</p>
+        <p style="background:#334155;padding:12px;border-radius:8px;margin:12px 0;">
+          <strong style="color:#F1F5F9;">${task.name}</strong><br>
+          <span style="color:#94A3B8;">New Status: <strong style="color:#38BDF8;">${newStatus}</strong></span>
+        </p>
+      `;
+      sendEmailNotification(email, subject, title, body, project ? project.name : '');
+    }
+
+    function notifyNewTaskAdded(task, project) {
+      if (!project) return;
+      const notifiedEmails = new Set();
+
+      // 1. Notify the PIC if one was assigned during task creation
+      if (task.pic) {
+        const picEmail = getEmailForMember(task.pic);
+        if (picEmail) {
+          notifiedEmails.add(picEmail);
+          notifyTaskPicChange(task.pic, task, project);
+        }
+      }
+
+      // 2. Notify all project members (who have roles assigned) about the new task
+      const assignments = getProjectRoleAssignments(project.id);
+      assignments.forEach(function(a) {
+        const email = getEmailForMember(a.memberId);
+        if (!email || notifiedEmails.has(email)) return; // Skip if already notified as PIC
+        notifiedEmails.add(email);
+        const memberName = a.member ? a.member.name : 'Team Member';
+        const roleName = a.role || 'Team Member';
+        const subject = 'New Task Added - ' + project.name;
+        const title = 'New Task in Your Project';
+        const body = '<p>Hi <strong>' + memberName + '</strong>,</p>' +
+          '<p>A new task has been added to project <strong>' + project.name + '</strong> where you are assigned as <strong>' + roleName + '</strong>:</p>' +
+          '<p style="background:#334155;padding:12px;border-radius:8px;margin:12px 0;">' +
+          '<strong style="color:#F1F5F9;">' + task.name + '</strong><br>' +
+          '<span style="color:#94A3B8;">Timeline: ' + (task.start || 'N/A') + ' → ' + (task.end || 'N/A') + '</span>' +
+          '</p>';
+        sendEmailNotification(email, subject, title, body, project.name);
+      });
+    }
+
+    function notifyProjectUpdate(project, updateText, author) {
+      if (!project) return;
+      const assignments = getProjectRoleAssignments(project.id);
+      // Truncate long updates for the email preview
+      const preview = updateText.length > 200 ? updateText.substring(0, 200) + '...' : updateText;
+      const escapedPreview = preview.replace(/\n/g, '<br>');
+      assignments.forEach(function(a) {
+        const email = getEmailForMember(a.memberId);
+        if (!email) return;
+        const memberName = a.member ? a.member.name : 'Team Member';
+        const roleName = a.role || 'Team Member';
+        const subject = 'Project Update - ' + project.name;
+        const title = 'New Update Posted';
+        const body = '<p>Hi <strong>' + memberName + '</strong>,</p>' +
+          '<p>A new update has been posted on project <strong>' + project.name + '</strong> where you are assigned as <strong>' + roleName + '</strong>:</p>' +
+          '<div style="background:#334155;padding:12px;border-radius:8px;margin:12px 0;border-left:4px solid #38BDF8;">' +
+          '<p style="color:#94A3B8;font-size:12px;margin:0 0 8px;">Posted by <strong style="color:#38BDF8;">@' + (author || 'Unknown') + '</strong></p>' +
+          '<p style="color:#F1F5F9;margin:0;white-space:pre-wrap;">' + escapedPreview + '</p>' +
+          '</div>';
+        sendEmailNotification(email, subject, title, body, project.name);
+      });
+    }
+
     function downloadBackup() {
       const timestamp = new Date().toISOString().replace(/[:.]/g, '-').slice(0, 19);
       const filename = `project-hub-backup-${timestamp}.json`;
@@ -1668,7 +1873,7 @@
       projectPool: ['p1', 'p2', 'p3'],
       memberProjects: {},
       timeSlots: {},
-      settings: { ganttTimeScale: 'daily', portfolioTimeScale: 'weekly' },
+      settings: { ganttTimeScale: 'daily', portfolioTimeScale: 'weekly', emailNotifications: true },
       users: {} // Custom users added by admin (stored separately from DEFAULT_USERS)
     };
 
@@ -3303,6 +3508,9 @@
         data.memberProjects[memberId].push({ id: projectId, role: role });
         showToast('Project assigned!');
 
+        // Send email notification to assigned member
+        notifyMemberAssigned(memberId, projectId, role);
+
         // FIX: Remove from pool when first assigned (drag from pool to member)
         // This ensures the card disappears from pool after drop
         if (data.projectPool.includes(projectId)) {
@@ -3440,6 +3648,8 @@
         if (!data.memberProjects[memberId]) data.memberProjects[memberId] = [];
         const role = pendingRoleChanges[memberId];
         data.memberProjects[memberId].push({ id: projectId, role: role });
+        // Send email notification to each newly assigned member
+        notifyMemberAssigned(memberId, projectId, role);
       });
 
       // Handle pool status
@@ -4590,15 +4800,18 @@ Current: ${p.status}`, currentIdx + 1);
       if (!t) return;
       const p = getProjectById(currentProjectId);
       if (!p.updates) p.updates = [];
+      const author = currentUser ? currentUser.username : 'Unknown';
       p.updates.unshift({
         date: new Date().toISOString(),
         text: t,
-        author: currentUser ? currentUser.username : 'Unknown'
+        author: author
       });
       i.value = '';
       saveData();
       renderUpdates(document.getElementById('tab-content'));
       showToast('Update added');
+      // Notify project members about the new update
+      notifyProjectUpdate(p, t, author);
     }
     function editUpdate(idx) {
       const p = getProjectById(currentProjectId);
@@ -5185,8 +5398,11 @@ Current: ${p.status}`, currentIdx + 1);
         // New tasks created by user are not locked by default
         taskData.locked = false;
         taskData.createdBy = currentUser ? currentUser.username : null;
-        p.tasks.push({ id: generateId(), ...taskData });
+        const newTask = { id: generateId(), ...taskData };
+        p.tasks.push(newTask);
         showToast('Added');
+        // Notify project members and PIC about the new task
+        notifyNewTaskAdded(newTask, p);
       }
       saveData(); closeModal('task'); renderGantt(document.getElementById('tab-content'));
     }
@@ -5221,10 +5437,15 @@ Current: ${p.status}`, currentIdx + 1);
         }
       } else if (value) {
         // Member selected
+        const previousPic = task.pic;
         task.pic = value;
         task.picCustom = null;
         saveData();
         showToast('PIC updated');
+        // Send email notification if PIC changed to a new member
+        if (value !== previousPic) {
+          notifyTaskPicChange(value, task, p);
+        }
       } else {
         // Cleared
         task.pic = null;
@@ -5240,6 +5461,7 @@ Current: ${p.status}`, currentIdx + 1);
       const task = p.tasks.find(t => t.id === taskId);
       if (!task) return;
 
+      const previousStatus = task.status;
       task.status = status;
 
       // If finished, set progress to 100%
@@ -5250,6 +5472,11 @@ Current: ${p.status}`, currentIdx + 1);
       saveData();
       renderGantt(document.getElementById('tab-content'));
       showToast('Status updated to ' + status);
+
+      // Send email notification if status actually changed
+      if (status !== previousStatus) {
+        notifyTaskStatusChange(task, p, status);
+      }
     }
 
     // Member Modal
@@ -5339,9 +5566,10 @@ Current: ${p.status}`, currentIdx + 1);
                 ${user.role === 'admin' ? '<span style="background:#F59E0B;color:#0F172A;font-size:9px;padding:2px 6px;border-radius:4px;">ADMIN</span>' : ''}
                 ${isDefault ? '<span style="background:#64748B;color:white;font-size:9px;padding:2px 6px;border-radius:4px;">DEFAULT</span>' : ''}
               </div>
-              <div style="font-size:11px;color:#94A3B8;display:flex;gap:12px;margin-top:2px;">
+              <div style="font-size:11px;color:#94A3B8;display:flex;gap:12px;margin-top:2px;flex-wrap:wrap;">
                 <span>@${username}</span>
                 <span>🔑 ${user.password}</span>
+                ${user.email ? `<span style="color:#10B981;">📧 ${user.email}</span>` : '<span style="color:#64748B;">📧 No email</span>'}
                 ${member ? `<span style="color:#38BDF8;">👤 ${member.name}</span>` : ''}
               </div>
             </div>
@@ -5377,6 +5605,7 @@ Current: ${p.status}`, currentIdx + 1);
       document.getElementById('user-username').value = '';
       document.getElementById('user-password').value = '';
       document.getElementById('user-displayname').value = '';
+      document.getElementById('user-email').value = '';
       document.getElementById('user-role').value = 'user';
       document.getElementById('user-icon').value = '👤';
       
@@ -5399,6 +5628,7 @@ Current: ${p.status}`, currentIdx + 1);
       document.getElementById('user-username').value = username;
       document.getElementById('user-password').value = user.password;
       document.getElementById('user-displayname').value = user.name;
+      document.getElementById('user-email').value = user.email || '';
       document.getElementById('user-role').value = user.role;
       document.getElementById('user-icon').value = user.icon || '👤';
       
@@ -5419,6 +5649,7 @@ Current: ${p.status}`, currentIdx + 1);
       const displayName = document.getElementById('user-displayname').value.trim();
       const role = document.getElementById('user-role').value;
       const icon = document.getElementById('user-icon').value;
+      const email = document.getElementById('user-email').value.trim();
       const memberId = document.getElementById('user-member-link').value || null;
       
       // Validation
@@ -5455,6 +5686,7 @@ Current: ${p.status}`, currentIdx + 1);
         name: displayName,
         role,
         icon,
+        email,
         memberId
       };
       
