@@ -4917,10 +4917,11 @@ Current: ${p.status}`, currentIdx + 1);
         modalSubtasks = t.subtasks ? JSON.parse(JSON.stringify(t.subtasks)) : [];
       }
       else {
+        const todayStr = getBangkokToday();
         document.getElementById('edit-task-id').value = '';
         document.getElementById('task-name').value = '';
-        document.getElementById('task-start').value = p.startDate || '';
-        document.getElementById('task-end').value = p.startDate || '';
+        document.getElementById('task-start').value = todayStr;
+        document.getElementById('task-end').value = todayStr;
         picSelect.value = '';
         picCustom.value = '';
         document.getElementById('task-progress').value = 0;
