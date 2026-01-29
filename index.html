@@ -5395,8 +5395,26 @@ Current: ${p.status}`, currentIdx + 1);
       const completed = t.subtasks.filter(st => st.done).length;
       t.progress = Math.round((completed / t.subtasks.length) * 100);
 
+      // Remember which subtask lists are currently expanded before re-render
+      const expandedTaskIds = [];
+      document.querySelectorAll('.subtask-inline-list').forEach(function(el) {
+        if (el.style.display === 'block') {
+          const elId = el.id.replace('subtask-list-', '');
+          expandedTaskIds.push(elId);
+        }
+      });
+
       saveData();
       renderGantt(document.getElementById('tab-content'));
+
+      // Restore expanded subtask lists after re-render
+      expandedTaskIds.forEach(function(tid) {
+        const list = document.getElementById('subtask-list-' + tid);
+        if (list) list.style.display = 'block';
+        const arrow = document.querySelector('.gantt-task-row-wrapper[data-task-id="' + tid + '"] .subtask-expand');
+        if (arrow) arrow.classList.add('expanded');
+      });
+
       showToast(t.subtasks[subtaskIdx].done ? 'Subtask completed' : 'Subtask unchecked');
     }
 
