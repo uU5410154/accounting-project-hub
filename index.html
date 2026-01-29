@@ -152,6 +152,8 @@
     .portfolio-project-group:last-child { }
     .portfolio-project-name { min-width: 200px; max-width: 200px; padding: 8px 12px; font-size: 12px; font-weight: 500; cursor: pointer; display: flex; align-items: center; border-right: 1px solid #334155; border-bottom: 1px solid #334155; background: #1E293B; position: sticky; left: 0; z-index: 10; height: 36px; box-sizing: border-box; }
     .portfolio-project-name:hover { color: #38BDF8; background: #334155; }
+    .portfolio-saving-row { cursor: pointer; transition: background 0.15s; }
+    .portfolio-saving-row:hover { background: rgba(56,189,248,0.08) !important; }
     .portfolio-role-name { min-width: 200px; max-width: 200px; padding: 4px 12px 4px 20px; font-size: 11px; display: flex; align-items: center; border-right: 1px solid #334155; border-bottom: 1px solid #334155; background: #1a2235; position: sticky; left: 0; z-index: 10; height: 36px; box-sizing: border-box; }
     .portfolio-bar-container { flex: 1; position: relative; height: 36px; display: flex; align-items: center; }
     .portfolio-bar { position: absolute; height: 22px; border-radius: 6px; display: flex; align-items: center; justify-content: center; font-size: 10px; color: white; font-weight: 500; cursor: pointer; transition: all 0.2s; min-width: 40px; top: 50%; transform: translateY(-50%); }
@@ -675,67 +677,81 @@
         <h1 style="font-size: 22px; font-weight: 700; margin: 16px 0;">📊 Portfolio Overview</h1>
         <p style="color:#64748B;margin-bottom:16px;">Aggregated timeline of all projects with role assignments</p>
 
-        <!-- Portfolio BUG-2: Project Status Summary Cards -->
-        <div id="portfolio-status-cards" style="display:flex;gap:12px;margin-bottom:16px;flex-wrap:wrap;">
-          <!-- Cards will be rendered here by JavaScript -->
+        <!-- Portfolio Tab Buttons -->
+        <div style="display:flex;gap:8px;margin-bottom:20px;">
+          <button id="portfolio-tab-timeline" class="gantt-scale-btn active" onclick="switchPortfolioTab('timeline')" style="padding:10px 24px;font-size:14px;">📅 Timeline</button>
+          <button id="portfolio-tab-saving" class="gantt-scale-btn" onclick="switchPortfolioTab('saving')" style="padding:10px 24px;font-size:14px;">💰 Saving</button>
         </div>
 
-        <!-- Portfolio SUG-1 & SUG-2: Enhanced Filters (Multi-select Member, Project Name, Status) -->
-        <div id="portfolio-filters" style="display:flex;gap:12px;flex-wrap:wrap;align-items:center;margin-bottom:16px;padding:12px;background:#334155;border-radius:8px;">
-          <div style="display:flex;flex-direction:column;gap:4px;">
-            <span style="color:#94A3B8;font-size:11px;">👤 Members:</span>
-            <select id="portfolio-member-filter" multiple onchange="renderPortfolio()" style="background:#1E293B;border:1px solid #475569;color:#E2E8F0;padding:6px 12px;border-radius:6px;font-size:12px;min-width:150px;max-height:100px;">
-              <!-- Options will be populated by JavaScript -->
-            </select>
-            <span style="font-size:9px;color:#64748B;">Hold Ctrl/Cmd for multi-select</span>
+        <!-- Timeline Tab Content -->
+        <div id="portfolio-timeline-tab">
+          <!-- Portfolio BUG-2: Project Status Summary Cards -->
+          <div id="portfolio-status-cards" style="display:flex;gap:12px;margin-bottom:16px;flex-wrap:wrap;">
+            <!-- Cards will be rendered here by JavaScript -->
           </div>
 
-          <div style="display:flex;flex-direction:column;gap:4px;">
-            <span style="color:#94A3B8;font-size:11px;">🏷️ Roles:</span>
-            <div id="portfolio-role-filter" style="display:flex;flex-wrap:wrap;gap:6px;background:#1E293B;padding:8px;border-radius:6px;border:1px solid #475569;">
-              <label style="display:flex;align-items:center;gap:4px;cursor:pointer;font-size:11px;">
-                <input type="checkbox" value="PM" onchange="renderPortfolio()" checked style="accent-color:#8B5CF6;">
-                <span style="background:#8B5CF6;color:white;padding:1px 6px;border-radius:3px;">PM</span>
-              </label>
-              <label style="display:flex;align-items:center;gap:4px;cursor:pointer;font-size:11px;">
-                <input type="checkbox" value="Dev" onchange="renderPortfolio()" checked style="accent-color:#EF4444;">
-                <span style="background:#EF4444;color:white;padding:1px 6px;border-radius:3px;">Dev</span>
-              </label>
-              <label style="display:flex;align-items:center;gap:4px;cursor:pointer;font-size:11px;">
-                <input type="checkbox" value="QA" onchange="renderPortfolio()" checked style="accent-color:#F59E0B;">
-                <span style="background:#F59E0B;color:white;padding:1px 6px;border-radius:3px;">QA</span>
-              </label>
-              <label style="display:flex;align-items:center;gap:4px;cursor:pointer;font-size:11px;">
-                <input type="checkbox" value="Support" onchange="renderPortfolio()" checked style="accent-color:#06B6D4;">
-                <span style="background:#06B6D4;color:white;padding:1px 6px;border-radius:3px;">Support</span>
-              </label>
-              <label style="display:flex;align-items:center;gap:4px;cursor:pointer;font-size:11px;">
-                <input type="checkbox" value="Lead" onchange="renderPortfolio()" checked style="accent-color:#3B82F6;">
-                <span style="background:#3B82F6;color:white;padding:1px 6px;border-radius:3px;">Lead</span>
-              </label>
+          <!-- Portfolio SUG-1 & SUG-2: Enhanced Filters (Multi-select Member, Project Name, Status) -->
+          <div id="portfolio-filters" style="display:flex;gap:12px;flex-wrap:wrap;align-items:center;margin-bottom:16px;padding:12px;background:#334155;border-radius:8px;">
+            <div style="display:flex;flex-direction:column;gap:4px;">
+              <span style="color:#94A3B8;font-size:11px;">👤 Members:</span>
+              <select id="portfolio-member-filter" multiple onchange="renderPortfolio()" style="background:#1E293B;border:1px solid #475569;color:#E2E8F0;padding:6px 12px;border-radius:6px;font-size:12px;min-width:150px;max-height:100px;">
+                <!-- Options will be populated by JavaScript -->
+              </select>
+              <span style="font-size:9px;color:#64748B;">Hold Ctrl/Cmd for multi-select</span>
             </div>
-          </div>
 
-          <div style="display:flex;flex-direction:column;gap:4px;">
-            <span style="color:#94A3B8;font-size:11px;">📋 Status:</span>
-            <select id="portfolio-status-filter" onchange="renderPortfolio()" style="background:#1E293B;border:1px solid #475569;color:#E2E8F0;padding:6px 12px;border-radius:6px;font-size:12px;">
-              <option value="all">All Statuses</option>
-              <option value="Not Started">Not Started</option>
-              <option value="Planning">Planning</option>
-              <option value="In Progress">In Progress</option>
-              <option value="On Hold">On Hold</option>
-              <option value="Completed">Completed</option>
-            </select>
-          </div>
+            <div style="display:flex;flex-direction:column;gap:4px;">
+              <span style="color:#94A3B8;font-size:11px;">🏷️ Roles:</span>
+              <div id="portfolio-role-filter" style="display:flex;flex-wrap:wrap;gap:6px;background:#1E293B;padding:8px;border-radius:6px;border:1px solid #475569;">
+                <label style="display:flex;align-items:center;gap:4px;cursor:pointer;font-size:11px;">
+                  <input type="checkbox" value="PM" onchange="renderPortfolio()" checked style="accent-color:#8B5CF6;">
+                  <span style="background:#8B5CF6;color:white;padding:1px 6px;border-radius:3px;">PM</span>
+                </label>
+                <label style="display:flex;align-items:center;gap:4px;cursor:pointer;font-size:11px;">
+                  <input type="checkbox" value="Dev" onchange="renderPortfolio()" checked style="accent-color:#EF4444;">
+                  <span style="background:#EF4444;color:white;padding:1px 6px;border-radius:3px;">Dev</span>
+                </label>
+                <label style="display:flex;align-items:center;gap:4px;cursor:pointer;font-size:11px;">
+                  <input type="checkbox" value="QA" onchange="renderPortfolio()" checked style="accent-color:#F59E0B;">
+                  <span style="background:#F59E0B;color:white;padding:1px 6px;border-radius:3px;">QA</span>
+                </label>
+                <label style="display:flex;align-items:center;gap:4px;cursor:pointer;font-size:11px;">
+                  <input type="checkbox" value="Support" onchange="renderPortfolio()" checked style="accent-color:#06B6D4;">
+                  <span style="background:#06B6D4;color:white;padding:1px 6px;border-radius:3px;">Support</span>
+                </label>
+                <label style="display:flex;align-items:center;gap:4px;cursor:pointer;font-size:11px;">
+                  <input type="checkbox" value="Lead" onchange="renderPortfolio()" checked style="accent-color:#3B82F6;">
+                  <span style="background:#3B82F6;color:white;padding:1px 6px;border-radius:3px;">Lead</span>
+                </label>
+              </div>
+            </div>
 
-          <div style="display:flex;flex-direction:column;gap:4px;">
-            <span style="color:#94A3B8;font-size:11px;">🔍 Project Name:</span>
-            <input type="text" id="portfolio-name-filter" onkeyup="renderPortfolio()" placeholder="Search..." style="background:#1E293B;border:1px solid #475569;color:#E2E8F0;padding:6px 12px;border-radius:6px;font-size:12px;min-width:150px;">
-          </div>
+            <div style="display:flex;flex-direction:column;gap:4px;">
+              <span style="color:#94A3B8;font-size:11px;">📋 Status:</span>
+              <select id="portfolio-status-filter" onchange="renderPortfolio()" style="background:#1E293B;border:1px solid #475569;color:#E2E8F0;padding:6px 12px;border-radius:6px;font-size:12px;">
+                <option value="all">All Statuses</option>
+                <option value="Not Started">Not Started</option>
+                <option value="Planning">Planning</option>
+                <option value="In Progress">In Progress</option>
+                <option value="On Hold">On Hold</option>
+                <option value="Completed">Completed</option>
+              </select>
+            </div>
 
-          <button onclick="clearPortfolioFilters()" style="background:#475569;border:none;color:#E2E8F0;padding:6px 12px;border-radius:6px;font-size:11px;cursor:pointer;margin-top:16px;">Clear Filters</button>
+            <div style="display:flex;flex-direction:column;gap:4px;">
+              <span style="color:#94A3B8;font-size:11px;">🔍 Project Name:</span>
+              <input type="text" id="portfolio-name-filter" onkeyup="renderPortfolio()" placeholder="Search..." style="background:#1E293B;border:1px solid #475569;color:#E2E8F0;padding:6px 12px;border-radius:6px;font-size:12px;min-width:150px;">
+            </div>
+
+            <button onclick="clearPortfolioFilters()" style="background:#475569;border:none;color:#E2E8F0;padding:6px 12px;border-radius:6px;font-size:11px;cursor:pointer;margin-top:16px;">Clear Filters</button>
+          </div>
+          <div id="portfolio-gantt"></div>
         </div>
-        <div id="portfolio-gantt"></div>
+
+        <!-- Saving Tab Content -->
+        <div id="portfolio-saving-tab" style="display:none;">
+          <div id="portfolio-saving-content"></div>
+        </div>
       </div>
     </div>
 
@@ -996,10 +1012,7 @@
       </div>
       <div class="modal-body">
         <input type="hidden" id="edit-update-index">
-        <div class="form-group">
-          <label class="form-label">Date</label>
-          <input type="date" class="form-input" id="update-date">
-        </div>
+        <div id="update-original-info" style="background:#1E293B;padding:10px 14px;border-radius:8px;margin-bottom:16px;font-size:12px;color:#94A3B8;"></div>
         <div class="form-group">
           <label class="form-label">Update Text *</label>
           <textarea class="form-textarea" id="update-text" placeholder="Enter update..." rows="5" style="min-height:120px;resize:vertical;"></textarea>
@@ -2144,6 +2157,123 @@
       renderPortfolio();
     }
 
+    let activePortfolioTab = 'timeline';
+
+    function switchPortfolioTab(tab) {
+      activePortfolioTab = tab;
+      document.getElementById('portfolio-tab-timeline').classList.remove('active');
+      document.getElementById('portfolio-tab-saving').classList.remove('active');
+      document.getElementById('portfolio-tab-' + tab).classList.add('active');
+
+      document.getElementById('portfolio-timeline-tab').style.display = tab === 'timeline' ? 'block' : 'none';
+      document.getElementById('portfolio-saving-tab').style.display = tab === 'saving' ? 'block' : 'none';
+
+      if (tab === 'saving') renderPortfolioSaving();
+      if (tab === 'timeline') renderPortfolio();
+    }
+
+    function renderPortfolioSaving() {
+      const container = document.getElementById('portfolio-saving-content');
+      const allProjects = [...data.projects];
+
+      // Sort by target saving hours descending, then by name
+      const ranked = allProjects.sort((a, b) => (b.savingHours || 0) - (a.savingHours || 0) || a.name.localeCompare(b.name));
+
+      // Totals
+      const totalTarget = data.projects.reduce((sum, p) => sum + (p.savingHours || 0), 0);
+      const totalActual = data.projects.filter(p => p.status === 'Completed').reduce((sum, p) => sum + (p.actualSavingHours || 0), 0);
+      const maxTarget = ranked.length > 0 ? (ranked[0].savingHours || 0) : 1;
+
+      let html = '';
+
+      // Summary cards
+      html += `<div style="display:flex;gap:12px;margin-bottom:24px;flex-wrap:wrap;">
+        <div style="flex:1;min-width:180px;background:linear-gradient(135deg,#10B981,#059669);padding:24px;border-radius:12px;text-align:center;">
+          <div style="font-size:36px;font-weight:700;color:white;">${totalTarget}</div>
+          <div style="font-size:13px;color:rgba(255,255,255,0.9);margin-top:4px;">Target Hours/Month</div>
+        </div>
+        <div style="flex:1;min-width:180px;background:linear-gradient(135deg,#3B82F6,#1D4ED8);padding:24px;border-radius:12px;text-align:center;">
+          <div style="font-size:36px;font-weight:700;color:white;">${totalActual}</div>
+          <div style="font-size:13px;color:rgba(255,255,255,0.9);margin-top:4px;">Actual Hours/Month</div>
+        </div>
+        <div style="flex:1;min-width:180px;background:linear-gradient(135deg,${totalActual >= totalTarget ? '#10B981,#059669' : '#F59E0B,#D97706'});padding:24px;border-radius:12px;text-align:center;">
+          <div style="font-size:36px;font-weight:700;color:white;">${totalTarget > 0 ? Math.round(totalActual / totalTarget * 100) : 0}%</div>
+          <div style="font-size:13px;color:rgba(255,255,255,0.9);margin-top:4px;">Achievement</div>
+        </div>
+        <div style="flex:1;min-width:180px;background:#1E293B;padding:24px;border-radius:12px;text-align:center;border:2px solid #8B5CF6;">
+          <div style="font-size:36px;font-weight:700;color:#8B5CF6;">${ranked.length}</div>
+          <div style="font-size:13px;color:#94A3B8;margin-top:4px;">Projects with Saving</div>
+        </div>
+      </div>`;
+
+      // Ranking list
+      if (ranked.length === 0) {
+        html += `<div style="background:#334155;padding:40px;border-radius:12px;text-align:center;">
+          <div style="font-size:48px;margin-bottom:16px;">📊</div>
+          <div style="font-size:18px;font-weight:600;color:#94A3B8;">No projects with saving hours</div>
+          <div style="font-size:13px;color:#64748B;margin-top:8px;">Set Target Saving Hours in project details to see rankings here.</div>
+        </div>`;
+      } else {
+        html += `<div style="background:#334155;border-radius:12px;overflow:hidden;">
+          <div style="display:flex;padding:14px 20px;background:#1E293B;font-size:12px;font-weight:600;color:#94A3B8;border-bottom:1px solid #475569;">
+            <div style="width:50px;text-align:center;">#</div>
+            <div style="flex:1;">Project</div>
+            <div style="width:100px;text-align:center;">Status</div>
+            <div style="width:120px;text-align:right;">Target (h/mo)</div>
+            <div style="width:120px;text-align:right;">Actual (h/mo)</div>
+            <div style="width:100px;text-align:right;">Achievement</div>
+            <div style="flex:1.5;padding-left:20px;">Progress</div>
+          </div>`;
+
+        ranked.forEach((p, idx) => {
+          const rank = idx + 1;
+          const target = p.savingHours || 0;
+          const actual = p.actualSavingHours || 0;
+          const achievement = target > 0 ? Math.round(actual / target * 100) : 0;
+          const barWidth = maxTarget > 0 ? Math.round((target / maxTarget) * 100) : 0;
+          const actualBarWidth = maxTarget > 0 ? Math.round((actual / maxTarget) * 100) : 0;
+          const isCompleted = p.status === 'Completed';
+
+          const statusColors = {
+            'Not Started': '#64748B', 'Planning': '#8B5CF6', 'In Progress': '#F59E0B',
+            'On Hold': '#6B7280', 'Completed': '#10B981'
+          };
+          const statusColor = statusColors[p.status] || '#64748B';
+
+          let medalIcon = '';
+          if (rank === 1) medalIcon = '🥇';
+          else if (rank === 2) medalIcon = '🥈';
+          else if (rank === 3) medalIcon = '🥉';
+
+          html += `<div style="display:flex;align-items:center;padding:14px 20px;border-bottom:1px solid #2D3748;${rank <= 3 ? 'background:rgba(59,130,246,0.05);' : ''}" onclick="openProject('${p.id}')" class="portfolio-saving-row">
+            <div style="width:50px;text-align:center;font-weight:700;font-size:16px;color:${rank <= 3 ? '#E2E8F0' : '#64748B'};">${medalIcon || rank}</div>
+            <div style="flex:1;min-width:0;">
+              <div style="font-weight:600;font-size:14px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;cursor:pointer;color:#E2E8F0;">${p.name}</div>
+            </div>
+            <div style="width:100px;text-align:center;">
+              <span style="background:${statusColor};color:white;padding:3px 10px;border-radius:6px;font-size:11px;">${p.status}</span>
+            </div>
+            <div style="width:120px;text-align:right;font-weight:600;color:#10B981;font-size:15px;">${target}h</div>
+            <div style="width:120px;text-align:right;font-weight:600;color:${isCompleted ? '#3B82F6' : '#64748B'};font-size:15px;">${isCompleted ? actual + 'h' : '-'}</div>
+            <div style="width:100px;text-align:right;font-weight:600;color:${isCompleted ? (achievement >= 100 ? '#10B981' : '#F59E0B') : '#64748B'};">${isCompleted ? achievement + '%' : '-'}</div>
+            <div style="flex:1.5;padding-left:20px;">
+              <div style="position:relative;height:20px;background:#0F172A;border-radius:10px;overflow:hidden;">
+                <div style="position:absolute;top:0;left:0;height:100%;width:${barWidth}%;background:rgba(16,185,129,0.3);border-radius:10px;"></div>
+                ${isCompleted ? `<div style="position:absolute;top:0;left:0;height:100%;width:${actualBarWidth}%;background:linear-gradient(90deg,#3B82F6,#2563EB);border-radius:10px;"></div>` : ''}
+                <div style="position:absolute;top:0;left:0;width:100%;height:100%;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:600;color:white;">
+                  ${target}h${isCompleted ? ' / ' + actual + 'h actual' : ''}
+                </div>
+              </div>
+            </div>
+          </div>`;
+        });
+
+        html += '</div>';
+      }
+
+      container.innerHTML = html;
+    }
+
     // Get selected roles from checkboxes
     function getSelectedPortfolioRoles() {
       const checkboxes = document.querySelectorAll('#portfolio-role-filter input[type="checkbox"]:checked');
@@ -2270,11 +2400,12 @@
       ];
 
       // Build project data with role assignments - filter by selected members and roles
+      const hasMemberFilter = selectedMemberIds.length > 0;
       const projectsWithRoles = sortedProjects.map((p, idx) => {
         let assignments = getProjectRoleAssignments(p.id);
 
-        // Filter assignments to only show selected members (if member filter is active)
-        if (selectedMemberIds.length > 0) {
+        // Only show member rows when member filter is active
+        if (hasMemberFilter) {
           assignments = assignments.filter(a => selectedMemberIds.includes(a.memberId));
         }
 
@@ -2283,13 +2414,15 @@
           assignments = assignments.filter(a => selectedRoles.includes(a.role));
         }
 
-        // Group assignments by role (only include selected roles)
+        // Group assignments by role - only when member filter is active
         const roleGroups = {};
-        PORTFOLIO_ROLES.forEach(r => {
-          if (selectedRoles.includes(r.role)) {
-            roleGroups[r.role] = assignments.filter(a => a.role === r.role);
-          }
-        });
+        if (hasMemberFilter) {
+          PORTFOLIO_ROLES.forEach(r => {
+            if (selectedRoles.includes(r.role)) {
+              roleGroups[r.role] = assignments.filter(a => a.role === r.role);
+            }
+          });
+        }
 
         return {
           ...p,
@@ -4415,7 +4548,7 @@ Current: ${p.status}`, currentIdx + 1);
             <button class="btn btn-primary" onclick="addNewUpdate()">Post</button>
           </div>
         </div>
-        <div class="updates-list">${!u.length?'<div class="no-updates">No updates yet.</div>':u.map((x,i)=>`<div class="update-item"><div class="update-actions"><button class="btn btn-secondary btn-icon btn-sm" onclick="editUpdate(${i})">✏️</button><button class="btn btn-danger btn-icon btn-sm" onclick="deleteUpdate(${i})">🗑️</button></div><div class="update-date">${formatBangkokDateTime(x.date)}${x.author ? ` • <span style="color:#38BDF8;font-weight:500;">@${x.author}</span>` : ''}</div><div class="update-text" style="white-space:pre-wrap;">${formatUpdateText(x.text)}</div></div>`).join('')}</div>
+        <div class="updates-list">${!u.length?'<div class="no-updates">No updates yet.</div>':u.map((x,i)=>`<div class="update-item"><div class="update-actions"><button class="btn btn-secondary btn-icon btn-sm" onclick="editUpdate(${i})">✏️</button><button class="btn btn-danger btn-icon btn-sm" onclick="deleteUpdate(${i})">🗑️</button></div><div class="update-date">${formatBangkokDateTime(x.date)}${x.author ? ` • <span style="color:#38BDF8;font-weight:500;">@${x.author}</span>` : ''}${x.updatedAt ? ` <span style="color:#94A3B8;font-size:11px;"> | Updated: ${formatBangkokDateTime(x.updatedAt)}${x.updatedBy ? ` by @${x.updatedBy}` : ''}</span>` : ''}</div><div class="update-text" style="white-space:pre-wrap;">${formatUpdateText(x.text)}</div></div>`).join('')}</div>
       </div>`;
     }
 
@@ -4467,16 +4600,27 @@ Current: ${p.status}`, currentIdx + 1);
       renderUpdates(document.getElementById('tab-content'));
       showToast('Update added');
     }
-    function editUpdate(idx) { const p = getProjectById(currentProjectId); const u = p.updates[idx]; document.getElementById('edit-update-index').value = idx; document.getElementById('update-date').value = u.date; document.getElementById('update-text').value = u.text; document.getElementById('modal-update').classList.remove('hidden'); }
+    function editUpdate(idx) {
+      const p = getProjectById(currentProjectId);
+      const u = p.updates[idx];
+      document.getElementById('edit-update-index').value = idx;
+      document.getElementById('update-text').value = u.text;
+      let infoHtml = `Posted: ${formatBangkokDateTime(u.date)}${u.author ? ` by @${u.author}` : ''}`;
+      if (u.updatedAt) {
+        infoHtml += `<br>Last edited: ${formatBangkokDateTime(u.updatedAt)}${u.updatedBy ? ` by @${u.updatedBy}` : ''}`;
+      }
+      document.getElementById('update-original-info').innerHTML = infoHtml;
+      document.getElementById('modal-update').classList.remove('hidden');
+    }
     function saveUpdate() {
       const idx = parseInt(document.getElementById('edit-update-index').value);
       const p = getProjectById(currentProjectId);
-      const existingAuthor = p.updates[idx].author;
-      p.updates[idx] = {
-        date: document.getElementById('update-date').value,
-        text: document.getElementById('update-text').value.trim(),
-        author: existingAuthor || (currentUser ? currentUser.username : 'Unknown')
-      };
+      const existing = p.updates[idx];
+      existing.text = document.getElementById('update-text').value.trim();
+      existing.updatedAt = new Date().toISOString();
+      existing.updatedBy = currentUser ? currentUser.username : 'Unknown';
+      // Preserve original date and author
+      if (!existing.author) existing.author = currentUser ? currentUser.username : 'Unknown';
       saveData();
       closeModal('update');
       renderUpdates(document.getElementById('tab-content'));
