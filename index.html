@@ -1209,6 +1209,7 @@
     <div class="loading-subtext" id="loading-subtext">Please wait</div>
   </div>
 
+  <script src="https://cdn.sheetjs.com/xlsx-0.20.3/package/dist/xlsx.full.min.js"></script>
   <script>
     // ==================== AUTHENTICATION ====================
     // Default users (always available, cannot be deleted)
@@ -2470,6 +2471,11 @@
         </div>
       </div>`;
 
+      // Export button
+      html += `<div style="display:flex;justify-content:flex-end;margin-bottom:16px;">
+        <button class="btn btn-success btn-sm" onclick="exportSavingToExcel()" style="padding:8px 16px;font-size:13px;">📥 Export to Excel</button>
+      </div>`;
+
       // Ranking list
       if (ranked.length === 0) {
         html += `<div style="background:#334155;padding:40px;border-radius:12px;text-align:center;">
@@ -2478,10 +2484,11 @@
           <div style="font-size:13px;color:#64748B;margin-top:8px;">Set Target Saving Hours in project details to see rankings here.</div>
         </div>`;
       } else {
-        html += `<div style="background:#334155;border-radius:12px;overflow:hidden;">
-          <div style="display:flex;padding:14px 20px;background:#1E293B;font-size:12px;font-weight:600;color:#94A3B8;border-bottom:1px solid #475569;">
+        html += `<div style="background:#334155;border-radius:12px;overflow:hidden;overflow-x:auto;">
+          <div style="display:flex;padding:14px 20px;background:#1E293B;font-size:12px;font-weight:600;color:#94A3B8;border-bottom:1px solid #475569;min-width:900px;">
             <div style="width:50px;text-align:center;">#</div>
             <div style="flex:1;">Project</div>
+            <div style="width:110px;text-align:center;">User Team</div>
             <div style="width:100px;text-align:center;">Status</div>
             <div style="width:120px;text-align:right;">Target (h/mo)</div>
             <div style="width:120px;text-align:right;">Actual (h/mo)</div>
@@ -2509,10 +2516,13 @@
           else if (rank === 2) medalIcon = '🥈';
           else if (rank === 3) medalIcon = '🥉';
 
-          html += `<div style="display:flex;align-items:center;padding:14px 20px;border-bottom:1px solid #2D3748;${rank <= 3 ? 'background:rgba(59,130,246,0.05);' : ''}" onclick="openProject('${p.id}')" class="portfolio-saving-row">
+          html += `<div style="display:flex;align-items:center;padding:14px 20px;border-bottom:1px solid #2D3748;min-width:900px;${rank <= 3 ? 'background:rgba(59,130,246,0.05);' : ''}" onclick="openProject('${p.id}')" class="portfolio-saving-row">
             <div style="width:50px;text-align:center;font-weight:700;font-size:16px;color:${rank <= 3 ? '#E2E8F0' : '#64748B'};">${medalIcon || rank}</div>
             <div style="flex:1;min-width:0;">
               <div style="font-weight:600;font-size:14px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;cursor:pointer;color:#E2E8F0;">${p.name}</div>
+            </div>
+            <div style="width:110px;text-align:center;">
+              <span style="color:#94A3B8;font-size:12px;">${p.team || '-'}</span>
             </div>
             <div style="width:100px;text-align:center;">
               <span style="background:${statusColor};color:white;padding:3px 10px;border-radius:6px;font-size:11px;">${p.status}</span>
@@ -2536,6 +2546,66 @@
       }
 
       container.innerHTML = html;
+    }
+
+    function exportSavingToExcel() {
+      if (typeof XLSX === 'undefined') {
+        showToast('Excel library not loaded. Please refresh and try again.');
+        return;
+      }
+
+      const allProjects = [...data.projects];
+      const ranked = allProjects.sort((a, b) => (b.savingHours || 0) - (a.savingHours || 0) || a.name.localeCompare(b.name));
+
+      // Build header row
+      const headers = ['#', 'Project', 'User Team', 'Status', 'Target (h/mo)', 'Actual (h/mo)', 'Achievement (%)'];
+
+      // Build data rows
+      const rows = ranked.map((p, idx) => {
+        const target = p.savingHours || 0;
+        const actual = p.actualSavingHours || 0;
+        const isCompleted = p.status === 'Completed';
+        const achievement = (isCompleted && target > 0) ? Math.round(actual / target * 100) : null;
+        return [
+          idx + 1,
+          p.name,
+          p.team || '',
+          p.status,
+          target,
+          isCompleted ? actual : null,
+          achievement
+        ];
+      });
+
+      // Totals row
+      const totalTarget = ranked.reduce((sum, p) => sum + (p.savingHours || 0), 0);
+      const totalActual = ranked.filter(p => p.status === 'Completed').reduce((sum, p) => sum + (p.actualSavingHours || 0), 0);
+      const totalAchievement = totalTarget > 0 ? Math.round(totalActual / totalTarget * 100) : 0;
+      rows.push([]);
+      rows.push(['', 'TOTAL', '', '', totalTarget, totalActual, totalAchievement]);
+
+      // Create worksheet
+      const wsData = [headers, ...rows];
+      const ws = XLSX.utils.aoa_to_sheet(wsData);
+
+      // Set column widths
+      ws['!cols'] = [
+        { wch: 5 },   // #
+        { wch: 35 },  // Project
+        { wch: 15 },  // User Team
+        { wch: 14 },  // Status
+        { wch: 16 },  // Target
+        { wch: 16 },  // Actual
+        { wch: 16 }   // Achievement
+      ];
+
+      // Create workbook and export
+      const wb = XLSX.utils.book_new();
+      XLSX.utils.book_append_sheet(wb, ws, 'Project Saving');
+
+      const timestamp = new Date().toISOString().split('T')[0];
+      XLSX.writeFile(wb, 'project-saving-' + timestamp + '.xlsx');
+      showToast('Excel exported successfully');
     }
 
     // Get selected roles from checkboxes
@@ -3414,17 +3484,18 @@
             </div>` : ''}
           </div>
           <div class="board-count">${projectsWithRoles.length} project${projectsWithRoles.length!==1?'s':''}</div>
-          ${projectsWithRoles.length ? `<div class="board-projects">${projectsWithRoles.map(pr => {
+          ${projectsWithRoles.length ? `<div class="board-projects" data-member-id="${m.id}">${projectsWithRoles.map(pr => {
             const p = pr.project;
             const role = pr.role;
             // SUG-7: Calculate risk status
             const riskStatus = calculateRiskStatus(p);
             // Get distinct project color
             const pColor = getProjectCardColor(p.id);
+            const canDrag = isAdmin() || isCurrentUser;
             return `
-            <div class="board-project-item" draggable="true" data-project-id="${p.id}"
+            <div class="board-project-item" draggable="${canDrag}" data-project-id="${p.id}"
                  style="border-left: 4px solid ${pColor.bg};background:linear-gradient(135deg, ${pColor.bg}25 0%, ${pColor.bg}10 100%);${riskStatus.isRisk ? 'box-shadow:0 0 0 2px #EF4444;' : ''}cursor:pointer;"
-                 ondragstart="handleDragStart(event, '${p.id}')" ondragend="handleDragEnd(event)"
+                 ${canDrag ? `ondragstart="handleDragStart(event, '${p.id}')" ondragend="handleDragEnd(event)"` : ''}
                  onclick="handleProjectCardClick(event, '${p.id}')">
               <div class="board-project-header">
                 <span class="board-project-name" style="color:${pColor.bg};font-weight:600;">${p.name}${riskStatus.isRisk ? ' ⚠️' : ''}</span>
@@ -3448,31 +3519,85 @@
     
     // Drag and Drop Handlers
     let draggedProjectId = null;
-    
+    let dragSourceMemberId = null;
+
     function handleDragStart(e, projectId) {
       draggedProjectId = projectId;
+      // Track which member board this project is being dragged from
+      const board = e.target.closest('.board');
+      dragSourceMemberId = board ? board.getAttribute('data-member-id') : null;
       e.target.classList.add('dragging');
       e.dataTransfer.effectAllowed = 'move';
       e.dataTransfer.setData('text/plain', projectId);
     }
-    
+
     function handleDragEnd(e) {
       e.target.classList.remove('dragging');
       draggedProjectId = null;
+      dragSourceMemberId = null;
       document.querySelectorAll('.drag-over').forEach(el => el.classList.remove('drag-over'));
+      // Remove all reorder indicators
+      document.querySelectorAll('.reorder-indicator').forEach(el => el.remove());
     }
-    
+
     function handleDragOver(e) {
       e.preventDefault();
       e.dataTransfer.dropEffect = 'move';
       const board = e.target.closest('.board') || e.target.closest('.board-dropzone');
       if (board) board.classList.add('drag-over');
+
+      // Show reorder indicator when dragging within the same member board
+      const targetBoard = e.target.closest('.board');
+      if (targetBoard && dragSourceMemberId) {
+        const targetMemberId = targetBoard.getAttribute('data-member-id');
+        const canReorder = isAdmin() || targetMemberId === getCurrentUserMemberId();
+        if (targetMemberId === dragSourceMemberId && canReorder) {
+          showReorderIndicator(e, targetBoard);
+        }
+      }
     }
-    
+
     function handleDragLeave(e) {
       const board = e.target.closest('.board') || e.target.closest('.board-dropzone');
       if (board && !board.contains(e.relatedTarget)) {
         board.classList.remove('drag-over');
+        // Remove reorder indicators when leaving the board
+        board.querySelectorAll('.reorder-indicator').forEach(el => el.remove());
+      }
+    }
+
+    function showReorderIndicator(e, board) {
+      // Remove existing indicators
+      board.querySelectorAll('.reorder-indicator').forEach(el => el.remove());
+
+      const projectItems = Array.from(board.querySelectorAll('.board-project-item'));
+      if (!projectItems.length) return;
+
+      let closestItem = null;
+      let insertAfter = false;
+      let minDist = Infinity;
+
+      projectItems.forEach(item => {
+        if (item.classList.contains('dragging')) return;
+        const rect = item.getBoundingClientRect();
+        const midY = rect.top + rect.height / 2;
+        const dist = Math.abs(e.clientY - midY);
+        if (dist < minDist) {
+          minDist = dist;
+          closestItem = item;
+          insertAfter = e.clientY > midY;
+        }
+      });
+
+      if (closestItem) {
+        const indicator = document.createElement('div');
+        indicator.className = 'reorder-indicator';
+        indicator.style.cssText = 'height:3px;background:#3B82F6;border-radius:2px;margin:2px 0;pointer-events:none;';
+        if (insertAfter) {
+          closestItem.parentNode.insertBefore(indicator, closestItem.nextSibling);
+        } else {
+          closestItem.parentNode.insertBefore(indicator, closestItem);
+        }
       }
     }
 
@@ -3503,12 +3628,121 @@
       e.preventDefault();
       const board = e.target.closest('.board');
       if (board) board.classList.remove('drag-over');
-      
+
       const projectId = e.dataTransfer.getData('text/plain') || draggedProjectId;
       if (!projectId || !memberId) return;
-      
-      // Show role selection modal
+
+      // Check if this is a reorder within the same member board
+      if (dragSourceMemberId && dragSourceMemberId === memberId) {
+        const canReorder = isAdmin() || memberId === getCurrentUserMemberId();
+        if (canReorder) {
+          handleReorderDrop(e, memberId, projectId);
+          // Clean up indicators
+          if (board) board.querySelectorAll('.reorder-indicator').forEach(el => el.remove());
+          return;
+        }
+      }
+
+      // Clean up indicators
+      document.querySelectorAll('.reorder-indicator').forEach(el => el.remove());
+
+      // Cross-board drop: Show role selection modal
       openRoleSelectModal(projectId, memberId);
+    }
+
+    // Handle reordering projects within a member's board
+    function handleReorderDrop(e, memberId, projectId) {
+      const assignments = data.memberProjects[memberId] || [];
+      if (assignments.length < 2) return;
+
+      // Find the dragged project's index in the assignments array
+      const dragIdx = assignments.findIndex(a => {
+        const aId = typeof a === 'string' ? a : a.id;
+        return aId === projectId;
+      });
+      if (dragIdx < 0) return;
+
+      // Determine target position based on mouse Y position relative to project cards
+      const board = e.target.closest('.board');
+      if (!board) return;
+      const projectItems = Array.from(board.querySelectorAll('.board-project-item'));
+      if (!projectItems.length) return;
+
+      let targetIdx = -1;
+      let insertAfter = false;
+      let minDist = Infinity;
+
+      projectItems.forEach((item, i) => {
+        const rect = item.getBoundingClientRect();
+        const midY = rect.top + rect.height / 2;
+        const dist = Math.abs(e.clientY - midY);
+        if (dist < minDist) {
+          minDist = dist;
+          targetIdx = i;
+          insertAfter = e.clientY > midY;
+        }
+      });
+
+      if (targetIdx < 0) return;
+
+      // The visible project list may be filtered, so we need to map visible index to assignments index
+      // Get the filtered project IDs in display order
+      const PROJECT_ROLES = ['PM', 'Dev', 'QA', 'Support', 'Lead'];
+      const filterContainer = document.getElementById('team-role-filter');
+      const selectedRoles = filterContainer
+        ? Array.from(filterContainer.querySelectorAll('input[type="checkbox"]:checked')).map(cb => cb.value)
+        : PROJECT_ROLES;
+      const searchInput = document.getElementById('team-project-search');
+      const searchText = searchInput ? searchInput.value.toLowerCase().trim() : '';
+
+      const visibleProjectIds = assignments
+        .map(a => {
+          const aId = typeof a === 'string' ? a : a.id;
+          const aRole = typeof a === 'string' ? null : a.role;
+          const project = getProjectById(aId);
+          if (!project) return null;
+          // Apply same filters as renderTeamBoards
+          if (!aRole && selectedRoles.length !== PROJECT_ROLES.length) return null;
+          if (aRole && !selectedRoles.includes(aRole)) return null;
+          if (searchText) {
+            const match = project.name.toLowerCase().includes(searchText) ||
+              (project.description && project.description.toLowerCase().includes(searchText)) ||
+              (project.status && project.status.toLowerCase().includes(searchText)) ||
+              (project.team && project.team.toLowerCase().includes(searchText));
+            if (!match) return null;
+          }
+          return aId;
+        })
+        .filter(id => id !== null);
+
+      // Get the target project ID from the visible list
+      const dropTargetProjectId = visibleProjectIds[targetIdx];
+      if (!dropTargetProjectId || dropTargetProjectId === projectId) return;
+
+      // Find the actual index of the target in the full assignments array
+      const dropTargetAssignIdx = assignments.findIndex(a => {
+        const aId = typeof a === 'string' ? a : a.id;
+        return aId === dropTargetProjectId;
+      });
+      if (dropTargetAssignIdx < 0) return;
+
+      // Remove the dragged item from its current position
+      const [movedItem] = assignments.splice(dragIdx, 1);
+
+      // Calculate the new insert position
+      let newIdx = assignments.findIndex(a => {
+        const aId = typeof a === 'string' ? a : a.id;
+        return aId === dropTargetProjectId;
+      });
+      if (insertAfter) newIdx++;
+
+      // Insert at the new position
+      assignments.splice(newIdx, 0, movedItem);
+
+      data.memberProjects[memberId] = assignments;
+      saveData();
+      renderTeamBoards();
+      showToast('Project order updated');
     }
     
     // Role selection modal
