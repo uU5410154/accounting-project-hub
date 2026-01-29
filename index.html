@@ -774,6 +774,15 @@
           <div style="display:flex;gap:8px;flex-wrap:wrap;"></div>
         </div>
 
+        <!-- Search Bar -->
+        <div id="mytasks-search-bar" style="margin-bottom:16px;">
+          <div style="display:flex;align-items:center;gap:8px;background:#334155;padding:10px 16px;border-radius:10px;">
+            <span style="font-size:16px;">🔍</span>
+            <input type="text" id="mytasks-search" placeholder="Search project or task name..." oninput="onMyTasksSearch()" style="flex:1;background:transparent;border:none;color:#E2E8F0;font-size:14px;outline:none;font-family:inherit;" autocomplete="off">
+            <button id="mytasks-search-clear" onclick="clearMyTasksSearch()" style="display:none;background:none;border:none;color:#94A3B8;font-size:16px;cursor:pointer;padding:0 4px;" title="Clear search">&times;</button>
+          </div>
+        </div>
+
         <!-- Urgency Filter Tabs -->
         <div id="mytasks-urgency-tabs" style="margin-bottom:20px;">
           <div style="display:flex;gap:8px;flex-wrap:wrap;"></div>
@@ -2054,14 +2063,23 @@
 
           if (!touchesToday && !isDelayed) return;
 
-          // Filter by PIC member
+          // Filter by member: match if member is PIC on this task OR has a role on this project
           let includeTask = false;
 
           if (filterMemberId === 'all' || filterMemberId === null) {
             includeTask = true;
           } else {
+            // Check if member is PIC on this task
             if (task.pic === filterMemberId) {
               includeTask = true;
+            }
+            // Check if member has a role assigned on this project
+            if (!includeTask) {
+              const assignments = data.memberProjects[filterMemberId] || [];
+              includeTask = assignments.some(function(a) {
+                const aId = typeof a === 'string' ? a : a.id;
+                return aId === project.id;
+              });
             }
           }
 
@@ -2090,15 +2108,17 @@
       return myTasks;
     }
 
-    // Get all members who are PIC on active tasks (touching today or delayed)
+    // Get all members who are PIC on active tasks OR have a role on projects with active tasks
     function getMembersWithTodayTasks() {
       const today = getBangkokToday();
       const todayDate = new Date(today);
       const memberIds = new Set();
+      const projectsWithActiveTasks = new Set();
 
       data.projects.forEach(project => {
         if (!project.tasks) return;
 
+        let hasActiveTask = false;
         project.tasks.forEach(task => {
           const taskStart = new Date(task.start);
           const taskEnd = new Date(task.end);
@@ -2111,10 +2131,23 @@
           const isDelayed = taskEnd < todayDate;
 
           if (touchesToday || isDelayed) {
+            hasActiveTask = true;
             if (task.pic) {
               memberIds.add(task.pic);
             }
           }
+        });
+
+        if (hasActiveTask) {
+          projectsWithActiveTasks.add(project.id);
+        }
+      });
+
+      // Also include members who have a role assigned on projects with active tasks
+      projectsWithActiveTasks.forEach(projectId => {
+        const assignments = getProjectRoleAssignments(projectId);
+        assignments.forEach(a => {
+          memberIds.add(a.memberId);
         });
       });
 
@@ -2127,6 +2160,7 @@
 
     let mytasksSelectedMember = 'all';
     let mytasksSelectedUrgency = 'all';
+    let mytasksSearchText = '';
 
     function selectMyTasksMember(memberId) {
       mytasksSelectedMember = memberId;
@@ -2135,6 +2169,23 @@
 
     function selectMyTasksUrgency(urgency) {
       mytasksSelectedUrgency = urgency;
+      renderMyTasks();
+    }
+
+    function onMyTasksSearch() {
+      const input = document.getElementById('mytasks-search');
+      mytasksSearchText = input ? input.value.trim().toLowerCase() : '';
+      const clearBtn = document.getElementById('mytasks-search-clear');
+      if (clearBtn) clearBtn.style.display = mytasksSearchText ? 'block' : 'none';
+      renderMyTasks();
+    }
+
+    function clearMyTasksSearch() {
+      const input = document.getElementById('mytasks-search');
+      if (input) input.value = '';
+      mytasksSearchText = '';
+      const clearBtn = document.getElementById('mytasks-search-clear');
+      if (clearBtn) clearBtn.style.display = 'none';
       renderMyTasks();
     }
 
@@ -2213,7 +2264,15 @@
       urgencyTabsContainer.querySelector('div').innerHTML = urgencyTabsHtml;
 
       // Get filtered tasks
-      const myTasks = getMyTasks(selectedMember, mytasksSelectedUrgency === 'all' ? null : mytasksSelectedUrgency);
+      let myTasks = getMyTasks(selectedMember, mytasksSelectedUrgency === 'all' ? null : mytasksSelectedUrgency);
+
+      // Apply search filter
+      if (mytasksSearchText) {
+        myTasks = myTasks.filter(item =>
+          item.project.name.toLowerCase().includes(mytasksSearchText) ||
+          item.task.name.toLowerCase().includes(mytasksSearchText)
+        );
+      }
 
       // Update subtitle based on selected filter
       let subtitleText = '';
