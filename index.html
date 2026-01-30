@@ -4241,7 +4241,7 @@ Current: ${p.status}`, currentIdx + 1);
       
       html += '</div>'; // end gantt-scroll-container
       
-      const hintText = isAdmin() ? 'Drag bars to move • Drag edges to resize • Double-tap to edit • Ctrl/Cmd+Click to multi-select • 🔒 = Lock task' : 'Double-tap to update progress • Ctrl/Cmd+Click to multi-select • 🔒 = Locked by admin';
+      const hintText = isAdmin() ? 'Drag bars to move • Drag edges to resize • Double-tap to edit • Ctrl/Cmd+Click to multi-select • 🔒 = Lock task' : (p.lockedTimeline ? 'Timeline locked by admin • Double-tap to update progress' : 'Drag bars to move • Double-tap to edit • Ctrl/Cmd+Click to multi-select • 🔒 = Locked by admin');
       html += `<div class="gantt-hint">${hintText}</div></div>`;
       c.innerHTML = html;
       
@@ -4306,8 +4306,10 @@ Current: ${p.status}`, currentIdx + 1);
       } else {
         tasks.forEach((t, index) => {
           const isLocked = t.locked || false;
-          // When timeline is locked, NO ONE can edit dates (not even admin) - admin can only unlock
+          // When timeline is locked, NO ONE can drag bar dates (not even admin) - admin can only unlock
           const canEditThisTask = !p.lockedTimeline && (isAdmin() || !isLocked);
+          // Users can open the edit modal (name, subtasks, progress, PIC) as long as timeline is not locked
+          const canOpenEdit = !p.lockedTimeline || isAdmin();
           const canDrag = !p.lockedTimeline;
           const opacity = t.progress === 0 ? 'opacity:0.7;' : '';
           const hasSubtasks = t.subtasks && t.subtasks.length > 0;
@@ -4325,7 +4327,7 @@ Current: ${p.status}`, currentIdx + 1);
             ${hasSubtasks ? `<span class="subtask-expand" onclick="toggleSubtaskExpand('${t.id}')" title="Show subtasks">▶</span>` : ''}
             <span class="gantt-task-text" data-full-text="${t.name}">${t.name}${hasSubtasks ? ` <span style="color:#64748B;font-size:10px;">(${completedCount}/${subtaskCount})</span>` : ''}</span>
             <div class="gantt-task-actions">
-              ${canEditThisTask ? `<button class="btn btn-secondary btn-icon btn-sm" onclick="editTask('${t.id}')" style="width:20px;height:20px;font-size:9px;">✏️</button>` : ''}
+              ${canOpenEdit ? `<button class="btn btn-secondary btn-icon btn-sm" onclick="editTask('${t.id}')" style="width:20px;height:20px;font-size:9px;">✏️</button>` : ''}
               <button class="btn btn-danger btn-icon btn-sm" onclick="deleteTask('${t.id}')" style="width:20px;height:20px;font-size:9px;">🗑️</button>
             </div>
           </div>
@@ -4438,22 +4440,23 @@ Current: ${p.status}`, currentIdx + 1);
           const widthDays = Math.max(1, Math.ceil((te - ts) / 864e5) + 1);
 
           const isLocked = t.locked || false;
-          // When timeline is locked, NO ONE can drag bars (not even admin)
-          const canEditThisTask = !p.lockedTimeline && (isAdmin() || !isLocked);
-          const canDragThisTask = canEditThisTask;
-          
+          // canDragThisTask: can drag/resize bar dates - requires unlocked timeline AND (admin OR task not individually locked)
+          const canDragThisTask = !p.lockedTimeline && (isAdmin() || !isLocked);
+          // canOpenEdit: can double-click to open edit modal - allowed when timeline is unlocked (even if task is individually locked)
+          const canOpenEdit = !p.lockedTimeline || isAdmin();
+
           html += `<div class="gantt-row"><div class="gantt-bar-container" style="min-width:${totalDays * dayWidth}px;" data-day-width="${dayWidth}" data-start-date="${start.toISOString()}">`;
           dates.forEach(d => {
             const isWeekend = d.getDay() === 0 || d.getDay() === 6;
             html += `<div class="gantt-bar-cell ${isWeekend ? 'weekend' : ''}" style="min-width:${dayWidth}px;"></div>`;
           });
-          
+
           // Today line
           const todayDays = Math.ceil((today - start) / 864e5);
           if (todayDays >= 0 && todayDays <= totalDays) {
             html += `<div class="gantt-today-line" style="left:${todayDays * dayWidth + dayWidth/2}px;"></div>`;
           }
-          
+
           if (canDragThisTask) {
             html += `<div class="gantt-bar" id="bar-${t.id}" data-task-id="${t.id}" data-start="${t.start}" data-end="${t.end}" data-locked="${isLocked}"
                   style="left:${leftDays*dayWidth}px;width:${widthDays*dayWidth}px;background:${getProgressColor(t.progress)};cursor:move"
@@ -4463,7 +4466,7 @@ Current: ${p.status}`, currentIdx + 1);
                 <div class="gantt-bar-handle gantt-bar-handle-right" onmousedown="event.stopPropagation();startGanttDrag(event,'${t.id}','resize-right')" ontouchstart="event.stopPropagation();startGanttDrag(event,'${t.id}','resize-right')"></div>
               </div>`;
           } else {
-            html += `<div class="gantt-bar" id="bar-${t.id}" style="left:${leftDays*dayWidth}px;width:${widthDays*dayWidth}px;background:${getProgressColor(t.progress)};cursor:not-allowed;opacity:0.8" ondblclick="updateTaskProgress('${t.id}')">
+            html += `<div class="gantt-bar" id="bar-${t.id}" data-task-id="${t.id}" style="left:${leftDays*dayWidth}px;width:${widthDays*dayWidth}px;background:${getProgressColor(t.progress)};${canOpenEdit ? 'cursor:pointer;' : 'cursor:not-allowed;opacity:0.8;'}" ondblclick="${canOpenEdit ? `editTask('${t.id}')` : `updateTaskProgress('${t.id}')`}">
                 <span class="gantt-bar-label">${t.progress}%</span>
               </div>`;
           }
@@ -4515,8 +4518,7 @@ Current: ${p.status}`, currentIdx + 1);
       } else {
         tasks.forEach(t => {
           const isLocked = t.locked || false;
-          // When timeline is locked, NO ONE can edit dates (not even admin)
-          const canEditThisTask = !p.lockedTimeline && (isAdmin() || !isLocked);
+          const canOpenEdit = !p.lockedTimeline || isAdmin();
           const canDeleteThisTask = isAdmin() || (t.createdBy && currentUser && t.createdBy === currentUser.username);
           const hasSubtasks = t.subtasks && t.subtasks.length > 0;
           const subtaskCount = hasSubtasks ? t.subtasks.length : 0;
@@ -4525,7 +4527,7 @@ Current: ${p.status}`, currentIdx + 1);
             ${hasSubtasks ? `<span class="subtask-expand" onclick="toggleSubtaskExpand('${t.id}')" title="Show subtasks">▶</span>` : ''}
             <span class="gantt-task-text" data-full-text="${t.name}">${t.name}${hasSubtasks ? ` <span style="color:#64748B;font-size:10px;">(${completedCount}/${subtaskCount})</span>` : ''}</span>
             <div class="gantt-task-actions">
-              ${canEditThisTask ? `<button class="btn btn-secondary btn-icon btn-sm" onclick="editTask('${t.id}')" style="width:22px;height:22px;font-size:10px;">✏️</button>` : ''}
+              ${canOpenEdit ? `<button class="btn btn-secondary btn-icon btn-sm" onclick="editTask('${t.id}')" style="width:22px;height:22px;font-size:10px;">✏️</button>` : ''}
               <button class="btn btn-danger btn-icon btn-sm" onclick="deleteTask('${t.id}')" style="width:22px;height:22px;font-size:10px;">🗑️</button>
             </div>
           </div>`;
