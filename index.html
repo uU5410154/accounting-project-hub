@@ -345,6 +345,8 @@
       touch-action: none;
     }
     .gantt-bar:active { box-shadow: 0 4px 12px rgba(0,0,0,0.4); }
+    .gantt-bar.selected { outline: 2px solid #38BDF8; outline-offset: 1px; box-shadow: 0 0 8px rgba(56,189,248,0.5); }
+    .gantt-bar.multi-dragging { opacity: 0.85; }
     .gantt-bar-label { font-size: 10px; font-weight: 600; color: white; text-shadow: 0 1px 2px rgba(0,0,0,0.3); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
     .gantt-bar-handle { position: absolute; top: 0; width: 12px; height: 100%; cursor: ew-resize; z-index: 5; }
     .gantt-bar-handle-left { left: 0; border-radius: 6px 0 0 6px; }
@@ -1893,6 +1895,7 @@
     let selectedMember = data.members[0]?.id || null;
     let activeTab = 'brief';
     let ganttDrag = { active: false, taskId: null, mode: null, startX: 0, originalStart: null, originalEnd: null, dayWidth: 36, projectStart: null, projectEnd: null };
+    let ganttSelectedTaskIds = new Set();
 
     function loadData() {
       try {
@@ -4222,6 +4225,7 @@ Current: ${p.status}`, currentIdx + 1);
           <button class="gantt-scale-btn ${ganttTimeScale==='daily'?'active':''}" onclick="setGanttScale('daily')">Daily</button>
           <button class="gantt-scale-btn ${ganttTimeScale==='weekly'?'active':''}" onclick="setGanttScale('weekly')">Weekly</button>
           <button class="gantt-scale-btn ${ganttTimeScale==='monthly'?'active':''}" onclick="setGanttScale('monthly')">Monthly</button>
+          <span id="gantt-selection-count" style="display:none;font-size:11px;color:#38BDF8;background:#1E3A5F;padding:4px 10px;border-radius:6px;margin-left:8px;"></span>
           <span style="flex:1;"></span>
           ${canAddTask ? `<button class="btn btn-primary btn-sm" onclick="openTaskModal()">+ Add Task</button>` : ''}
         </div>
@@ -4237,7 +4241,7 @@ Current: ${p.status}`, currentIdx + 1);
       
       html += '</div>'; // end gantt-scroll-container
       
-      const hintText = isAdmin() ? 'Drag bars to move • Drag edges to resize • Double-tap to edit • 🔒 = Lock task' : 'Double-tap to update progress • 🔒 = Locked by admin';
+      const hintText = isAdmin() ? 'Drag bars to move • Drag edges to resize • Double-tap to edit • Ctrl/Cmd+Click to multi-select • 🔒 = Lock task' : 'Double-tap to update progress • Ctrl/Cmd+Click to multi-select • 🔒 = Locked by admin';
       html += `<div class="gantt-hint">${hintText}</div></div>`;
       c.innerHTML = html;
       
@@ -4251,7 +4255,17 @@ Current: ${p.status}`, currentIdx + 1);
           const scrollTo = Math.max(0, (ganttTimeScale === 'daily' ? todayOffset * cellWidth : todayOffset / 7 * cellWidth) - 200);
           scrollContainer.scrollLeft = scrollTo;
         }, 100);
+
+        // Click on empty gantt area clears selection
+        scrollContainer.addEventListener('mousedown', function(e) {
+          if (!e.target.closest('.gantt-bar')) {
+            clearGanttSelection();
+          }
+        });
       }
+
+      // Clear selection on re-render
+      ganttSelectedTaskIds.clear();
     }
     
     function renderGanttDaily(start, end, tasks, p, today, canAddTask) {
@@ -4817,6 +4831,52 @@ Current: ${p.status}`, currentIdx + 1);
       }
     }
 
+    function toggleGanttBarSelection(e, taskId) {
+      const isMulti = e.ctrlKey || e.metaKey;
+      if (isMulti) {
+        if (ganttSelectedTaskIds.has(taskId)) {
+          ganttSelectedTaskIds.delete(taskId);
+        } else {
+          ganttSelectedTaskIds.add(taskId);
+        }
+      } else {
+        // Single click: if already the only selection, deselect; otherwise select only this
+        if (ganttSelectedTaskIds.size === 1 && ganttSelectedTaskIds.has(taskId)) {
+          ganttSelectedTaskIds.clear();
+        } else {
+          ganttSelectedTaskIds.clear();
+          ganttSelectedTaskIds.add(taskId);
+        }
+      }
+      updateGanttBarSelectionUI();
+    }
+
+    function updateGanttBarSelectionUI() {
+      document.querySelectorAll('.gantt-bar').forEach(bar => {
+        const tid = bar.getAttribute('data-task-id');
+        if (tid && ganttSelectedTaskIds.has(tid)) {
+          bar.classList.add('selected');
+        } else {
+          bar.classList.remove('selected');
+        }
+      });
+      // Update selection count indicator
+      const indicator = document.getElementById('gantt-selection-count');
+      if (indicator) {
+        if (ganttSelectedTaskIds.size > 1) {
+          indicator.textContent = ganttSelectedTaskIds.size + ' tasks selected';
+          indicator.style.display = 'inline-block';
+        } else {
+          indicator.style.display = 'none';
+        }
+      }
+    }
+
+    function clearGanttSelection() {
+      ganttSelectedTaskIds.clear();
+      updateGanttBarSelectionUI();
+    }
+
     function startGanttDrag(e, taskId, mode) {
       e.preventDefault();
       const p = getProjectById(currentProjectId);
@@ -4834,22 +4894,53 @@ Current: ${p.status}`, currentIdx + 1);
         showToast('This task is locked');
         return;
       }
-      
+
       const container = document.getElementById('gantt-container');
       const clientX = e.touches ? e.touches[0].clientX : e.clientX;
-      // Use timelineStart (fixed Jan 1) for position calculations, but projectStart/End for date constraints
-      ganttDrag = {
-        active: true,
-        taskId,
-        mode,
-        startX: clientX,
-        originalStart: t.start,
-        originalEnd: t.end,
-        dayWidth: parseInt(container.dataset.dayWidth),
-        timelineStart: container.dataset.timelineStart || '2026-01-01',
-        projectStart: container.dataset.projectStart,
-        projectEnd: container.dataset.projectEnd
-      };
+
+      // If dragging a selected bar in move mode, prepare multi-drag
+      // If the dragged bar is not in the selection, reset selection to just this bar
+      if (mode === 'move' && ganttSelectedTaskIds.size > 1 && ganttSelectedTaskIds.has(taskId)) {
+        // Multi-drag: store original dates for all selected tasks
+        const multiOriginals = {};
+        ganttSelectedTaskIds.forEach(tid => {
+          const task = p.tasks.find(x => x.id === tid);
+          if (task && !p.lockedTimeline && (isAdmin() || !task.locked)) {
+            multiOriginals[tid] = { start: task.start, end: task.end };
+          }
+        });
+        ganttDrag = {
+          active: true,
+          taskId,
+          mode,
+          startX: clientX,
+          originalStart: t.start,
+          originalEnd: t.end,
+          dayWidth: parseInt(container.dataset.dayWidth),
+          timelineStart: container.dataset.timelineStart || '2026-01-01',
+          projectStart: container.dataset.projectStart,
+          projectEnd: container.dataset.projectEnd,
+          multiOriginals,
+          hasMoved: false
+        };
+      } else {
+        // Single drag (or resize) - no multi
+        ganttDrag = {
+          active: true,
+          taskId,
+          mode,
+          startX: clientX,
+          originalStart: t.start,
+          originalEnd: t.end,
+          dayWidth: parseInt(container.dataset.dayWidth),
+          timelineStart: container.dataset.timelineStart || '2026-01-01',
+          projectStart: container.dataset.projectStart,
+          projectEnd: container.dataset.projectEnd,
+          multiOriginals: null,
+          hasMoved: false
+        };
+      }
+
       document.addEventListener('mousemove', onGanttDrag);
       document.addEventListener('mouseup', stopGanttDrag);
       document.addEventListener('touchmove', onGanttDrag, { passive: false });
@@ -4862,14 +4953,68 @@ Current: ${p.status}`, currentIdx + 1);
       const clientX = e.touches ? e.touches[0].clientX : e.clientX;
       const deltaX = clientX - ganttDrag.startX;
       const deltaDays = Math.round(deltaX / ganttDrag.dayWidth);
+
+      if (deltaDays !== 0) ganttDrag.hasMoved = true;
+
       const p = getProjectById(currentProjectId);
+      const timelineStart = new Date(ganttDrag.timelineStart);
+      const timelineEnd = new Date(timelineStart);
+      timelineEnd.setFullYear(timelineEnd.getFullYear() + 2);
+
+      // Multi-drag: move all selected bars
+      if (ganttDrag.mode === 'move' && ganttDrag.multiOriginals) {
+        Object.keys(ganttDrag.multiOriginals).forEach(tid => {
+          const orig = ganttDrag.multiOriginals[tid];
+          let newStart = new Date(orig.start);
+          let newEnd = new Date(orig.end);
+          newStart.setDate(newStart.getDate() + deltaDays);
+          newEnd.setDate(newEnd.getDate() + deltaDays);
+
+          // Constrain to timeline boundaries
+          if (newStart < timelineStart) {
+            const diff = Math.ceil((timelineStart - newStart) / 864e5);
+            newStart = new Date(timelineStart);
+            newEnd.setDate(newEnd.getDate() + diff);
+          }
+          if (newEnd > timelineEnd) {
+            const diff = Math.ceil((newEnd - timelineEnd) / 864e5);
+            newEnd = new Date(timelineEnd);
+            newStart.setDate(newStart.getDate() - diff);
+          }
+
+          const bar = document.getElementById('bar-' + tid);
+          if (bar) {
+            const leftDays = Math.ceil((newStart - timelineStart) / 864e5);
+            const widthDays = Math.ceil((newEnd - newStart) / 864e5) + 1;
+            bar.style.left = (leftDays * ganttDrag.dayWidth) + 'px';
+            bar.style.width = (widthDays * ganttDrag.dayWidth) + 'px';
+            bar.dataset.tempStart = newStart.toISOString().split('T')[0];
+            bar.dataset.tempEnd = newEnd.toISOString().split('T')[0];
+            bar.classList.add('multi-dragging');
+          }
+        });
+
+        // Show tooltip for the primary dragged bar
+        const primaryOrig = ganttDrag.multiOriginals[ganttDrag.taskId];
+        if (primaryOrig) {
+          let ns = new Date(primaryOrig.start);
+          let ne = new Date(primaryOrig.end);
+          ns.setDate(ns.getDate() + deltaDays);
+          ne.setDate(ne.getDate() + deltaDays);
+          const wd = Math.ceil((ne - ns) / 864e5) + 1;
+          const tooltip = document.getElementById('gantt-tooltip');
+          tooltip.innerHTML = `<div class="gantt-tooltip-dates">${formatDateShort(ns.toISOString().split('T')[0])} → ${formatDateShort(ne.toISOString().split('T')[0])}</div><div class="gantt-tooltip-duration">${Object.keys(ganttDrag.multiOriginals).length} tasks, ${wd} day${wd>1?'s':''} each</div>`;
+          tooltip.style.left = (clientX + 10) + 'px';
+          tooltip.style.top = ((e.touches ? e.touches[0].clientY : e.clientY) + 10) + 'px';
+          tooltip.classList.remove('hidden');
+        }
+        return;
+      }
+
+      // Single bar drag (original logic)
       const t = p.tasks.find(x => x.id === ganttDrag.taskId);
       if (!t) return;
 
-      // timelineStart is the fixed start of the Gantt (Jan 1, 2026) - used for bar positioning
-      // projectStart/End are the project's date range - used for constraining task dates
-      const timelineStart = new Date(ganttDrag.timelineStart);
-      const projectStart = new Date(ganttDrag.projectStart), projectEnd = new Date(ganttDrag.projectEnd);
       let newStart = new Date(ganttDrag.originalStart), newEnd = new Date(ganttDrag.originalEnd);
 
       if (ganttDrag.mode === 'move') { newStart.setDate(newStart.getDate() + deltaDays); newEnd.setDate(newEnd.getDate() + deltaDays); }
@@ -4877,18 +5022,15 @@ Current: ${p.status}`, currentIdx + 1);
       else if (ganttDrag.mode === 'resize-right') { newEnd.setDate(newEnd.getDate() + deltaDays); if (newEnd <= newStart) newEnd = new Date(newStart.getTime() + 864e5); }
 
       // Constrain to timeline boundaries (fixed timeline, not project boundaries)
-      const timelineEnd = new Date(timelineStart);
-      timelineEnd.setFullYear(timelineEnd.getFullYear() + 2);
       if (newStart < timelineStart) { const diff = Math.ceil((timelineStart - newStart) / 864e5); newStart = new Date(timelineStart); if (ganttDrag.mode === 'move') newEnd.setDate(newEnd.getDate() + diff); }
       if (newEnd > timelineEnd) { const diff = Math.ceil((newEnd - timelineEnd) / 864e5); newEnd = new Date(timelineEnd); if (ganttDrag.mode === 'move') newStart.setDate(newStart.getDate() - diff); }
 
       const bar = document.getElementById('bar-' + ganttDrag.taskId);
-      // Calculate position relative to timelineStart (not projectStart!)
       const leftDays = Math.ceil((newStart - timelineStart) / 864e5);
       const widthDays = Math.ceil((newEnd - newStart) / 864e5) + 1;
       bar.style.left = (leftDays * ganttDrag.dayWidth) + 'px';
       bar.style.width = (widthDays * ganttDrag.dayWidth) + 'px';
-      
+
       const tooltip = document.getElementById('gantt-tooltip');
       tooltip.innerHTML = `<div class="gantt-tooltip-dates">${formatDateShort(newStart.toISOString().split('T')[0])} → ${formatDateShort(newEnd.toISOString().split('T')[0])}</div><div class="gantt-tooltip-duration">${widthDays} day${widthDays>1?'s':''}</div>`;
       tooltip.style.left = (clientX + 10) + 'px';
@@ -4898,21 +5040,50 @@ Current: ${p.status}`, currentIdx + 1);
       bar.dataset.tempEnd = newEnd.toISOString().split('T')[0];
     }
 
-    function stopGanttDrag() {
+    function stopGanttDrag(e) {
       if (!ganttDrag.active) return;
-      const bar = document.getElementById('bar-' + ganttDrag.taskId);
-      if (bar?.dataset.tempStart && bar?.dataset.tempEnd) {
+
+      // Handle selection on click (no drag movement)
+      if (!ganttDrag.hasMoved && ganttDrag.mode === 'move') {
+        const origEvent = e;
+        toggleGanttBarSelection(origEvent, ganttDrag.taskId);
+      }
+
+      // Multi-drag: persist all moved bars
+      if (ganttDrag.multiOriginals && ganttDrag.hasMoved) {
         const p = getProjectById(currentProjectId);
-        const t = p.tasks.find(x => x.id === ganttDrag.taskId);
-        if (t && (t.start !== bar.dataset.tempStart || t.end !== bar.dataset.tempEnd)) {
-          t.start = bar.dataset.tempStart;
-          t.end = bar.dataset.tempEnd;
+        let updatedCount = 0;
+        Object.keys(ganttDrag.multiOriginals).forEach(tid => {
+          const bar = document.getElementById('bar-' + tid);
+          if (bar?.dataset.tempStart && bar?.dataset.tempEnd) {
+            const task = p.tasks.find(x => x.id === tid);
+            if (task && (task.start !== bar.dataset.tempStart || task.end !== bar.dataset.tempEnd)) {
+              task.start = bar.dataset.tempStart;
+              task.end = bar.dataset.tempEnd;
+              updatedCount++;
+            }
+          }
+          if (bar) bar.classList.remove('multi-dragging');
+        });
+        if (updatedCount > 0) {
           saveData();
-          showToast('Timeline updated: ' + formatDateShort(t.start) + ' → ' + formatDateShort(t.end));
-          // No re-render needed - the bar position is already updated visually
-          // This prevents the scroll position from resetting (flashing)
+          showToast(updatedCount + ' task' + (updatedCount > 1 ? 's' : '') + ' updated');
+        }
+      } else if (ganttDrag.hasMoved) {
+        // Single bar drag: original persist logic
+        const bar = document.getElementById('bar-' + ganttDrag.taskId);
+        if (bar?.dataset.tempStart && bar?.dataset.tempEnd) {
+          const p = getProjectById(currentProjectId);
+          const t = p.tasks.find(x => x.id === ganttDrag.taskId);
+          if (t && (t.start !== bar.dataset.tempStart || t.end !== bar.dataset.tempEnd)) {
+            t.start = bar.dataset.tempStart;
+            t.end = bar.dataset.tempEnd;
+            saveData();
+            showToast('Timeline updated: ' + formatDateShort(t.start) + ' → ' + formatDateShort(t.end));
+          }
         }
       }
+
       document.getElementById('gantt-tooltip')?.classList.add('hidden');
       ganttDrag.active = false;
       document.removeEventListener('mousemove', onGanttDrag);
@@ -5258,10 +5429,6 @@ Current: ${p.status}`, currentIdx + 1);
     }
 
     function openProjectModal() {
-      if (!isAdmin()) {
-        showToast('Only admin can create projects');
-        return;
-      }
       document.getElementById('edit-project-id').value = '';
       document.getElementById('project-name').value = '';
       document.getElementById('project-desc-input').value = '';
@@ -6108,6 +6275,13 @@ Current: ${p.status}`, currentIdx + 1);
       if (e.key === 'Enter') {
         e.preventDefault();
         saveNewTeam();
+      }
+    });
+
+    // Escape key to clear Gantt bar selection
+    document.addEventListener('keydown', function(e) {
+      if (e.key === 'Escape' && ganttSelectedTaskIds.size > 0) {
+        clearGanttSelection();
       }
     });
     
