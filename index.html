@@ -4633,7 +4633,8 @@ Current: ${p.status}`, currentIdx + 1);
           const widthWeeks = Math.max(1, Math.ceil((te - ts) / 864e5 / 7) + 1);
           const isLocked = t.locked || false;
           const canEditThisTask = isAdmin() || (!isLocked && !p.lockedTimeline);
-          
+          const canOpenEdit = !p.lockedTimeline || isAdmin();
+
           html += `<div class="gantt-row"><div class="gantt-bar-container" style="min-width:${totalWeeks * weekWidth}px;">`;
           weeks.forEach(() => html += `<div class="gantt-bar-cell" style="min-width:${weekWidth}px;"></div>`);
           
@@ -4643,7 +4644,7 @@ Current: ${p.status}`, currentIdx + 1);
             html += `<div class="gantt-today-line" style="left:${todayWeek * weekWidth + weekWidth/2}px;"></div>`;
           }
           
-          html += `<div class="gantt-bar" style="left:${leftWeeks*weekWidth}px;width:${widthWeeks*weekWidth}px;background:${getProgressColor(t.progress)};${canEditThisTask?'':'opacity:0.8;'}" ondblclick="${canEditThisTask?`editTask('${t.id}')`:`updateTaskProgress('${t.id}')`}">
+          html += `<div class="gantt-bar" style="left:${leftWeeks*weekWidth}px;width:${widthWeeks*weekWidth}px;background:${getProgressColor(t.progress)};${canOpenEdit?'':'opacity:0.8;cursor:pointer;'}" ondblclick="${canOpenEdit?`editTask('${t.id}')`:`updateTaskProgress('${t.id}')`}">
               <span class="gantt-bar-label">${t.progress}%</span>
             </div>`;
           html += '</div></div>';
@@ -4662,7 +4663,7 @@ Current: ${p.status}`, currentIdx + 1);
         months.push(new Date(d));
         d.setMonth(d.getMonth() + 1);
       }
-      
+
       let html = `<div class="gantt-wrapper">
         <div class="gantt-task-column">
           <div class="gantt-task-col" style="height:52px;">Tasks</div>`;
@@ -4674,6 +4675,7 @@ Current: ${p.status}`, currentIdx + 1);
           const isLocked = t.locked || false;
           // When timeline is locked, NO ONE can edit dates (not even admin)
           const canEditThisTask = !p.lockedTimeline && (isAdmin() || !isLocked);
+          const canOpenEdit = !p.lockedTimeline || isAdmin();
           const canDeleteThisTask = isAdmin() || (t.createdBy && currentUser && t.createdBy === currentUser.username);
           const hasSubtasks = t.subtasks && t.subtasks.length > 0;
           const subtaskCount = hasSubtasks ? t.subtasks.length : 0;
@@ -4682,7 +4684,7 @@ Current: ${p.status}`, currentIdx + 1);
             ${hasSubtasks ? `<span class="subtask-expand" onclick="toggleSubtaskExpand('${t.id}')" title="Show subtasks">▶</span>` : ''}
             <span class="gantt-task-text" data-full-text="${t.name}">${t.name}${hasSubtasks ? ` <span style="color:#64748B;font-size:10px;">(${completedCount}/${subtaskCount})</span>` : ''}</span>
             <div class="gantt-task-actions">
-              ${canEditThisTask ? `<button class="btn btn-secondary btn-icon btn-sm" onclick="editTask('${t.id}')" style="width:22px;height:22px;font-size:10px;">✏️</button>` : ''}
+              ${canOpenEdit ? `<button class="btn btn-secondary btn-icon btn-sm" onclick="editTask('${t.id}')" style="width:22px;height:22px;font-size:10px;">✏️</button>` : ''}
               <button class="btn btn-danger btn-icon btn-sm" onclick="deleteTask('${t.id}')" style="width:22px;height:22px;font-size:10px;">🗑️</button>
             </div>
           </div>`;
@@ -4782,6 +4784,7 @@ Current: ${p.status}`, currentIdx + 1);
           const isLocked = t.locked || false;
           // When timeline is locked, NO ONE can edit dates (not even admin)
           const canEditThisTask = !p.lockedTimeline && (isAdmin() || !isLocked);
+          const canOpenEdit = !p.lockedTimeline || isAdmin();
 
           html += `<div class="gantt-row"><div class="gantt-bar-container" style="min-width:${months.length * monthWidth}px;">`;
           months.forEach(() => html += `<div class="gantt-bar-cell" style="min-width:${monthWidth}px;"></div>`);
@@ -4793,7 +4796,7 @@ Current: ${p.status}`, currentIdx + 1);
             html += `<div class="gantt-today-line" style="left:${todayPos}px;"></div>`;
           }
 
-          html += `<div class="gantt-bar" style="left:${leftMonths*monthWidth}px;width:${widthMonths*monthWidth}px;background:${getProgressColor(t.progress)};${canEditThisTask?'':'opacity:0.8;'}" ondblclick="${canEditThisTask?`editTask('${t.id}')`:`updateTaskProgress('${t.id}')`}">
+          html += `<div class="gantt-bar" style="left:${leftMonths*monthWidth}px;width:${widthMonths*monthWidth}px;background:${getProgressColor(t.progress)};${canOpenEdit?'':'opacity:0.8;cursor:pointer;'}" ondblclick="${canOpenEdit?`editTask('${t.id}')`:`updateTaskProgress('${t.id}')`}">
               <span class="gantt-bar-label">${t.progress}%</span>
             </div>`;
           html += '</div></div>';
@@ -5824,10 +5827,10 @@ Current: ${p.status}`, currentIdx + 1);
     function editTask(tid) {
       const p = getProjectById(currentProjectId);
       const t = p.tasks.find(x => x.id === tid);
-      // When timeline is locked, still allow opening modal to edit name/subtasks
-      // But for non-admin with locked task (individual), block completely
-      if (!isAdmin() && t?.locked) {
-        showToast('This task is locked');
+      // When timeline is locked by admin, block non-admin completely
+      // When timeline is unlocked, allow editing even individually locked tasks (dates preserved in saveTask)
+      if (!isAdmin() && p.lockedTimeline) {
+        showToast('Timeline is locked by admin');
         return;
       }
       openTaskModal(tid);
